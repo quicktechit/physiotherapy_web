@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "637978940538",
+    "project_id": "physiotherapy-208fa",
+    "storage_bucket": "physiotherapy-208fa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:637978940538:android:894926dca552824e0f17c3",
+        "android_client_info": {
+          "package_name": "com.quicktech.e_prescription"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "637978940538-eoa8gid8noovuh62sqqst779tv2tmgh3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.quicktech.e_prescription",
+            "certificate_hash": "b2df1c638a42bf63cd8357be209a4ff325c4c8ae"
+          }
+        },
+        {
+          "client_id": "637978940538-q1eon5pvsna0oollfq47t9avm0kc2qu8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.quicktech.e_prescription",
+            "certificate_hash": "b943f8606a2e9a84a1af41c1099bb2f7ce57dd7b"
+          }
+        },
+        {
+          "client_id": "637978940538-8ra2n5459golm1q22fo576om3pe3trfn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGay6cS8VR-chk2PZ5VGaqzA5onYLW6Uw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "637978940538-8ra2n5459golm1q22fo576om3pe3trfn.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "637978940538-m28ao15sf7fon64nm85d6hbb1rj7j4q5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ePrescription"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

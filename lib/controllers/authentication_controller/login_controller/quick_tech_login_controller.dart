@@ -1,0 +1,441 @@
+import 'package:e_prescription/services/auth_services/quick_tech_auth_storage_service.dart';
+import 'package:e_prescription/screens/authentications/login/quick_tech_login_verification.dart';
+import 'package:e_prescription/services/template_services/quick_tech_template_storage_service.dart';
+import 'package:e_prescription/utils/api.dart';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:e_prescription/models/user_model/quick_tech_user_model.dart';
+
+class QuickTechLoginController extends GetxController {
+  Future<void> loginWithCredentials(String mobile, String password) async {
+    if (validatePhoneNumber(mobile) != null ||
+        validatePassword(password) != null) {
+      Get.snackbar(
+        'Error',
+        'Please fill all fields correctly',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+    try {
+      isLoading(true);
+      final response = await http.post(
+        Uri.parse(Api.login),
+        headers: {'Accept': 'application/json'},
+        body: {'mobile': mobile, 'password': password},
+      );
+      final data = json.decode(response.body);
+      if (data['status'] == 'success') {
+        final token = data['access_token'];
+        final user = QuickTechUserModel.fromJson(data['user']);
+        await QuickTechAuthStorageService.saveToken(token);
+        await QuickTechAuthStorageService.saveUser(user);
+        Get.offAllNamed('/mainhome');
+      } else if (data['verifyToken'] != null && data['mobile'] != null) {
+        Get.snackbar(
+          'Verification Required',
+          'Please verify your account. A verification code has been sent to your mobile.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        Get.to(() => QuickTechLoginVerification(staticMobile: data['mobile']));
+      } else {
+        Get.snackbar(
+          'Login Failed',
+          data['message'] ?? 'You Have to Sign Up First',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Login failed: \\${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  // Google Sign-In
+  Future<void> googleSignIn() async {
+    try {
+      isLoading(true);
+      // Ensure you have: import 'package:google_sign_in/google_sign_in.dart';
+      final GoogleSignIn googleSignIn = GoogleSignIn.standard();
+      await googleSignIn.signOut(); // Always show account picker
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        isLoading(false);
+        return; // User cancelled
+      }
+      final email = googleUser.email;
+      print('GoogleSignIn email: $email');
+      final response = await http.post(
+        Uri.parse(
+          '${Api.baseUrl}/api/check/email/and/login',
+        ),
+        headers: {'Accept': 'application/json'},
+        body: {'email': email},
+      );
+      print('GoogleSignIn API response: ${response.body}');
+      final data = json.decode(response.body);
+      if (data['status'] == 'success') {
+        final token = data['access_token'];
+        final user = QuickTechUserModel.fromJson(data['user']);
+        await QuickTechAuthStorageService.saveToken(token);
+        await QuickTechAuthStorageService.saveUser(user);
+        Get.offAllNamed('/mainhome');
+      } else if (data['status'] == 'failed' &&
+          data['message'] == 'This email has no user registered') {
+        showRegistrationBottomSheet(email);
+      } else {
+        Get.snackbar(
+          'Login Failed',
+          data['message'] ?? 'Unknown error',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      print('Google Sign-In error: $e');
+      Get.snackbar(
+        'Error',
+        'Google Sign-In failed: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  // Show registration bottom sheet for new Google users
+  void showRegistrationBottomSheet(String email) {
+    final phoneController = TextEditingController();
+    final passController = TextEditingController();
+    final confirmPassController = TextEditingController();
+    // To store the password for direct login after registration
+    String? tempPassword;
+    Get.bottomSheet(
+      SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Register New Account',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16),
+              Text('Email: $email'),
+              SizedBox(height: 16),
+              TextField(
+                controller: phoneController,
+                decoration: InputDecoration(labelText: 'Phone Number'),
+                keyboardType: TextInputType.phone,
+              ),
+              SizedBox(height: 8),
+              TextField(
+                controller: passController,
+                decoration: InputDecoration(labelText: 'Password'),
+                obscureText: true,
+              ),
+              SizedBox(height: 8),
+              TextField(
+                controller: confirmPassController,
+                decoration: InputDecoration(labelText: 'Confirm Password'),
+                obscureText: true,
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () async {
+                  final phone = phoneController.text.trim();
+                  final pass = passController.text.trim();
+                  final confirmPass = confirmPassController.text.trim();
+                  print(
+                    'Register values: email=$email, phone=$phone, pass=$pass, confirmPass=$confirmPass',
+                  );
+                  if (phone.isEmpty || pass.isEmpty || confirmPass.isEmpty) {
+                    Get.snackbar(
+                      'Error',
+                      'All fields are required',
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                    return;
+                  }
+                  if (pass != confirmPass) {
+                    Get.snackbar(
+                      'Error',
+                      'Passwords do not match',
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                    return;
+                  }
+                  if (validatePhoneNumber(phone) != null ||
+                      validatePassword(pass) != null) {
+                    Get.snackbar(
+                      'Error',
+                      'Please fill all fields correctly',
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                    return;
+                  }
+                  try {
+                    isLoading(true);
+                    final registerResponse = await http.post(
+                      Uri.parse(Api.register),
+                      headers: {'Accept': 'application/json'},
+                      body: {
+                        'email': email,
+                        'mobile': phone,
+                        'password': pass,
+                        'password_confirmation': confirmPass,
+                      },
+                    );
+                    print('Register API response: ${registerResponse.body}');
+                    final registerData = json.decode(registerResponse.body);
+                    if (registerData['verifyToken'] != null &&
+                        registerData['mobile'] != null) {
+                      // Auto verify using the verify API
+                      final verifyResponse = await http.post(
+                        Uri.parse(
+                          '${Api.baseUrl}/api/verify',
+                        ),
+                        headers: {'Accept': 'application/json'},
+                        body: {
+                          'mobile': registerData['mobile'].toString(),
+                          'otp': registerData['verifyToken'].toString(),
+                        },
+                      );
+                      print('Auto verify API response: ${verifyResponse.body}');
+                      final verifyData = json.decode(verifyResponse.body);
+                      if (verifyData['status'] == 'success' ||
+                          verifyData['message']
+                                  ?.toString()
+                                  .toLowerCase()
+                                  .contains('success') ==
+                              true) {
+                        // After verification, log in with email and password
+                        tempPassword = pass;
+                        final loginResponse = await http.post(
+                          Uri.parse(Api.login),
+                          headers: {'Accept': 'application/json'},
+                          body: {'mobile': phone, 'password': tempPassword},
+                        );
+                        print(
+                          'Login after auto verify API response: ${loginResponse.body}',
+                        );
+                        final loginData = json.decode(loginResponse.body);
+                        if (loginData['status'] == 'success') {
+                          final token = loginData['access_token'];
+                          final user = QuickTechUserModel.fromJson(
+                            loginData['user'],
+                          );
+                          await QuickTechAuthStorageService.saveToken(token);
+                          await QuickTechAuthStorageService.saveUser(user);
+                          Get.back();
+                          Get.offAllNamed('/mainhome');
+                        } else {
+                          Get.snackbar(
+                            'Login Failed',
+                            loginData['message'] ??
+                                'Login after verification failed',
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                        }
+                      } else {
+                        Get.snackbar(
+                          'Verification Failed',
+                          verifyData['message'] ?? 'Auto verification failed',
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
+                      }
+                    } else if (registerData['status'] == 'success') {
+                      Get.snackbar(
+                        'Registration Success',
+                        'Please check your SMS for verification code.',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    } else {
+                      Get.snackbar(
+                        'Registration Failed',
+                        registerData['message'] ?? 'Unknown error',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    }
+                  } catch (e) {
+                    Get.snackbar(
+                      'Error',
+                      'Registration failed: ${e.toString()}',
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                  } finally {
+                    isLoading(false);
+                  }
+                },
+                child: Text('Register'),
+              ),
+              SizedBox(height: 8),
+              TextButton(onPressed: () => Get.back(), child: Text('Cancel')),
+            ],
+          ),
+        ),
+      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+    );
+  }
+
+  Future<void> logout() async {
+    final token = QuickTechAuthStorageService.getToken();
+
+    try {
+      if (token != null && token.isNotEmpty) {
+        await http.post(
+          Uri.parse(Api.logout),
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        );
+      }
+    } catch (_) {}
+
+    await QuickTechAuthStorageService.clear();
+    QuickTechTemplateStorageService.clearSelectedTemplateId();
+    // Remove ALL controllers properly
+    Get.deleteAll(force: true);
+
+    // Navigate fresh
+    Get.offAllNamed('/login');
+
+    // Get.snackbar(
+    //   "Logged out",
+    //   "Session cleared",
+    //   snackPosition: SnackPosition.BOTTOM,
+    // );
+  }
+
+  TextEditingController phonenumberController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  // Reactive variables
+  var isLoading = false.obs;
+  var phoneNumber = ''.obs;
+  var password = ''.obs;
+  var isPasswordVisible = false.obs;
+
+  // Validation
+  String? validatePhoneNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your phone number';
+    }
+
+    if (value.length < 10) {
+      return 'Phone number must be at least 10 digits';
+    }
+    return null;
+  }
+
+  String? validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your password';
+    }
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    return null;
+  }
+
+  Future<void> login() async {
+    final phone = phonenumberController.text.trim();
+    final pass = passwordController.text.trim();
+    if (validatePhoneNumber(phone) != null || validatePassword(pass) != null) {
+      Get.snackbar(
+        'Error',
+        'Please fill all fields correctly',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+    try {
+      isLoading(true);
+      final response = await http.post(
+        Uri.parse(Api.login),
+        headers: {'Accept': 'application/json'},
+        body: {'mobile': phone, 'password': pass},
+      );
+      final data = json.decode(response.body);
+      if (data['status'] == 'success') {
+        final token = data['access_token'];
+        final user = QuickTechUserModel.fromJson(data['user']);
+        await QuickTechAuthStorageService.saveToken(token);
+        await QuickTechAuthStorageService.saveUser(user);
+        print('Login successful, Token: $token, User: ${user.toJson()}');
+        // Controllers are managed by locator/setUp and route bindings; avoid ad-hoc instantiation here
+        Get.offAllNamed('/mainhome');
+      } else if (data['verifyToken'] != null && data['mobile'] != null) {
+        Get.snackbar(
+          'Verification Required',
+          'Please verify your account. A verification code has been sent to your mobile.\nVerification Code: ${data['verifyToken']}',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        Get.to(() => QuickTechLoginVerification(staticMobile: data['mobile']));
+      } else {
+        Get.snackbar(
+          'Login Failed',
+          // 'You Have to Sign Up First',
+          data['message'] ?? 'You Have to Sign Up First',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Login failed: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  void togglePasswordVisibility() {
+    print("Toggling password visibility: ${!isPasswordVisible.value}");
+    isPasswordVisible.toggle();
+  }
+
+  Future<bool> onWillPop() async {
+    return await showDialog(
+          context: Get.context!,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Confirm Exit'),
+              content: Text('Are you sure you want to exit the app?'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Get.back(canPop: false);
+                  },
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Get.back(canPop: true);
+                    SystemNavigator.pop();
+                  },
+                  child: Text('Exit'),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+  }
+}
