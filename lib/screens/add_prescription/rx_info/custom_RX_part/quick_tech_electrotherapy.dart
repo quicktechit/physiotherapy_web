@@ -1,5 +1,6 @@
 import 'package:e_prescription/const/quick_tech_app_colors.dart';
 import 'package:e_prescription/const/quick_tech_styles.dart';
+import 'package:e_prescription/const/text_to_html.dart';
 import 'package:e_prescription/controllers/prescription_controller/prescription_rx_controller/quick_tech_electrotherapy_controller.dart';
 import 'package:e_prescription/controllers/theme_controller/quick_tech_theme_controller.dart';
 import 'package:e_prescription/locator.dart';
@@ -340,12 +341,14 @@ Widget customElectroOthersCard() {
                             ),
                             onPressed: () {
                               final idx = activeInputIndex.value;
-                              final text = tempControllers[idx].text.trim();
-                              if (text.isNotEmpty) {
+                             final plainText = tempControllers[idx].text.trim();
+                              if (plainText.isNotEmpty) {
+                                // Convert plain text to HTML format for mPDF
+                                final htmlText = convertToHtmlParagraphs(plainText);
                                 electrotherapyController.extraElectrotherapies
-                                    .add(text);
+                                    .add(htmlText);
                                 electrotherapyController.extraTherapyControllers
-                                    .add(TextEditingController(text: text));
+                                    .add(TextEditingController(text: htmlText));
                               }
                               tempControllers[idx].dispose();
                               tempControllers.removeAt(idx);
@@ -506,7 +509,7 @@ Widget customElectroOthersCard() {
                                     SizedBox(height: 8),
                                     // Therapy content
                                     Text(
-                                      therapy,
+                                      stripHtmlTags(therapy),
                                       style: myStyle(
                                         11,
                                         themeController.isDay.value

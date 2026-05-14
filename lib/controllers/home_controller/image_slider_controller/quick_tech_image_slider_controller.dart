@@ -1,3 +1,4 @@
+import 'package:e_prescription/const/const.dart';
 import 'package:get/get.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
@@ -23,31 +24,78 @@ class QuickTechImageSliderController extends GetxController {
 
   Future<void> fetchSliderImages() async {
     try {
-      final response = await retryRequest(() => http.get(Uri.parse(Api.sliderApi)), maxAttempts: 3, initialDelay: Duration(seconds: 1));
+      final response = await retryRequest(
+            () => http.get(Uri.parse(Api.sliderApi)),
+        maxAttempts: 3,
+        initialDelay: const Duration(seconds: 1),
+      );
+
+      // Full API response print
+      debugPrint('========== SLIDER API RESPONSE ==========');
+      debugPrint('Status Code: ${response.statusCode}');
+      debugPrint('Body: ${response.body}');
+      debugPrint('========================================');
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+
+        // Parsed JSON print
+        debugPrint('Parsed JSON: $data');
+
         final List<dynamic> services = data['service'] ?? [];
-        final List<String> urls = services.map<String>((s) {
-          final photo = s['slider_photo'] ?? '';
-          if (photo == null) return '';
+
+        debugPrint('Service Count: ${services.length}');
+        debugPrint('Services: $services');
+
+        final List<String> urls = services
+            .map<String>((s) {
+          final photo = s['slider_photo'];
+
+          debugPrint('Slider Photo Raw: $photo');
+
+          if (photo == null || photo.toString().isEmpty) {
+            return '';
+          }
+
           final photoStr = photo.toString();
+
           // Ensure full URL
-          if (photoStr.startsWith('http')) return photoStr;
-          return Api.baseUrl + (photoStr.startsWith('/') ? photoStr : '/'+photoStr);
-        }).where((u) => u.isNotEmpty).toList();
+          final fullUrl = photoStr.startsWith('http')
+              ? photoStr
+              : Api.baseUrl +
+              (photoStr.startsWith('/') ? photoStr : '/$photoStr');
+
+          debugPrint('Generated Full URL: $fullUrl');
+
+          return fullUrl;
+        })
+            .where((u) => u.isNotEmpty)
+            .toList();
+
+        debugPrint('Final URL List: $urls');
+        debugPrint('Total Valid URLs: ${urls.length}');
 
         if (urls.isNotEmpty) {
           imgList.assignAll(urls);
+
           // Reset index if out of bounds
-          if (currentIndex.value >= imgList.length) currentIndex.value = 0;
+          if (currentIndex.value >= imgList.length) {
+            currentIndex.value = 0;
+          }
+
+          debugPrint('Images assigned successfully.');
+          debugPrint('imgList: ${imgList.toList()}');
           return;
         }
-      }
-    } catch (e) {
-      print('Error fetching slider images: $e');
-    }
 
-   
+        debugPrint('No valid image URLs found in the response.');
+      } else {
+        debugPrint('API Error: ${response.statusCode}');
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Error fetching slider images: $e');
+      debugPrint('StackTrace: $stackTrace');
+    }
   }
 
   void _startAutoSlide() {

@@ -1,3 +1,4 @@
+import 'package:e_prescription/const/text_to_html.dart';
 import 'package:e_prescription/locator.dart';
 import 'package:e_prescription/widgets/quick_tech_custom_text_field.dart';
 import 'package:flutter/material.dart';
@@ -604,11 +605,16 @@ class _CustomManualTherapyInfoState extends State<CustomManualTherapyInfo> {
                               ),
                               onPressed: () {
                                 final idx = activeInputIndex.value;
-                                final text = tempControllers[idx].text.trim();
-                                if (text.isNotEmpty) {
-                                  therapyController.customTherapies.add(text);
+                                final plainText = tempControllers[idx].text.trim();
+                                if (plainText.isNotEmpty) {
+                                  // Convert plain text to HTML format for mPDF
+                                  final htmlText = convertToHtmlParagraphs(plainText);
+                                  
+                                  // Store HTML format in both lists
+                                  therapyController.customTherapies.add(htmlText);
+                                  therapyController.customTherapies.add(htmlText);
                                   therapyController.customTherapyControllers
-                                      .add(TextEditingController(text: text));
+                                      .add(TextEditingController(text: htmlText));
                                 }
                                 tempControllers[idx].dispose();
                                 tempControllers.removeAt(idx);
@@ -766,7 +772,7 @@ class _CustomManualTherapyInfoState extends State<CustomManualTherapyInfo> {
                                       SizedBox(height: 8),
                                       // Therapy content
                                       Text(
-                                        therapy,
+                                         stripHtmlTags(therapy),
                                         style: myStyle(
                                           11,
                                           themeController.isDay.value
