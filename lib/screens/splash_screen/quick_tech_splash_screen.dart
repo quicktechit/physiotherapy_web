@@ -12,16 +12,29 @@ import '../../responsive.dart';
 
 
 
-class QuickTechSplashScreen extends StatelessWidget {
-  QuickTechSplashScreen({Key? key}) : super(key: key);
+class QuickTechSplashScreen extends StatefulWidget {
+  const QuickTechSplashScreen({Key? key}) : super(key: key);
 
-  final QuickTechSplashScreenController splashScreenController = locator.get<QuickTechSplashScreenController>();
-  final QuickTechThemeController themeController = locator.get<QuickTechThemeController>();
+  @override
+  State<QuickTechSplashScreen> createState() => _QuickTechSplashScreenState();
+}
+
+class _QuickTechSplashScreenState extends State<QuickTechSplashScreen> {
+  final QuickTechSplashScreenController splashScreenController =
+      locator.get<QuickTechSplashScreenController>();
+  final QuickTechThemeController themeController =
+      locator.get<QuickTechThemeController>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Call startNavigation in initState, not in build(), so it fires exactly
+    // once and does not reschedule on hot-restart / rebuild.
+    splashScreenController.startNavigation();
+  }
+
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      splashScreenController.startNavigation();
-    });
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -36,7 +49,7 @@ class QuickTechSplashScreen extends StatelessWidget {
             Text(
               'E-Prescription',
               style: myStyle(
-                Responsive.isDesktop(context)?10.sp:  26.sp,
+                Responsive.isDesktop(context)?28.sp:  26.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightmaincolor
                     : QuickTechAppColors.darkmaincolor,
@@ -49,7 +62,7 @@ class QuickTechSplashScreen extends StatelessWidget {
               'Digital Prescriptions for PhysioTherapists',
               textAlign: TextAlign.center,
               style: myStyle(
-                Responsive.isDesktop(context)?6.sp:  18.sp,
+                Responsive.isDesktop(context)?18.sp:  18.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightsecondarytextcolor
                     : QuickTechAppColors.darksecondarytextcolor,

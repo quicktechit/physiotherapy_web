@@ -55,6 +55,9 @@ import 'package:get_it/get_it.dart';
 
 final locator = GetIt.instance;
 void setUp() {
+  // Guard: prevent double-registration on hot restart
+  if (locator.isRegistered<QuickTechThemeController>()) return;
+
   ///Assessment Controllers
   locator.registerLazySingleton<QuickTechAssestiveDeviceController>(
     () => QuickTechAssestiveDeviceController(),

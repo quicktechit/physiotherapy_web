@@ -19,6 +19,8 @@ import 'package:get/get.dart';
 import 'package:e_prescription/locator.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import 'package:flutter/foundation.dart';
+import 'package:printing/printing.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:open_file/open_file.dart';
@@ -303,35 +305,29 @@ class QuickTechPdfController extends GetxController {
     pw.Document pdf, {
     String? customFileName,
   }) async {
+    final pdfBytes = await pdf.save();
+    final fileName = customFileName ??
+        'Prescription_${patientInfoController.patientName.value}_'
+            '${patientInfoController.date.value?.toLocal().toString().split(' ')[0] ?? DateTime.now().toString().split(' ')[0]}.pdf'
+            .replaceAll(' ', '_')
+            .replaceAll('/', '-');
     try {
-      final directory = await getApplicationDocumentsDirectory();
-
-      //
-      final prescDir = Directory('${directory.path}/prescriptions');
-      if (!await prescDir.exists()) {
-        await prescDir.create();
+      if (kIsWeb) {
+        // On web: use the printing package to trigger browser print/save
+        await Printing.sharePdf(bytes: Uint8List.fromList(pdfBytes), filename: fileName);
+      } else {
+        final directory = await getApplicationDocumentsDirectory();
+        final prescDir = Directory('${directory.path}/prescriptions');
+        if (!await prescDir.exists()) {
+          await prescDir.create();
+        }
+        final filePath = '${prescDir.path}/$fileName';
+        final file = File(filePath);
+        await file.writeAsBytes(pdfBytes);
+        // OpenFile.open is guarded by !kIsWeb above; the stub is used on web
+        await OpenFile.open(filePath);
       }
-
-      // Generate a file name using patient name and date
-      final fileName =
-          customFileName ??
-          'Prescription_${patientInfoController.patientName.value}_${patientInfoController.date.value?.toLocal().toString().split(' ')[0] ?? DateTime.now().toString().split(' ')[0]}.pdf'
-              .replaceAll(' ', '_')
-              .replaceAll('/', '-');
-
-      // Full file path
-      final filePath = '${prescDir.path}/$fileName';
-
-      // Save the PDF file
-      final file = File(filePath);
-      await file.writeAsBytes(await pdf.save());
-
-      print("PDF saved at $filePath");
-
-      await OpenFile.open(filePath);
     } catch (e) {
-      print("Error saving PDF: $e");
-
       Get.snackbar('Error', 'Failed to save PDF: $e');
     }
   }

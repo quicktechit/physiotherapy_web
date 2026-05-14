@@ -1,13 +1,6 @@
 import 'package:e_prescription/const/const.dart';
-import 'package:e_prescription/const/quick_tech_app_colors.dart';
-import 'package:e_prescription/const/quick_tech_styles.dart';
-import 'package:e_prescription/locator.dart';
-import 'package:e_prescription/widgets/quick_tech_custom_button.dart';
+
 import 'package:e_prescription/widgets/quick_tech_custom_text_field.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:e_prescription/controllers/authentication_controller/login_controller/quick_tech_forgot_pass_controller.dart';
 
 class QuickTechResetPassword extends StatefulWidget {
   final String mobile;
@@ -41,7 +34,7 @@ class _QuickTechResetPasswordState extends State<QuickTechResetPassword> {
         appBar: AppBar(
           title: Text(
             'Reset Password',
-            style: myStyle( Responsive.isDesktop(context)?12.sp: 22.sp, QuickTechAppColors.white, FontWeight.w700),
+            style: myStyle( Responsive.isDesktop(context)?26.sp: 22.sp, QuickTechAppColors.white, FontWeight.w700),
           ),
           backgroundColor: QuickTechAppColors.lightmaincolor,
           elevation: 0,

@@ -1,0 +1,439 @@
+════════════════════════════════════════════════════════════════════════════════
+REMAINING FIXES - COPY & PASTE CODE
+════════════════════════════════════════════════════════════════════════════════
+
+These are the 3 remaining files that need fixes. Use these exact code snippets.
+
+════════════════════════════════════════════════════════════════════════════════
+FIX #1: quick_tech_profile_update.dart
+════════════════════════════════════════════════════════════════════════════════
+
+STEP 1: Fix import at line 16
+────────────────────────────
+
+REPLACE THIS:
+  import 'dart:io';
+
+WITH THIS:
+  import 'dart:io' if (dart.library.html) 'package:e_prescription/utils/stub_io.dart';
+  import 'package:flutter/foundation.dart';
+
+
+STEP 2: Add these imports at the top
+────────────────────────────────────
+
+AFTER your existing imports, add:
+  import 'package:e_prescription/utils/web_file_helper.dart';
+  import 'package:e_prescription/utils/web_image_helper.dart';
+
+
+STEP 3: Fix FileImage usage in ProfileImage() method (around line 344)
+───────────────────────────────────────────────────────────────────
+
+REPLACE THIS ProfileImage() method:
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │ Widget ProfileImage() {                                                 │
+  │   if (_localImagePath != null && File(_localImagePath!).existsSync()) { │
+  │     return CircleAvatar(                                                │
+  │       backgroundImage: FileImage(File(_localImagePath!)),               │
+  │     );                                                                  │
+  │   }                                                                     │
+  │   ...                                                                   │
+  │ }                                                                       │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+WITH THIS:
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │ // ✅ WEB-SAFE: Profile image widget                                   │
+  │ Widget ProfileImage() {                                                 │
+  │   // Check local file (native only)                                    │
+  │   if (_localImagePath != null && !kIsWeb) {                            │
+  │     return FutureBuilder<bool>(                                        │
+  │       future: WebFileHelper.fileExists(_localImagePath),              │
+  │       builder: (context, snapshot) {                                  │
+  │         if (snapshot.hasData && snapshot.data == true) {              │
+  │           // File exists, show Image.file                             │
+  │           return CircleAvatar(                                        │
+  │             backgroundImage: FileImage(File(_localImagePath!)),      │
+  │           );                                                          │
+  │         }                                                             │
+  │         // File doesn't exist, fall through to network                │
+  │         return _buildNetworkImage();                                  │
+  │       },                                                              │
+  │     );                                                                │
+  │   }                                                                   │
+  │                                                                       │
+  │   // On web or no local path, show network image                     │
+  │   return _buildNetworkImage();                                        │
+  │ }                                                                     │
+  │                                                                       │
+  │ // ✅ Helper for network image                                       │
+  │ Widget _buildNetworkImage() {                                        │
+  │   if (profileController.profilePhoto.value.isNotEmpty) {             │
+  │     String imageUrl = profileController.profilePhoto.value;          │
+  │                                                                       │
+  │     if (imageUrl.startsWith('http') ||                               │
+  │         imageUrl.startsWith('https')) {                              │
+  │       return CircleAvatar(                                           │
+  │         backgroundImage: NetworkImage(imageUrl),                     │
+  │       );                                                             │
+  │     } else {                                                         │
+  │       return CircleAvatar(                                           │
+  │         backgroundImage: NetworkImage('${Api.baseUrl}$imageUrl'),   │
+  │       );                                                             │
+  │     }                                                                │
+  │   }                                                                  │
+  │                                                                      │
+  │   // Fallback                                                        │
+  │   return CircleAvatar(                                              │
+  │     backgroundColor: Colors.grey[300],                              │
+  │     child: Icon(Icons.person, size: 60, color: Colors.grey[600]),   │
+  │   );                                                                │
+  │ }                                                                   │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+STEP 4: Fix profile photo upload in onTap handler
+──────────────────────────────────────────────
+
+Find this section (around line 81-100):
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │ GestureDetector(                                                        │
+  │   onTap: () async {                                                    │
+  │     final pickedFile = await _picker.pickImage(...);                  │
+  │     if (pickedFile != null) {                                         │
+  │       setState(() {                                                   │
+  │         _isNewImageSelected = true;                                   │
+  │         _localImagePath = pickedFile.path;  // ❌ Fragile on web     │
+  │       });                                                             │
+  │     }                                                                 │
+  │   },                                                                  │
+  │ )                                                                     │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+REPLACE WITH:
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │ GestureDetector(                                                        │
+  │   onTap: () async {                                                    │
+  │     final pickedFile = await _picker.pickImage(                       │
+  │       source: ImageSource.gallery,                                    │
+  │       imageQuality: 80,                                               │
+  │     );                                                                │
+  │     if (pickedFile != null) {                                         │
+  │       setState(() {                                                   │
+  │         _isNewImageSelected = true;                                   │
+  │         // ✅ Store XFile instead of path                             │
+  │         _localImageXFile = pickedFile;                                │
+  │         _localImagePath = kIsWeb ? pickedFile.name : pickedFile.path; │
+  │       });                                                             │
+  │     }                                                                 │
+  │   },                                                                  │
+  │ )                                                                     │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+Add this at the top of _QuickTechProfileUpdatePageState:
+  XFile? _localImageXFile;  // ✅ Store the XFile object
+
+
+STEP 5: Update saveProfile() call
+───────────────────────────────
+
+Find: profileController.saveProfile(isNewImage: true, localImagePath: _localImagePath);
+
+Replace with:
+  profileController.saveProfile(
+    isNewImage: _isNewImageSelected,
+    localImagePath: _localImagePath,
+    xfile: _localImageXFile,  // ✅ Add this parameter
+  );
+
+
+════════════════════════════════════════════════════════════════════════════════
+FIX #2: quicktech_assessment_pdf_view.dart
+════════════════════════════════════════════════════════════════════════════════
+
+STEP 1: Fix imports
+───────────────────
+
+Replace:
+  import 'dart:io';
+
+With:
+  import 'dart:io' if (dart.library.html) 'package:e_prescription/utils/stub_io.dart';
+  import 'package:flutter/foundation.dart';
+  import 'package:e_prescription/utils/web_file_helper.dart';
+
+
+STEP 2: Fix Platform detection (around line 46-56)
+──────────────────────────────────────────────────
+
+REPLACE THIS:
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │ if (kIsWeb) {                                                           │
+  │   // Web download handling                                             │
+  │ } else if (Platform.isAndroid) {                                       │
+  │   final status = await Permission.storage.request();                   │
+  │   if (!status.isGranted) {                                             │
+  │     // Handle permission denied                                        │
+  │   }                                                                    │
+  │   filePath = '/storage/emulated/0/Download/$fileName';                 │
+  │ } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) │
+  │ {                                                                       │
+  │   final downloadsDir = await getDownloadsDirectory();                  │
+  │   filePath = '${downloadsDir.path}/$fileName';                         │
+  │ } else {                                                               │
+  │   // For iOS                                                           │
+  │   final dir = await getApplicationDocumentsDirectory();                │
+  │   filePath = '${dir.path}/$fileName';                                  │
+  │ }                                                                      │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+WITH THIS:
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │ String? filePath;                                                       │
+  │                                                                         │
+  │ if (kIsWeb) {                                                           │
+  │   // ✅ Web: Use file_saver                                            │
+  │   final fileName = 'assessment_${DateTime.now().millisecondsSinceEpoch} │
+  │   await WebFileHelper.savePdf(bytes: pdfBytes, fileName: fileName);    │
+  │   return;                                                              │
+  │ }                                                                      │
+  │                                                                         │
+  │ // ✅ Native: Use platform-aware file saving                           │
+  │ if (!kIsWeb && Platform.isAndroid) {                                   │
+  │   final status = await Permission.storage.request();                   │
+  │   if (!status.isGranted) {                                             │
+  │     print('Storage permission denied');                                │
+  │     return;                                                            │
+  │   }                                                                    │
+  │   filePath = '/storage/emulated/0/Download/$fileName';                 │
+  │ } else if (!kIsWeb &&                                                  │
+  │            (Platform.isWindows ||                                      │
+  │             Platform.isLinux ||                                        │
+  │             Platform.isMacOS)) {                                       │
+  │   final dir = await getDownloadsDirectory();                           │
+  │   if (dir == null) {                                                   │
+  │     print('Could not find downloads directory');                       │
+  │     return;                                                            │
+  │   }                                                                    │
+  │   filePath = '${dir.path}/$fileName';                                  │
+  │ } else if (!kIsWeb && Platform.isIOS) {                                │
+  │   final dir = await getApplicationDocumentsDirectory();                │
+  │   filePath = '${dir.path}/$fileName';                                  │
+  │ }                                                                      │
+  │                                                                         │
+  │ if (filePath != null) {                                                │
+  │   final file = File(filePath);                                         │
+  │   await file.writeAsBytes(pdfBytes);                                   │
+  │   print('Downloaded to $filePath');                                    │
+  │ }                                                                      │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+
+════════════════════════════════════════════════════════════════════════════════
+FIX #3: package_service.dart
+════════════════════════════════════════════════════════════════════════════════
+
+STEP 1: Fix imports
+───────────────────
+
+Add these imports at the top:
+  import 'dart:io' if (dart.library.html) 'package:e_prescription/utils/stub_io.dart';
+  import 'package:flutter/foundation.dart';
+  import 'package:e_prescription/utils/web_image_helper.dart';
+
+
+STEP 2: Fix screenshot upload in subscribePackage() method
+──────────────────────────────────────────────────────
+
+REPLACE THIS:
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │ // Add screenshot if provided                                          │
+  │ if (screenshotPath != null && screenshotPath.isNotEmpty) {             │
+  │   request.files.add(                                                   │
+  │     await http.MultipartFile.fromPath('screenshot', screenshotPath),   │
+  │   );                                                                   │
+  │ }                                                                      │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+WITH THIS:
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │ // ✅ Add screenshot if provided (web-safe)                            │
+  │ if (screenshotPath != null && screenshotPath.isNotEmpty && !kIsWeb) {   │
+  │   try {                                                                │
+  │     request.files.add(                                                │
+  │       await http.MultipartFile.fromPath('screenshot', screenshotPath),│
+  │     );                                                                │
+  │   } catch (e) {                                                       │
+  │     print('Warning: Failed to add screenshot: $e');                   │
+  │     // Continue without screenshot                                    │
+  │   }                                                                   │
+  │ }                                                                     │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+STEP 3: Optional: Add web-specific screenshot parameter
+────────────────────────────────────────────────────
+
+Modify the function signature:
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │ Future<SubscribePackageResponse> subscribePackage(                      │
+  │   int packageId, {                                                      │
+  │   String? bkashNumber,                                                  │
+  │   String? transactionId,                                                │
+  │   String? screenshotPath,                                               │
+  │   dynamic screenshotFile,  // ✅ Add this parameter for web            │
+  │ }) async {                                                              │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+Then in the file adding section:
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │ // ✅ Add screenshot (web-safe)                                        │
+  │ if (kIsWeb && screenshotFile != null) {                                │
+  │   // Web: Use the passed XFile object                                 │
+  │   await WebImageHelper.addImageToRequest(                             │
+  │     request: request,                                                 │
+  │     fieldName: 'screenshot',                                          │
+  │     xfile: screenshotFile,                                            │
+  │   );                                                                  │
+  │ } else if (!kIsWeb && screenshotPath != null && screenshotPath.isNotEmpty) {
+  │   // Native: Use the file path                                        │
+  │   request.files.add(                                                 │
+  │     await http.MultipartFile.fromPath('screenshot', screenshotPath),  │
+  │   );                                                                  │
+  │ }                                                                     │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+
+════════════════════════════════════════════════════════════════════════════════
+HOW TO USE THE NEW UTILITIES
+════════════════════════════════════════════════════════════════════════════════
+
+🌐 WebImageHelper - For image handling across platforms
+─────────────────────────────────────────────────────
+
+// Get image provider
+final provider = await WebImageHelper.getImageProvider(
+  xfile: myXFile,
+  networkUrl: myImageUrl,
+  defaultAsset: 'assets/images/placeholder.png',
+);
+CircleAvatar(backgroundImage: provider);
+
+// Or use the widget directly
+WebImageHelper.buildImageWidget(
+  imageSource: url,
+  xfile: xfile,
+  width: 200,
+  height: 200,
+);
+
+// Add image to multipart request
+await WebImageHelper.addImageToRequest(
+  request: request,
+  fieldName: 'profile_photo',
+  xfile: pickedImage,
+);
+
+
+📁 WebFileHelper - For file operations across platforms
+──────────────────────────────────────────────────────
+
+// Check if file exists (safe on web)
+final exists = await WebFileHelper.fileExists(path);
+
+// Save PDF on any platform
+await WebFileHelper.savePdf(
+  bytes: pdfBytes,
+  fileName: 'document.pdf',
+);
+
+// Read file (native only, returns null on web)
+final bytes = await WebFileHelper.readFileAsBytes(path);
+
+// Check if running on web
+if (WebFileHelper.isWeb) {
+  // Web-specific code
+}
+
+
+🔌 ApiClient - For centralized API calls
+─────────────────────────────────────────
+
+// Register in locator
+locator.registerSingleton<ApiClient>(ApiClient());
+
+// Use in controller
+final _apiClient = locator.get<ApiClient>();
+
+Future<void> fetchProfile() async {
+  try {
+    final profile = await _apiClient.get(
+      Api.getProfile,
+      mapper: (json) => Profile.fromJson(json),
+    );
+  } on UnauthorizedException {
+    Get.offAllNamed('/login');
+  } on ApiException catch (e) {
+    Get.snackbar('Error', e.message);
+  }
+}
+
+
+════════════════════════════════════════════════════════════════════════════════
+TESTING CHECKLIST
+════════════════════════════════════════════════════════════════════════════════
+
+After applying all fixes, test these scenarios:
+
+Web Platform:
+  ☐ Image picker - upload profile photo
+  ☐ Image display - profile photos showing correctly
+  ☐ PDF generation - create and download assessment PDF
+  ☐ PDF generation - create and download prescription PDF
+  ☐ File upload - payment proof screenshot
+  ☐ Login/Logout - token handling
+  ☐ Profile update - modify and save profile
+
+Native Platforms:
+  ☐ Image picker - upload profile photo
+  ☐ Image display - profile photos showing correctly  
+  ☐ PDF generation - create and download PDFs
+  ☐ PDF open - open downloaded PDF
+  ☐ File operations - download to file system
+
+Cross-Platform:
+  ☐ API calls - all endpoints working
+  ☐ Error handling - proper error messages
+  ☐ Network errors - retry logic working
+  ☐ 401 errors - proper logout handling
+
+
+════════════════════════════════════════════════════════════════════════════════
+ESTIMATED TIME TO COMPLETE ALL FIXES
+════════════════════════════════════════════════════════════════════════════════
+
+Quick Wins (Already Done):                    
+  ✅ web_image_helper.dart - 30 min ✓
+  ✅ web_file_helper.dart - 30 min ✓
+  ✅ api_client.dart - 45 min ✓
+  ✅ registration_controller.dart - 30 min ✓
+  ✅ registration_widgets.dart - 30 min ✓
+  ✅ profile_controller.dart - 30 min ✓
+  ✅ packages.dart - 30 min ✓
+  ────────────────────
+  Subtotal: ~3.5 hours ✓
+
+Remaining Fixes:
+  ⏱️ profile_update.dart - 30 min
+  ⏱️ assessment_pdf_view.dart - 30 min
+  ⏱️ package_service.dart - 30 min
+  ⏱️ Testing & verification - 1-2 hours
+  ────────────────────
+  Subtotal: ~2.5-3.5 hours
+
+Total: 6-7 hours to production-ready web version
+
+════════════════════════════════════════════════════════════════════════════════
+
+Ready to implement? Follow the QUICK WINS first, then tackle the REMAINING FIXES!
+
+════════════════════════════════════════════════════════════════════════════════

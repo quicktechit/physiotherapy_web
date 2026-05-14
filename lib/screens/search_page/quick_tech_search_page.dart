@@ -1,12 +1,6 @@
 import 'package:e_prescription/const/const.dart';
-import 'package:e_prescription/const/quick_tech_app_colors.dart';
-import 'package:e_prescription/const/quick_tech_styles.dart';
+
 import 'package:e_prescription/controllers/patient_controller/quick_tech_patient_controller.dart';
-import 'package:e_prescription/controllers/theme_controller/quick_tech_theme_controller.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:e_prescription/locator.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class QuickTechSearchPage extends StatefulWidget {
   const QuickTechSearchPage({super.key});
@@ -73,7 +67,7 @@ class _QuickTechSearchPageState extends State<QuickTechSearchPage> {
                             themeController.isDay.value
                                 ? QuickTechAppColors.lightmaincolor
                                 : QuickTechAppColors.darkmaintextcolor,
-                        size: Responsive.isDesktop(context)?6.sp:  24.sp,
+                        size: Responsive.isDesktop(context)?20.sp:  24.sp,
                       ),
                       suffixIcon:
                           _searchQuery.isNotEmpty
@@ -81,7 +75,7 @@ class _QuickTechSearchPageState extends State<QuickTechSearchPage> {
                                   icon: Icon(
                                     Icons.close,
                                     color: Colors.grey,
-                                    size:  Responsive.isDesktop(context)?12.sp:22.sp,
+                                    size:  Responsive.isDesktop(context)?32.sp:22.sp,
                                   ),
                                   onPressed: () {
                                     setState(() {
@@ -113,7 +107,7 @@ class _QuickTechSearchPageState extends State<QuickTechSearchPage> {
                   Text(
                     'Search Results',
                     style: myStyle(
-                      Responsive.isDesktop(context)?4.sp: 14.sp,
+                      Responsive.isDesktop(context)?16.sp: 14.sp,
                       themeController.isDay.value
                           ? QuickTechAppColors.lightmaincolor
                           : QuickTechAppColors.darkmaintextcolor,
@@ -137,13 +131,13 @@ class _QuickTechSearchPageState extends State<QuickTechSearchPage> {
                             child: Icon(
                               Icons.person,
                               color: QuickTechAppColors.white,
-                              size:  Responsive.isDesktop(context)?4.sp: 22.sp,
+                              size:  Responsive.isDesktop(context)?20.sp: 22.sp,
                             ),
                           ),
                           title: Text(
                             patient.name,
                             style: myStyle(
-                              Responsive.isDesktop(context)?5.sp: 14.sp,
+                              Responsive.isDesktop(context)?16.sp: 14.sp,
                               themeController.isDay.value
                                   ? QuickTechAppColors.lightmaintextcolor
                                   : QuickTechAppColors.darkmaintextcolor,
@@ -152,7 +146,7 @@ class _QuickTechSearchPageState extends State<QuickTechSearchPage> {
                           subtitle: Text(
                             'ID: ${patient.id}, Age: ${patient.age}, Gender: ${patient.gender}',
                             style: myStyle(
-                              Responsive.isDesktop(context)?4.sp: 12.sp,
+                              Responsive.isDesktop(context)?14.sp: 12.sp,
                               themeController.isDay.value
                                   ? QuickTechAppColors.lightmaintextcolor
                                   : QuickTechAppColors.darkmaintextcolor,

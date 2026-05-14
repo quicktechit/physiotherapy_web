@@ -3,6 +3,7 @@ import 'package:e_prescription/screens/authentications/login/quick_tech_login_ve
 import 'package:e_prescription/services/template_services/quick_tech_template_storage_service.dart';
 import 'package:e_prescription/utils/api.dart';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -65,8 +66,13 @@ class QuickTechLoginController extends GetxController {
   Future<void> googleSignIn() async {
     try {
       isLoading(true);
-      // Ensure you have: import 'package:google_sign_in/google_sign_in.dart';
-      final GoogleSignIn googleSignIn = GoogleSignIn.standard();
+   
+      final GoogleSignIn googleSignIn = kIsWeb
+          ? GoogleSignIn(
+              clientId:
+                  const String.fromEnvironment('637978940538-8ra2n5459golm1q22fo576om3pe3trfn.apps.googleusercontent.com'),
+            )
+          : GoogleSignIn.standard();
       await googleSignIn.signOut(); // Always show account picker
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
@@ -74,7 +80,6 @@ class QuickTechLoginController extends GetxController {
         return; // User cancelled
       }
       final email = googleUser.email;
-      print('GoogleSignIn email: $email');
       final response = await http.post(
         Uri.parse(
           '${Api.baseUrl}/api/check/email/and/login',
@@ -82,7 +87,6 @@ class QuickTechLoginController extends GetxController {
         headers: {'Accept': 'application/json'},
         body: {'email': email},
       );
-      print('GoogleSignIn API response: ${response.body}');
       final data = json.decode(response.body);
       if (data['status'] == 'success') {
         final token = data['access_token'];
@@ -100,13 +104,12 @@ class QuickTechLoginController extends GetxController {
           snackPosition: SnackPosition.BOTTOM,
         );
       }
-    } catch (e) {
-      print('Google Sign-In error: $e');
-      Get.snackbar(
-        'Error',
-        'Google Sign-In failed: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      } catch (e) {
+        Get.snackbar(
+          'Error',
+          'Google Sign-In failed: ${e.toString()}',
+          snackPosition: SnackPosition.BOTTOM,
+        );
     } finally {
       isLoading(false);
     }
@@ -156,9 +159,6 @@ class QuickTechLoginController extends GetxController {
                   final phone = phoneController.text.trim();
                   final pass = passController.text.trim();
                   final confirmPass = confirmPassController.text.trim();
-                  print(
-                    'Register values: email=$email, phone=$phone, pass=$pass, confirmPass=$confirmPass',
-                  );
                   if (phone.isEmpty || pass.isEmpty || confirmPass.isEmpty) {
                     Get.snackbar(
                       'Error',

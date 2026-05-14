@@ -32,7 +32,11 @@ class QuickTechProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchProfile();
+    // Delay profile fetch to avoid blocking initialization
+    // Profile will be fetched when drawer is opened or screen loads
+    Future.delayed(const Duration(milliseconds: 500), () {
+      fetchProfile();
+    });
   }
 
   // -------------------------------

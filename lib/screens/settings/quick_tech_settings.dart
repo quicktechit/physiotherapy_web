@@ -149,7 +149,7 @@ class QuickTechSettings extends StatelessWidget {
                             : Colors.grey[400],
                       ),
                       onTap: () {
-                        Get.to(() => QuickTechProfileUpdatePage());
+                        Get.off(() => QuickTechProfileUpdatePage());
                       },
                     ),
                  

@@ -1,13 +1,14 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:e_prescription/const/quick_tech_app_colors.dart';
 import 'package:e_prescription/const/quick_tech_styles.dart';
+import 'package:e_prescription/const/web_image.dart';
 import 'package:e_prescription/controllers/theme_controller/quick_tech_theme_controller.dart';
 import 'package:e_prescription/locator.dart';
 import 'package:e_prescription/screens/profile/profile_update/quick_tech_profile_update.dart';
 import 'package:e_prescription/utils/api.dart';
 import 'package:e_prescription/widgets/quick_tech_custom_button.dart';
 
-import 'package:e_prescription/widgets/quick_tech_custom_divider.dart';
-import 'package:e_prescription/widgets/quick_tech_custom_listtile.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -15,22 +16,19 @@ import 'package:e_prescription/controllers/profile_controller/quick_tech_profile
 
 class QuickTechProfilePage extends StatefulWidget {
   final bool isAppBarVisible;
-  QuickTechProfilePage({super.key, required this.isAppBarVisible});
+  const QuickTechProfilePage({super.key, required this.isAppBarVisible});
 
   @override
   State<QuickTechProfilePage> createState() => _QuickTechProfilePageState();
 }
 
 class _QuickTechProfilePageState extends State<QuickTechProfilePage> {
-  final themeController = locator
-      .get<QuickTechThemeController>();
-  final profileController = locator
-      .get<QuickTechProfileController>();
+  final themeController = locator.get<QuickTechThemeController>();
+  final profileController = locator.get<QuickTechProfileController>();
 
   @override
   void initState() {
     super.initState();
-    // Fetch profile when page loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       profileController.fetchProfile();
     });
@@ -40,231 +38,318 @@ class _QuickTechProfilePageState extends State<QuickTechProfilePage> {
   Widget build(BuildContext context) {
     return Obx(
       () => Scaffold(
-        backgroundColor:
-            themeController.isDay.value
-                ? QuickTechAppColors.lightScaffoldColor
-                : QuickTechAppColors.darkScaffoldColor,
-        appBar:
-            widget.isAppBarVisible == true
-                ? AppBar(
-                  bottomOpacity: 4,
-                  backgroundColor:
-                      themeController.isDay.value
-                          ? QuickTechAppColors.lightmaincolor
-                          : QuickTechAppColors.darkmaincolor,
-                  elevation: 4,
-                  leading: IconButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    icon: Icon(
-                      Icons.arrow_back_ios_new_outlined,
-                      color: Colors.white,
+        backgroundColor: themeController.isDay.value
+            ? const Color(0xFFF4F6FA)
+            : QuickTechAppColors.darkScaffoldColor,
+        appBar: widget.isAppBarVisible
+            ? AppBar(
+                elevation: 0,
+                backgroundColor: themeController.isDay.value
+                    ? QuickTechAppColors.lightmaincolor
+                    : QuickTechAppColors.darkmaincolor,
+                leading: IconButton(
+                  onPressed: () => Get.back(),
+                  icon: const Icon(Icons.arrow_back_ios_new_outlined, color: Colors.white),
+                ),
+                title: Text(
+                  'Profile',
+                  style: myStyle(18, QuickTechAppColors.white, FontWeight.bold),
+                ),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: TextButton.icon(
+                      onPressed: () => Get.toNamed('/profileupdate'),
+                      icon: const Icon(FontAwesomeIcons.penToSquare, color: Colors.white, size: 16),
+                      label: const Text('Edit Profile', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.white.withValues(alpha: 0.15),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      ),
                     ),
                   ),
-                  title: Text(
-                    'Profile',
-                    style: myStyle(
-                      18,
-                      QuickTechAppColors.white,
-                      FontWeight.bold,
+                ],
+              )
+            : null,
+        body: Obx(() {
+          if (profileController.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (profileController.error.isNotEmpty) {
+            return Center(child: Text(profileController.error.value));
+          }
+          return Center(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Hero Card
+                    _buildHeroCard(),
+                    const SizedBox(height: 24),
+                    // English Info Card
+                    _buildSectionCard(
+                      title: 'English Information',
+                      icon: FontAwesomeIcons.globe,
+                      tiles: [
+                        _tileData(FontAwesomeIcons.building, 'Center Name', profileController.centerName.value, 'No Center Name'),
+                        _tileData(FontAwesomeIcons.mapLocationDot, 'Center Address', profileController.centerAddress.value, 'No Center Address'),
+                        _tileData(FontAwesomeIcons.user, 'Doctor Name', profileController.name.value, 'No Name'),
+                        _tileData(FontAwesomeIcons.scaleBalanced, 'Therapy Center', profileController.therapyCenter.value, 'No Therapy Center'),
+                        _tileData(FontAwesomeIcons.userDoctor, 'Designation', profileController.designation.value, 'No Designation'),
+                        _tileData(FontAwesomeIcons.locationArrow, 'Clinic Address', profileController.address.value, 'No Clinic Address'),
+                      ],
                     ),
+                    const SizedBox(height: 24),
+                    // Bengali Info Card
+                    _buildSectionCard(
+                      title: 'বাংলা তথ্য (Bengali Information)',
+                      icon: FontAwesomeIcons.language,
+                      tiles: [
+                        _tileData(FontAwesomeIcons.user, 'ডাক্তারের নাম', profileController.bnFirstName.value, 'নাম নেই'),
+                        _tileData(FontAwesomeIcons.houseChimneyMedical, 'থেরাপি সেন্টার', profileController.bnTherapyCenter.value, 'থেরাপি সেন্টার নেই'),
+                        _tileData(FontAwesomeIcons.userDoctor, 'পদবী', profileController.bnDesignation.value, 'পদবী নেই'),
+                        _tileData(FontAwesomeIcons.locationArrow, 'ক্লিনিক ঠিকানা', profileController.bnClinicAddress.value, 'ঠিকানা নেই'),
+                      ],
+                    ),
+                    if (!widget.isAppBarVisible) ...[
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        height: 50,
+                        child: QuickTechCustomButton(
+                          onTab: () => Get.to(() => QuickTechProfileUpdatePage()),
+                          color: themeController.isDay.value
+                              ? QuickTechAppColors.lightmaincolor
+                              : QuickTechAppColors.darkmaincolor,
+                          title: 'Update Profile',
+                          height: 50,
+                          width: double.infinity,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 32),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Map<String, dynamic> _tileData(IconData icon, String label, String value, String fallback) {
+    return {'icon': icon, 'label': label, 'value': value, 'fallback': fallback};
+  }
+
+  Widget _buildHeroCard() {
+    final isDay = themeController.isDay.value;
+    return Container(
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        color: isDay ? Colors.white : QuickTechAppColors.darkScaffoldColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDay ? 0.07 : 0.25),
+            blurRadius: 24,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: QuickTechAppColors.lightmaincolor, width: 3),
+              boxShadow: [
+                BoxShadow(
+                  color: QuickTechAppColors.lightmaincolor.withValues(alpha: 0.25),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ClipOval(
+              child: kIsWeb
+                  ? WebImage(
+                      imageUrl: "${Api.baseUrl}/${profileController.profilePhoto.value}",
+                      fit: BoxFit.cover,
+                    )
+                  : CachedNetworkImage(
+                      imageUrl: "${Api.baseUrl}/${profileController.profilePhoto.value}",
+                      fit: BoxFit.cover,
+                    ),
+            ),
+          ),
+          const SizedBox(width: 24),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  profileController.name.value.isNotEmpty
+                      ? profileController.name.value
+                      : 'No Name',
+                  style: myStyle(
+                    22,
+                    isDay ? QuickTechAppColors.lightmaintextcolor : QuickTechAppColors.darkmaintextcolor,
+                    FontWeight.bold,
                   ),
-                  actions: [
-                    IconButton(
-                      onPressed: () {
-                        Get.toNamed('/profileupdate');
-                      },
-                      icon: Icon(
-                        FontAwesomeIcons.penToSquare,
-                        color: QuickTechAppColors.white,
+                ),
+                const SizedBox(height: 4),
+                if (profileController.designation.value.isNotEmpty)
+                  Text(
+                    profileController.designation.value,
+                    style: myStyle(14, QuickTechAppColors.lightmaincolor, FontWeight.w600),
+                  ),
+                if (profileController.centerName.value.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(FontAwesomeIcons.building, size: 12,
+                          color: isDay ? Colors.grey[500] : Colors.grey[400]),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          profileController.centerName.value,
+                          style: TextStyle(fontSize: 13, color: isDay ? Colors.grey[600] : Colors.grey[400]),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionCard({
+    required String title,
+    required IconData icon,
+    required List<Map<String, dynamic>> tiles,
+  }) {
+    final isDay = themeController.isDay.value;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDay ? Colors.white : QuickTechAppColors.darkScaffoldColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDay ? 0.07 : 0.25),
+            blurRadius: 24,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: QuickTechAppColors.lightmaincolor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, size: 16, color: QuickTechAppColors.lightmaincolor),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  title,
+                  style: myStyle(
+                    15,
+                    isDay ? QuickTechAppColors.lightmaintextcolor : QuickTechAppColors.darkmaintextcolor,
+                    FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 340,
+              mainAxisExtent: 76,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            ),
+            itemCount: tiles.length,
+            itemBuilder: (context, index) {
+              final t = tiles[index];
+              final value = (t['value'] as String).isNotEmpty ? t['value'] as String : t['fallback'] as String;
+              final isEmpty = (t['value'] as String).isEmpty;
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isDay ? const Color(0xFFF8F9FC) : Colors.white.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isDay ? const Color(0xFFE8EAF0) : Colors.white.withValues(alpha: 0.08),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      t['icon'] as IconData,
+                      size: 16,
+                      color: isEmpty
+                          ? Colors.grey[400]
+                          : QuickTechAppColors.lightmaincolor,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            t['label'] as String,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isDay ? Colors.grey[500] : Colors.grey[400],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            value,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: isEmpty
+                                  ? (isDay ? Colors.grey[400] : Colors.grey[600])
+                                  : (isDay
+                                      ? QuickTechAppColors.lightmaintextcolor
+                                      : QuickTechAppColors.darkmaintextcolor),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
                     ),
                   ],
-                )
-                : null,
-        body: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Obx(() {
-            if (profileController.isLoading.value) {
-              return Center(child: CircularProgressIndicator());
-            }
-            if (profileController.error.isNotEmpty) {
-              return Center(child: Text(profileController.error.value));
-            }
-            return SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color:
-                              themeController.isDay.value
-                                  ? Colors.black.withValues(alpha: 0.2)
-                                  : Colors.grey.withValues(alpha: 0.5),
-                          blurRadius: 10,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: QuickTechAppColors.lightmaincolor,
-                        width: 1,
-                      ),
-                    ),
-                    child:
-                        profileController.profilePhoto.value.isNotEmpty
-                            ? CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                "${Api.baseUrl}/${profileController.profilePhoto.value}",
-                              ),
-                            )
-                            : CircleAvatar(
-                              child: Icon(
-                                Icons.person,
-                                size: 60,
-                                color: QuickTechAppColors.lightmaincolor,
-                              ),
-                              backgroundColor:
-                                  themeController.isDay.value
-                                      ? QuickTechAppColors.lightScaffoldColor
-                                      : QuickTechAppColors.darkScaffoldColor,
-                            ),
-                  ),
-                  SizedBox(height: 15),
-                  CustomDivider(themeController: themeController),
-                  SizedBox(height: 15),
-                  
-                  // English Section Header
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'English Information',
-                        style: myStyle(16, 
-                          themeController.isDay.value 
-                            ? QuickTechAppColors.lightmaintextcolor 
-                            : QuickTechAppColors.darkmaintextcolor, 
-                          FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                  customListtile(
-                    profileController.centerName.value.isNotEmpty
-                        ? profileController.centerName.value
-                        : 'No Center Name',
-                    FontAwesomeIcons.building,
-                    () {},
-                  ),
-                  customListtile(
-                    profileController.centerAddress.value.isNotEmpty
-                        ? profileController.centerAddress.value
-                        : 'No Center Address',
-                    FontAwesomeIcons.mapLocationDot,
-                    () {},
-                  ),
-                  customListtile(
-                    profileController.name.value.isNotEmpty
-                        ? profileController.name.value
-                        : 'No Name',
-                    FontAwesomeIcons.user,
-                    () {},
-                  ),
-                  customListtile(
-                    profileController.therapyCenter.value.isNotEmpty
-                        ? profileController.therapyCenter.value
-                        : 'No Therapy Center',
-                    FontAwesomeIcons.scaleBalanced,
-                    () {},
-                  ),
-                  customListtile(
-                    profileController.designation.value.isNotEmpty
-                        ? profileController.designation.value
-                        : 'No Designation',
-                    FontAwesomeIcons.userDoctor,
-                    () {},
-                  ),
-                  customListtile(
-                    profileController.address.value.isNotEmpty
-                        ? profileController.address.value
-                        : 'No Clinic Address',
-                    FontAwesomeIcons.locationArrow,
-                    () {},
-                  ),
-                  
-                  SizedBox(height: 10),
-                  CustomDivider(themeController: themeController),
-                  SizedBox(height: 10),
-                  
-                  // Bengali Section Header
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'বাংলা তথ্য (Bengali Information)',
-                        style: myStyle(16, 
-                          themeController.isDay.value 
-                            ? QuickTechAppColors.lightmaintextcolor 
-                            : QuickTechAppColors.darkmaintextcolor, 
-                          FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                  customListtile(
-                    profileController.bnFirstName.value.isNotEmpty
-                        ? profileController.bnFirstName.value
-                        : 'নাম নেই',
-                    FontAwesomeIcons.user,
-                    () {},
-                  ),
-                  customListtile(
-                    profileController.bnTherapyCenter.value.isNotEmpty
-                        ? profileController.bnTherapyCenter.value
-                        : 'থেরাপি সেন্টার নেই',
-                    FontAwesomeIcons.houseChimneyMedical,
-                    () {},
-                  ),
-                  customListtile(
-                    profileController.bnDesignation.value.isNotEmpty
-                        ? profileController.bnDesignation.value
-                        : 'পদবী নেই',
-                    FontAwesomeIcons.userDoctor,
-                    () {},
-                  ),
-                  customListtile(
-                    profileController.bnClinicAddress.value.isNotEmpty
-                        ? profileController.bnClinicAddress.value
-                        : 'ঠিকানা নেই',
-                    FontAwesomeIcons.locationArrow,
-                    () {},
-                  ),
-                  SizedBox(height: 20),
-                  widget.isAppBarVisible == true
-                      ? SizedBox()
-                      : QuickTechCustomButton(
-                        onTab: () {
-                        Get.to(()=>QuickTechProfileUpdatePage());},
-                        color:
-                            themeController.isDay.value
-                                ? QuickTechAppColors.lightmaincolor
-                                : QuickTechAppColors.darkmaincolor,
-                        title: 'Update Profile',
-                        height: 50,
-                        width: MediaQuery.of(context).size.width * 0.9,
-                      ),
-                ],
-              ),
-            );
-          }),
-        ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

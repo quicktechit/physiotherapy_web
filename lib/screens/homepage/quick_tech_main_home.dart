@@ -10,10 +10,18 @@ import 'package:e_prescription/screens/search_page/quick_tech_search_page.dart';
 import 'package:e_prescription/widgets/quick_tech_custom_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../responsive.dart';
+
+// ─── Nav destination definitions shared between bottom bar and rail ──────────
+const _navIcons = <IconData>[
+  Icons.home_rounded,
+  Icons.search_rounded,
+  Icons.group_rounded,
+  Icons.person_rounded,
+];
+
 
 class QuickTechMainHome extends StatefulWidget {
   const QuickTechMainHome({super.key});
@@ -28,39 +36,19 @@ class _QuickTechMainHomeState extends State<QuickTechMainHome>
   late AnimationController _fabController;
   late Animation<double> _fabScaleAnimation;
   late Animation<double> _fabRotationAnimation;
- final themeController = locator
-      .get<QuickTechThemeController>();
+  final themeController = locator.get<QuickTechThemeController>();
 
-  final _iconList = <IconData>[
-    Icons.home,
-    Icons.search,
-    Icons.group_rounded,
-    Icons.person,
-  ];
-
+  // Pages must match the order of _navIcons / _navLabels defined above
   final _pageList = [
     QuickTechHomePage(),
     QuickTechSearchPage(),
-   QuickTechPatientRecords(isAppBarVisible: false,),
-QuickTechProfilePage(isAppBarVisible: false,)
-   // QuickTechSettings(isAppBarVisible: false),
+    QuickTechPatientRecords(isAppBarVisible: false),
+    QuickTechProfilePage(isAppBarVisible: false),
   ];
 
   @override
   void initState() {
     super.initState();
-
-
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   try {
-    //     final user = QuickTechAuthStorageService.getUser();
-    //     final token = QuickTechAuthStorageService.getToken();
-    //     print('Logged in user: [${user?.firstName ?? ''}]');
-    //     print('Access token: [${token}]');
-    //   } catch (e) {
-    //     print('Error printing user/token: $e');
-    //   }
-    // });
 
     _fabController = AnimationController(
       duration: const Duration(milliseconds: 600),
@@ -68,12 +56,8 @@ QuickTechProfilePage(isAppBarVisible: false,)
       lowerBound: 0.0,
       upperBound: 1.0,
     );
-    _fabScaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.2), weight: 50),
-      TweenSequenceItem(tween: Tween(begin: 1.2, end: 1.0), weight: 50),
-    ]).animate(
-      CurvedAnimation(parent: _fabController, curve: Curves.easeInOut),
-    );
+
+    // Scale animation - smooth scale up and down
     _fabScaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
       CurvedAnimation(
         parent: _fabController,
@@ -82,6 +66,7 @@ QuickTechProfilePage(isAppBarVisible: false,)
       ),
     );
 
+    // Rotation animation - full 360 rotation
     _fabRotationAnimation = Tween<double>(
       begin: 0,
       end: 2 * 3.1416,
@@ -90,7 +75,11 @@ QuickTechProfilePage(isAppBarVisible: false,)
 
   @override
   void dispose() {
-    _fabController.dispose();
+    try {
+      _fabController.dispose();
+    } catch (e) {
+      print('Error disposing FAB controller: $e');
+    }
     super.dispose();
   }
 
@@ -103,6 +92,8 @@ QuickTechProfilePage(isAppBarVisible: false,)
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = Responsive.isDesktop(context);
+
     return Obx(
       () => Scaffold(
         backgroundColor:
@@ -110,6 +101,7 @@ QuickTechProfilePage(isAppBarVisible: false,)
                 ? QuickTechAppColors.lightScaffoldColor
                 : QuickTechAppColors.darkScaffoldColor,
 
+        // ── AppBar: shown on all platforms (menu icon for drawer) ────────
         appBar: AppBar(
           backgroundColor:
               themeController.isDay.value
@@ -119,15 +111,13 @@ QuickTechProfilePage(isAppBarVisible: false,)
           leading: Builder(
             builder:
                 (context) => IconButton(
-                  onPressed: () {
-                    Scaffold.of(context).openDrawer(); // Opens the drawer
-                  },
-                  icon: Icon(Icons.menu, color: Colors.white),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                  icon: const Icon(Icons.menu, color: Colors.white),
                 ),
           ),
           title: Text(
             'E-Prescription',
-            style: myStyle(Responsive.isDesktop(context)?6.sp: 16.sp, QuickTechAppColors.white, FontWeight.bold),
+            style: myStyle(16, QuickTechAppColors.white, FontWeight.bold),
           ),
           actions: [
             IconButton(
@@ -146,52 +136,67 @@ QuickTechProfilePage(isAppBarVisible: false,)
             ),
           ],
         ),
+
+        // ── Drawer: enabled on all platforms (mobile + desktop) ────────────
         drawer: customDrawer(context),
+
+        // ── Body: unified layout (drawer works on all platforms) ──────────
         body: _pageList[_currentIndex],
-        floatingActionButton: ScaleTransition(
-          scale: _fabScaleAnimation,
-          child: RotationTransition(
-            turns: _fabRotationAnimation,
-            child: FloatingActionButton(
-              onPressed: () {
-                print('Main Action');
-              //  _animateFab();
-                Get.to(()=>QuickTechPrescriptionForm());
-              },
-              backgroundColor:
-                  themeController.isDay.value
-                      ? QuickTechAppColors.lightmaincolor
-                      : QuickTechAppColors.darkmaincolor,
-              foregroundColor: Colors.white,
-              elevation: 10,
-              shape: CircleBorder(),
-              child:  Icon(Icons.add, size: 30.sp),
-            ),
-          ),
-        ),
+
+        // ── FAB: mobile only (drawer available on all platforms now) ────────
+        floatingActionButton:
+            isDesktop
+                ? null
+                : ScaleTransition(
+                  scale: _fabScaleAnimation,
+                  child: RotationTransition(
+                    turns: _fabRotationAnimation,
+                    child: FloatingActionButton(
+                      onPressed:
+                          () =>
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                Get.to(() => QuickTechPrescriptionForm());
+                              }),
+                      backgroundColor:
+                          themeController.isDay.value
+                              ? QuickTechAppColors.lightmaincolor
+                              : QuickTechAppColors.darkmaincolor,
+                      foregroundColor: Colors.white,
+                      elevation: 10,
+                      shape: const CircleBorder(),
+                      child: const Icon(Icons.add, size: 28),
+                    ),
+                  ),
+                ),
+
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        bottomNavigationBar: AnimatedBottomNavigationBar(
-          icons: _iconList,
-          activeIndex: _currentIndex,
-          gapLocation: GapLocation.center,
-          leftCornerRadius: 20,
-          rightCornerRadius: 20,
-          onTap: (index) => setState(() => _currentIndex = index),
-          activeColor:
-              themeController.isDay.value
-                  ? QuickTechAppColors.lightmaincolor
-                  : QuickTechAppColors.darkmaincolor,
-          inactiveColor: Colors.grey,
-          splashColor: const Color(0xFF6A11CB),
-          splashSpeedInMilliseconds: 300,
-          height: 60,
-          elevation: 10,
-          iconSize: 30,
-          backgroundColor:
-              themeController.isDay.value
-                  ? QuickTechAppColors.lightScaffoldColor
-                  : QuickTechAppColors.darkScaffoldColor,
-        ),
+
+        // ── Bottom nav: mobile only ────────────────────────────────────────
+        bottomNavigationBar:
+            isDesktop
+                ? null
+                : AnimatedBottomNavigationBar(
+                  icons: _navIcons,
+                  activeIndex: _currentIndex,
+                  gapLocation: GapLocation.center,
+                  leftCornerRadius: 20,
+                  rightCornerRadius: 20,
+                  onTap: (index) => setState(() => _currentIndex = index),
+                  activeColor:
+                      themeController.isDay.value
+                          ? QuickTechAppColors.lightmaincolor
+                          : QuickTechAppColors.darkmaincolor,
+                  inactiveColor: Colors.grey,
+                  splashColor: const Color(0xFF6A11CB),
+                  splashSpeedInMilliseconds: 300,
+                  height: 60,
+                  elevation: 10,
+                  iconSize: 28,
+                  backgroundColor:
+                      themeController.isDay.value
+                          ? QuickTechAppColors.lightScaffoldColor
+                          : QuickTechAppColors.darkScaffoldColor,
+                ),
       ),
     );
   }

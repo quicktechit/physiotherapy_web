@@ -1,4 +1,7 @@
-import '../../const/const.dart';
+// quick_tech_home_page.dart
+import 'package:e_prescription/const/const.dart';
+import 'package:e_prescription/screens/homepage/widgets/quick_tech_blog_banner.dart';
+
 
 class QuickTechHomePage extends StatefulWidget {
   const QuickTechHomePage({super.key});
@@ -8,76 +11,51 @@ class QuickTechHomePage extends StatefulWidget {
 }
 
 class _QuickTechHomePageState extends State<QuickTechHomePage> {
-  final themeController = locator
-      .get<QuickTechThemeController>();
+  final themeController = locator.get<QuickTechThemeController>();
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = Responsive.isDesktop(context);
+
     return Obx(
-      () => SingleChildScrollView(
-        child: Padding(
-          padding:  EdgeInsets.symmetric(horizontal: Responsive.isDesktop(context)?60.w:12.w),
+      () => Container(
+        color: themeController.isDay.value
+            ? const Color(0xFFF5F7FA)
+            : const Color(0xFF0F172A),
+        child: SingleChildScrollView(
+          controller: _scrollController,
           child: Column(
             children: [
-              SizedBox(height: 15.h),
-              customImageSlider(),
+              // ── Hero / Slider Section ──
+              QuickTechImageSlider(themeController: themeController),
 
+             
+
+              // ── Action Cards Grid ──
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Divider(
-                          color:
-                              themeController.isDay.value
-                                  ? QuickTechAppColors.lightmaincolor.withValues(alpha:
-                                    0.3,
-                                  )
-                                  : QuickTechAppColors.darkmaincolor.withValues(alpha:
-                                    0.3,
-                                  ),
-                          thickness: 1,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 25.h),
-                    Obx(() => customMainButtons(context)),
-                    SizedBox(height: 20.h),
-
-                    Obx(
-                      () => Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 40.w),
-                        child: customCard(
-                          onTap: () {
-                            Get.toNamed('/blogs');
-                          },
-                          title: 'Blogs',
-                          lottieAsset: 'assets/animations/blog.json',
-                          lottieHeight: 80.h,
-                          cardColor:
-                              themeController.isDay.value
-                                  ? QuickTechAppColors.white
-                                  : QuickTechAppColors.bkdarktxtfld,
-                          borderRadius: 18,
-                          elevation: 4,
-                          titleColor:
-                              themeController.isDay.value
-                                  ? QuickTechAppColors.lightmaincolor
-                                  : QuickTechAppColors.white,
-                          subtitleColor:
-                              themeController.isDay.value
-                                  ? QuickTechAppColors.black.withValues(alpha: 0.7)
-                                  : QuickTechAppColors.white.withValues(alpha: 0.7),
-                          padding: EdgeInsets.all(Responsive.isDesktop(context)?2.w:16.w),
-                        ),
-                      ),
-                    ),
-                  ],
+                padding: EdgeInsets.symmetric(
+                  horizontal: isDesktop ? 80.w : 20.w,
+                  vertical: 48.h,
                 ),
+                child: QuickTechCustomMainButtons(themeController: themeController),
               ),
+
+              // ── Blog Banner ──
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isDesktop ? 80.w : 20.w,
+                ),
+                child: QuickTechBlogBanner(themeController: themeController),
+              ),
+
+              SizedBox(height: 60.h),
             ],
           ),
         ),

@@ -21,6 +21,8 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
+import 'package:printing/printing.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
@@ -37,21 +39,26 @@ class QuickTechPdfAssesmentController extends GetxController {
   /// Get the current assessment ID
   int getAssessmentId() => _assessmentId;
 
-  // Download PDF from API and save locally
+  // Download PDF from API and save/share it
   Future<String?> fetchAndSavePdf() async {
     try {
       final response = await http.get(Uri.parse(apiUrl));
-      if (response.statusCode == 200) {
-        final bytes = response.bodyBytes;
+      if (response.statusCode != 200) return null;
+      final bytes = response.bodyBytes;
+      if (kIsWeb) {
+        // On web: trigger browser print/save dialog
+        await Printing.sharePdf(
+          bytes: bytes,
+          filename: 'assessment_prescription_$_assessmentId.pdf',
+        );
+        return 'web'; // non-null signals success
+      } else {
         final dir = await getApplicationDocumentsDirectory();
         final filePath = '${dir.path}/assessment_prescription_$_assessmentId.pdf';
-        final file = File(filePath);
-        await file.writeAsBytes(bytes);
+        await File(filePath).writeAsBytes(bytes);
         return filePath;
-      } else {
-        return null;
       }
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }

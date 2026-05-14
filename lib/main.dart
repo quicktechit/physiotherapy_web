@@ -3,9 +3,9 @@ import 'package:e_prescription/locator.dart';
 import 'package:e_prescription/routes/app_routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,21 +14,33 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  print('Step 1 - before Firebase');
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  print('Step 2 - Firebase done');
+  // Initialize GetStorage first (IndexedDB on web, Shared Preferences on mobile)
+  try {
+    await GetStorage.init();
+  } catch (e) {
+    debugPrint('GetStorage init error: $e');
+  }
 
-  setUp();
-  print('Step 3 - setUp done');
+  // Firebase - skip on web to avoid engine initialization conflicts
+  if (!kIsWeb) {
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    } catch (e) {
+      debugPrint('Firebase init error: $e');
+    }
+  }
 
-  await GetStorage.init();
-  print('Step 4 - GetStorage done');
+  // Setup GetX DI
+  try {
+    setUp();
+  } catch (e) {
+    debugPrint('SetUp error: $e');
+  }
 
   runApp(const MyApp());
-  print('Step 5 - runApp called');
 }
 
 class MyApp extends StatelessWidget {
@@ -38,20 +50,22 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeController = locator.get<QuickTechThemeController>();
     return ScreenUtilInit(
-      designSize: const Size(375, 812),
+      designSize: kIsWeb ? const Size(1440, 900) : const Size(375, 812),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
-        return GetMaterialApp(
-          themeMode: themeController.currentTheme,
-          title: 'PhysioTherapy',
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            primarySwatch: Colors.teal,
-            visualDensity: VisualDensity.adaptivePlatformDensity,
+        return Obx(
+          () => GetMaterialApp(
+            themeMode: themeController.currentTheme,
+            title: 'PhysioTherapy',
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              primarySwatch: Colors.teal,
+              visualDensity: VisualDensity.adaptivePlatformDensity,
+            ),
+            initialRoute: '/',
+            getPages: AppPages.pages,
           ),
-          initialRoute: '/',
-          getPages: AppPages.pages,
         );
       },
     );

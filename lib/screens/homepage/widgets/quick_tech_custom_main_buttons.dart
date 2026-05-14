@@ -1,98 +1,125 @@
-import 'package:e_prescription/const/quick_tech_app_colors.dart';
-import 'package:e_prescription/controllers/theme_controller/quick_tech_theme_controller.dart';
-import 'package:e_prescription/locator.dart';
+import 'package:e_prescription/const/const.dart';
 import 'package:e_prescription/screens/add_prescription/quick_tech_add_prescription_form.dart';
-import 'package:e_prescription/widgets/quick_tech_custom_card.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../responsive.dart';
+class QuickTechCustomMainButtons extends StatelessWidget {
+  final QuickTechThemeController themeController;
+  const QuickTechCustomMainButtons({super.key, required this.themeController});
 
-final themeController = locator.get<QuickTechThemeController>();
-Widget customMainButtons(BuildContext context) {
-  double containerWidth = Responsive.isDesktop(context)?0.25.sw: 0.40.sw;
-  return Column(
-    children: [
-      Container(
-        width: 1.sw,
+  @override
+  Widget build(BuildContext context) {
+    final isDesktop = Responsive.isDesktop(context);
+    final isDark = !themeController.isDay.value;
 
-        child: customCard(
-          title: 'Add Patient',
-          lottieAsset: 'assets/animations/addpatient.json',
-          cardColor:
-              themeController.isDay.value
-                  ? QuickTechAppColors.white
-                  : QuickTechAppColors.bkdarktxtfld,
-          borderRadius: 18,
-          elevation: 4,
-          titleColor:
-              themeController.isDay.value
-                  ? QuickTechAppColors.lightmaincolor
-                  : Colors.white,
-          subtitleColor: Colors.white.withValues(alpha: 0.9),
-          lottieHeight: 80.h,
-          padding: EdgeInsets.all(Responsive.isDesktop(context)?2.w:16.w),
-          onTap: () {
-            Get.toNamed('/addassessment');
-          },
-          isCenterTitle: true,
-          hasBorder: true,
-        ),
+    final actions = [
+      ActionCardData(
+        title: 'Add Patient',
+        subtitle: 'Register new patient records quickly',
+        lottie: 'assets/animations/addpatient.json',
+        gradient:  [QuickTechAppColors.lightmaincolor, QuickTechAppColors.lightmaincolor],
+        onTap: () => Get.toNamed('/addassessment'),
+        isWide: true,
       ),
-      SizedBox(height: 10.h),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      ActionCardData(
+        title: 'Add Prescription',
+        subtitle: 'Create & manage prescriptions',
+        lottie: 'assets/animations/prescription.json',
+        gradient: isDark
+            ? [const Color(0xFF1E293B), const Color(0xFF334155)]
+            : [Colors.white, Colors.white],
+        textColor: isDark ? Colors.white : QuickTechAppColors.lightmaincolor,
+        subtitleColor: isDark
+            ? Colors.white.withValues(alpha: 0.6)
+            : const Color(0xFF64748B),
+        hasBorder: !isDark,
+        onTap: () {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Get.off(() => QuickTechPrescriptionForm());
+          });
+        },
+        isWide: false,
+      ),
+      ActionCardData(
+        title: 'Add Assessment',
+        subtitle: 'Log clinical assessments',
+        lottie: 'assets/animations/assessment.json',
+        gradient:  [QuickTechAppColors.lightmaincolor, QuickTechAppColors.lightmaincolor],
+        onTap: () => Get.toNamed('/addassessment'),
+        isWide: false,
+      ),
+      ActionCardData(
+        title: 'Patient List',
+        subtitle: 'View and manage patient records',
+        lottie: 'assets/animations/patientrecords.json',
+       gradient: isDark
+            ? [const Color(0xFF1E293B), const Color(0xFF334155)]
+            : [Colors.white, Colors.white],
+        textColor: isDark ? Colors.white : QuickTechAppColors.lightmaincolor,
+        subtitleColor: isDark
+            ? Colors.white.withValues(alpha: 0.6)
+            : const Color(0xFF64748B),
+        hasBorder: !isDark,
+        onTap: () => Get.toNamed('/patientrecords'),
+        isWide: false,
+      ),
+    ];
+
+    if (isDesktop) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            //height: containerHeight,
-            width: containerWidth,
-            margin: EdgeInsets.only(right: 10.w),
-            child: customCard(
-              title: 'Add Prescription',
-              lottieAsset: 'assets/animations/prescription.json',
-              cardColor:
-                  themeController.isDay.value
-                      ? Colors.white
-                      : QuickTechAppColors.darkmaincolor,
-              borderRadius: 18,
-              elevation: 4,
-              titleColor:
-                  themeController.isDay.value
-                      ? QuickTechAppColors.lightmaincolor
-                      : Colors.white,
-              lottieHeight: 80.h,
-              padding: EdgeInsets.all(Responsive.isDesktop(context)?3.w: 16.w),
-              onTap: () {
-                Get.to(() => QuickTechPrescriptionForm());
-              },
-            ),
+          SectionHeader(isDark: isDark, label: 'Quick Actions'),
+          SizedBox(height: 28.h),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 5,
+                child: Column(
+                  children: [
+                    ActionCard(data: actions[0], isDesktop: true),
+                    SizedBox(height: 20.h),
+                    ActionCard(data: actions[3], isDesktop: true),
+                  ],
+                ),
+              ),
+              SizedBox(width: 20.w),
+              Expanded(
+                flex: 5,
+                child: Column(
+                  children: [
+                    ActionCard(data: actions[1], isDesktop: true),
+                    SizedBox(height: 20.h),
+                    ActionCard(data: actions[2], isDesktop: true),
+                  ],
+                ),
+              ),
+            ],
           ),
-          Container(
-            // height: containerHeight,
-            width: containerWidth,
-            margin: EdgeInsets.only(left: 10.w),
-            child: customCard(
-              title: 'Add Assessment',
-              lottieAsset: 'assets/animations/assessment.json',
-              cardColor:
-                  themeController.isDay.value
-                      ? QuickTechAppColors.lightmaincolor.withValues(alpha: 0.7)
-                      : QuickTechAppColors.bkdarktxtfld,
-              borderRadius: 18,
-              elevation: 4,
-              titleColor: Colors.white,
-              subtitleColor: Colors.white.withValues(alpha: 0.9),
-              lottieHeight: 80.h,
-              padding: EdgeInsets.all(Responsive.isDesktop(context)?3.w:16.w),
-              onTap: () {
-                Get.toNamed('/addassessment');
-              },
-            ),
-          ),
-
         ],
-      ),
-    ],
-  );
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(isDark: isDark, label: 'Quick Actions'),
+        SizedBox(height: 20.h),
+         Row(
+          children: [
+            Expanded(child: ActionCard(data: actions[0], isDesktop: false)),
+            SizedBox(width: 16.w),
+            Expanded(child: ActionCard(data: actions[3], isDesktop: false)),
+          ],
+        ),
+        SizedBox(height: 16.h),
+        Row(
+          children: [
+            Expanded(child: ActionCard(data: actions[1], isDesktop: false)),
+            SizedBox(width: 16.w),
+            Expanded(child: ActionCard(data: actions[2], isDesktop: false)),
+          ],
+        ),
+      ],
+    );
+  }
 }

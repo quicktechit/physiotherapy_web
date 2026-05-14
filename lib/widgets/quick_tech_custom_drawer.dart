@@ -18,7 +18,9 @@ final themeController = locator.get<QuickTechThemeController>();
 final profileController = locator.get<QuickTechProfileController>();
 final packageController = locator.get<QuickTechPackageController>();
 Widget customDrawer(BuildContext context) {
-  profileController.fetchProfile();
+  // Do NOT call fetchProfile() here — the controller already calls it in
+  // onInit(), and calling it on every drawer open triggers redundant API
+  // requests and causes the "multiple fetchProfile" log spam.
   return Obx(
     () => Drawer(
       backgroundColor:
@@ -41,7 +43,9 @@ Widget customDrawer(BuildContext context) {
                 profileController.profilePhoto.value.isNotEmpty
                     ? CircleAvatar(
                         backgroundImage: NetworkImage(
-                          "${Api.baseUrl}/${profileController.profilePhoto.value}",
+                          // profilePhoto from API starts with '/' so strip it
+                          // to avoid a double-slash in the URL.
+                          "${Api.baseUrl}/${profileController.profilePhoto.value.replaceFirst(RegExp(r'^/+'), '')}",
                         ),
                         radius: 40.r,
                       )
@@ -56,7 +60,7 @@ Widget customDrawer(BuildContext context) {
                       ? profileController.name.value
                       : 'Therapy Center',
                   style: myStyle(
-                    Responsive.isDesktop(context)?4.w: 14.sp,
+                    Responsive.isDesktop(context)?14.w: 14.sp,
                     QuickTechAppColors.darkmaintextcolor,
                     FontWeight.bold,
                   ),
@@ -68,7 +72,7 @@ Widget customDrawer(BuildContext context) {
             title: Text(
               'Home',
               style: myStyle(
-                Responsive.isDesktop(context)?6.w:16.sp,
+                Responsive.isDesktop(context)?18.w:14.sp,
                   themeController.isDay.value
                       ? QuickTechAppColors.lightmaintextcolor
                       : QuickTechAppColors.darkmaintextcolor,
@@ -83,7 +87,7 @@ Widget customDrawer(BuildContext context) {
             title: Text(
               'Add Prescription',
               style: myStyle(
-                Responsive.isDesktop(context)?4.w:14,
+                Responsive.isDesktop(context)?14.w:14,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightmaintextcolor
                     : QuickTechAppColors.darkmaintextcolor,
@@ -91,14 +95,16 @@ Widget customDrawer(BuildContext context) {
               ),
             ),
             onTap: () {
-              Get.off(()=> QuickTechPrescriptionForm());
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                Get.off(()=> QuickTechPrescriptionForm());
+              });
             },
           ),
           ListTile(
             title: Text(
               'Add Assessment',
               style: myStyle(
-                Responsive.isDesktop(context)?4.w: 14.sp,
+                Responsive.isDesktop(context)?14.w: 14.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightmaintextcolor
                     : QuickTechAppColors.darkmaintextcolor,
@@ -113,7 +119,7 @@ Widget customDrawer(BuildContext context) {
             title: Text(
               'Patient List',
               style: myStyle(
-                Responsive.isDesktop(context)?4.w:14.sp,
+                Responsive.isDesktop(context)?14.w:14.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightmaintextcolor
                     : QuickTechAppColors.darkmaintextcolor,
@@ -129,7 +135,7 @@ Widget customDrawer(BuildContext context) {
             title: Text(
               'Packages',
               style: myStyle(
-                Responsive.isDesktop(context)?4.w:14.sp,
+                Responsive.isDesktop(context)?14.w:14.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightmaintextcolor
                     : QuickTechAppColors.darkmaintextcolor,
@@ -137,14 +143,14 @@ Widget customDrawer(BuildContext context) {
               ),
             ),
             onTap: () {
-              Get.to(() => QuickTechPackages());
+              Get.off(() => QuickTechPackages());
             },
           ),
           ListTile(
             title: Text(
               'Templates',
               style: myStyle(
-                Responsive.isDesktop(context)?4.w:14.sp,
+                Responsive.isDesktop(context)?14.w:14.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightmaintextcolor
                     : QuickTechAppColors.darkmaintextcolor,
@@ -159,7 +165,7 @@ Widget customDrawer(BuildContext context) {
             title: Text(
               'Profile',
               style: myStyle(
-                Responsive.isDesktop(context)?4.w: 14.sp,
+                Responsive.isDesktop(context)?14.w: 14.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightmaintextcolor
                     : QuickTechAppColors.darkmaintextcolor,
@@ -174,7 +180,7 @@ Widget customDrawer(BuildContext context) {
             title: Text(
               'Settings',
               style: myStyle(
-                Responsive.isDesktop(context)?4.w: 14.sp,
+                Responsive.isDesktop(context)?14.w: 14.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightmaintextcolor
                     : QuickTechAppColors.darkmaintextcolor,
@@ -189,7 +195,7 @@ Widget customDrawer(BuildContext context) {
             title: Text(
               'Logout',
               style: myStyle(
-                Responsive.isDesktop(context)?4.w:14.sp,
+                Responsive.isDesktop(context)?14.w:14.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightmaintextcolor
                     : QuickTechAppColors.darkmaintextcolor,

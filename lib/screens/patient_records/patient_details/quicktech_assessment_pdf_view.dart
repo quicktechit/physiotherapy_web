@@ -8,10 +8,12 @@ import 'package:e_prescription/services/auth_services/quick_tech_auth_storage_se
 import 'package:get/get.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
+import 'package:flutter/foundation.dart';
 import 'package:printing/printing.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
+// dart:io, path_provider and permission_handler are mobile/desktop only
+import 'dart:io' if (dart.library.html) 'package:e_prescription/utils/stub_io.dart';
+import 'package:path_provider/path_provider.dart'
+    if (dart.library.html) 'package:e_prescription/utils/stub_path_provider.dart';
 
 class QuicktechAssessmentPdfView extends StatelessWidget {
   final int assessmentId;
@@ -38,43 +40,35 @@ class QuicktechAssessmentPdfView extends StatelessWidget {
                   onPressed: () async {
                     final fileName = 'assessment_${assessmentId}_${DateTime.now().millisecondsSinceEpoch}.pdf';
                     try {
-                      String filePath = '';
-                      // Request storage permission for Android
-                      if (Platform.isAndroid) {
-                        var status = await Permission.storage.status;
-                        if (!status.isGranted) {
-                          status = await Permission.storage.request();
-                          if (!status.isGranted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Storage permission denied.')),
-                            );
-                            return;
-                          }
-                        }
-                        // Save to /storage/emulated/0/Download
-                        filePath = '/storage/emulated/0/Download/$fileName';
-                      } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-                        final downloadsDir = await getDownloadsDirectory();
-                        if (downloadsDir == null) {
+                      if (kIsWeb) {
+                        // On web: trigger browser print/save dialog
+                        await Printing.sharePdf(bytes: pdfBytes, filename: fileName);
+                      } else if (Platform.isAndroid) {
+                        // Android: save directly to the public Downloads folder
+                        const androidDownloads = '/storage/emulated/0/Download';
+                        final file = File('$androidDownloads/$fileName');
+                        await file.writeAsBytes(pdfBytes);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Downloaded to $androidDownloads/$fileName')),
+                        );
+                      } else {
+                        // iOS / desktop: use the platform Downloads / documents dir
+                        final dir = Platform.isIOS
+                            ? await getApplicationDocumentsDirectory()
+                            : await getDownloadsDirectory();
+                        if (dir == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Could not find Downloads folder.')),
+                            const SnackBar(content: Text('Could not find Downloads folder.')),
                           );
                           return;
                         }
-                        filePath = '${downloadsDir.path}/$fileName';
-                      } else {
-                        // For iOS, fallback to app documents directory
-                        final dir = await getApplicationDocumentsDirectory();
-                        filePath = '${dir.path}/$fileName';
+                        final file = File('${dir.path}/$fileName');
+                        await file.writeAsBytes(pdfBytes);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Downloaded to ${dir.path}/$fileName')),
+                        );
                       }
-                      final file = File(filePath);
-                      await file.writeAsBytes(pdfBytes);
-                      print('Downloaded to $filePath');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Downloaded to $filePath')),
-                      );
                     } catch (e) {
-                      print('Download failed: $e');
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Download failed: $e')),
                       );

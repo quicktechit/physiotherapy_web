@@ -1,10 +1,13 @@
+
 import 'dart:io';
+
 
 import 'package:e_prescription/const/quick_tech_app_colors.dart';
 import 'package:e_prescription/const/quick_tech_styles.dart';
 import 'package:e_prescription/controllers/authentication_controller/registration_controller/quick_tech_registration_controller.dart';
 import 'package:e_prescription/controllers/theme_controller/quick_tech_theme_controller.dart';
 import 'package:e_prescription/widgets/quick_tech_custom_text_field.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,33 +17,64 @@ final QuickTechRegistrationController registrationController = locator.get<Quick
 final QuickTechThemeController themeController = locator.get<QuickTechThemeController>();
 
 final bool isDay = themeController.isDay.value;
+
+// ✅ WEB-SAFE: Profile image widget that works on both web and native
 Widget customProfileImageSection() {
   return Column(
     children: [
       GestureDetector(
         onTap: registrationController.pickImage,
         child: Obx(
-          () => CircleAvatar(
-            radius: 50.r,
-            backgroundColor: QuickTechAppColors.greyOpacity5,
-            backgroundImage:
-                registrationController.profileImage.value != null
-                    ? FileImage(
-                        File(registrationController.profileImage.value!.path),
-                      )
-                    : null,
-            child:
-                registrationController.profileImage.value == null
-                    ? Icon(
-                        Icons.camera_alt,
-                        size: 40.sp,
-                        color:
-                            themeController.isDay.value
-                                ? QuickTechAppColors.lightScaffoldColor
-                                : QuickTechAppColors.darkScaffoldColor,
-                      )
-                    : null,
-          ),
+          () {
+            final xfile = registrationController.profileImage.value;
+            return CircleAvatar(
+              radius: 50.r,
+              backgroundColor: QuickTechAppColors.greyOpacity5,
+              // ✅ Use web-safe image helper
+              backgroundImage: xfile != null
+                  ? (kIsWeb
+                      ? null // Will use child widget instead on web
+                      : null)
+                  : null,
+              child: xfile != null && kIsWeb
+                  ? FutureBuilder<List<int>>(
+                      future: xfile.readAsBytes(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return ClipOval(
+                            child: Image.memory(
+                              Uint8List.fromList(snapshot.data!),
+                              fit: BoxFit.cover,
+                              width: 100.r,
+                              height: 100.r,
+                            ),
+                          );
+                        }
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        }
+                        return Icon(Icons.camera_alt, size: 40.sp);
+                      },
+                    )
+                  : xfile != null && !kIsWeb
+                      ? ClipOval(
+                          child: Image.file(
+                            File(xfile.path),
+                            fit: BoxFit.cover,
+                            width: 100.r,
+                            height: 100.r,
+                          ),
+                        )
+                      : Icon(
+                          Icons.camera_alt,
+                          size: 40.sp,
+                          color: themeController.isDay.value
+                              ? QuickTechAppColors.lightScaffoldColor
+                              : QuickTechAppColors.darkScaffoldColor,
+                        ),
+            );
+          },
         ),
       ),
     ],

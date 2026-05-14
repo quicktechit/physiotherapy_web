@@ -1,5 +1,4 @@
 import 'package:e_prescription/const/const.dart';
-import 'package:get/get.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'dart:convert';

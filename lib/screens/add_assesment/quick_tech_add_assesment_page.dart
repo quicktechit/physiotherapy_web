@@ -615,10 +615,12 @@ class _QuickTechAddAssesmentPageState extends State<QuickTechAddAssesmentPage> w
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
               child: Text('Continue to Prescription'),
-              onPressed: () {
+                onPressed: () {
                 Navigator.of(context).pop();
                 _clearAllAssessmentData();
-                Get.off(() => QuickTechPrescriptionForm());
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Get.off(() => QuickTechPrescriptionForm());
+                });
               },
             ),
           ],

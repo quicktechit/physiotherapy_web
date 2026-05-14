@@ -36,8 +36,11 @@ class QuickTechPackageController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadCached(); // instant display from cache
-    _initData(); // background refresh
+    _loadCached(); // instant display from cache (sync, no block)
+    // Delay data fetch to avoid blocking app startup
+    Future.delayed(const Duration(milliseconds: 800), () {
+      _initData(); // background refresh (async, non-blocking)
+    });
   }
 Future<void> _initData() async {
   await fetchUserPackage(); // আগে user package
