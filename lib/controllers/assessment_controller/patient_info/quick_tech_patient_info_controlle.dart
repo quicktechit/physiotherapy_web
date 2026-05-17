@@ -142,48 +142,50 @@ final QuickTechThemeController themeController = locator.get<QuickTechThemeContr
 
 
   void updatePatientName(String name) {
-    patientNameController.text = name;
+    // controller already has the text from user input; no reassignment needed
   }
 
   void updateFatherName(String name) {
-    fatherNameController.text = name;
+    // controller already has the text from user input; no reassignment needed
   }
 
   void updateMotherName(String name) {
-    motherNameController.text = name;
+    // controller already has the text from user input; no reassignment needed
   }
+
   void updatePhoneNumber(String phone) {
-    phoneController.text = phone;
+    // controller already has the text from user input; no reassignment needed
   }
 
   void updateSpouseName(String name) {
-    spouseNameController.text = name;
+    // controller already has the text from user input; no reassignment needed
   }
 
   void updateAge(int newAge) {
     age.value = newAge;
-    ageController.text = newAge.toString();
+    // do NOT set ageController.text here — it resets cursor on web
   }
 
   void updateVoterID(String id) {
-    voterIDController.text = id;
+    // controller already has the text from user input; no reassignment needed
   }
 
   void updateDisabilityID(String id) {
-    disabilityIDController.text = id;
+    // controller already has the text from user input; no reassignment needed
   }
 
   void updateBloodGroup(String group) {
-    bloodGroupController.text = group;
+    // controller already has the text from user input; no reassignment needed
   }
 
   void updateGuardianName(String name) {
-    guardianNameController.text = name;
+    // controller already has the text from user input; no reassignment needed
   }
-void updateBirthDate(String date) {
-  birthDateController.text = date;
-  update(); 
-}
+
+  void updateBirthDate(String date) {
+    birthDateController.text = date;
+    update();
+  }
 
   void updateOccupation(String? newOccupation) {
     if (newOccupation != null) {
@@ -196,22 +198,27 @@ void updateBirthDate(String date) {
     }
   }
 
- void updateMaritalStatus(String status) {
+  void updateMaritalStatus(String status) {
+    maritalStatus.value = status;
     maritalStatusController.text = status;
   }
+
   void updateBirthRegistrationNo(String registrationNo) {
-    birthRegistrationNoController.text = registrationNo;
+    // controller already has the text from user input; no reassignment needed
   }
 
   void updateEducationOfPatient(String education) {
+    educationOfPatient.value = education;
     educationOfPatientController.text = education;
   }
 
   void updateEducationOfGuardian(String education) {
+    educationOfGuardian.value = education;
     educationOfGuardianController.text = education;
   }
 
   void updateSex(String gender) {
+    sex.value = gender;
     sexController.text = gender;
   }
 
