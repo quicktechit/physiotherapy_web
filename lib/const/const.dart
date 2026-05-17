@@ -21,3 +21,7 @@ export 'package:e_prescription/screens/homepage/quick_tech_main_home.dart';
 export 'package:e_prescription/widgets/quick_tech_custom_button.dart';
 export 'package:e_prescription/services/auth_services/quick_tech_auth_storage_service.dart';
 
+export 'package:e_prescription/screens/authentications/registration/widgets/quick_tech_registration_widgets.dart';
+
+export 'package:e_prescription/widgets/quick_tech_custom_text_style.dart';
+

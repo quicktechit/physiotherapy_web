@@ -377,8 +377,7 @@ Widget _ElectroTherapyDetails(Map<String, dynamic> therapy, bool isDay) {
                 ),
               ),
               const SizedBox(width: 20),
-              Obx(() {
-                return RadioGroup<bool>(
+             RadioGroup<bool>(
                   groupValue: therapyDropdownController.therapyDetails[id]?['isRegular'],
                   onChanged: (value) {
                     therapyDropdownController.frequencyControllers[id]?.text =
@@ -393,8 +392,7 @@ Widget _ElectroTherapyDetails(Map<String, dynamic> therapy, bool isDay) {
                   child: Radio<bool>(
                     value: false,
                   ),
-                );
-              }),
+                ),
               Text(
                 'Irregular',
                 style: myStyle(

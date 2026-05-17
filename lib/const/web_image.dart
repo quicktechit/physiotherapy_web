@@ -1,8 +1,8 @@
+import 'dart:html' as html;
 import 'dart:ui_web' as ui;
 import 'package:flutter/material.dart';
-import 'dart:html' as html;
 
-class WebImage extends StatelessWidget {
+class WebImage extends StatefulWidget {
   final String imageUrl;
   final BoxFit fit;
 
@@ -11,6 +11,38 @@ class WebImage extends StatelessWidget {
     required this.imageUrl,
     this.fit = BoxFit.cover,
   });
+
+  @override
+  State<WebImage> createState() => _WebImageState();
+}
+
+class _WebImageState extends State<WebImage> {
+  late final String viewType;
+
+  @override
+  void initState() {
+    super.initState();
+
+    viewType = 'img-${widget.imageUrl.hashCode}';
+
+    // register only ONCE
+    // ignore: undefined_prefixed_name
+    ui.platformViewRegistry.registerViewFactory(
+      viewType,
+      (int viewId) {
+        final img = html.ImageElement()
+          ..src = widget.imageUrl
+          ..style.width = '100%'
+          ..style.height = '100%'
+          ..style.objectFit = _cssObjectFit(widget.fit)
+          ..style.objectPosition = 'center'
+          ..style.border = 'none'
+          ..style.display = 'block';
+
+        return img;
+      },
+    );
+  }
 
   String _cssObjectFit(BoxFit fit) {
     switch (fit) {
@@ -21,9 +53,9 @@ class WebImage extends StatelessWidget {
       case BoxFit.cover:
         return 'cover';
       case BoxFit.fitWidth:
-        return 'cover'; // closest CSS equivalent
+        return 'cover';
       case BoxFit.fitHeight:
-        return 'cover'; // closest CSS equivalent
+        return 'cover';
       case BoxFit.none:
         return 'none';
       case BoxFit.scaleDown:
@@ -33,30 +65,6 @@ class WebImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final viewType = 'img-${imageUrl.hashCode}';
-
-    try {
-      ui.platformViewRegistry.registerViewFactory(
-        viewType,
-        (int viewId) {
-          final img = html.ImageElement()
-            ..src = imageUrl
-            ..style.width = '100%'
-            ..style.height = '100%'
-            ..style.objectFit = _cssObjectFit(fit)
-            ..style.objectPosition = 'center center'
-            ..style.display = 'block'
-            ..style.border = 'none'
-            ..style.margin = '0'
-            ..style.padding = '0';
-
-          return img;
-        },
-      );
-    } catch (_) {
-      // Ignore if already registered
-    }
-
     return SizedBox.expand(
       child: HtmlElementView(
         viewType: viewType,

@@ -45,8 +45,6 @@ class _QuickTechPackagesState extends State<QuickTechPackages> {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = Responsive.isDesktop(context);
-
     return Obx(() {
       final isDark = !themeController.isDay.value;
       final mainColor = isDark
@@ -55,126 +53,298 @@ class _QuickTechPackagesState extends State<QuickTechPackages> {
 
       return Scaffold(
         backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
-        appBar: _buildAppBar(isDark, mainColor, isDesktop, context),
+        appBar: _buildAppBar(isDark, mainColor, context),
         drawer: customDrawer(context),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: isDesktop ? 80.w : 16.w,
-              vertical: 32.h,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // ── Page Header ──
-                if (isDesktop) ...[
-                  _PageHeader(isDark: isDark, mainColor: mainColor),
-                  SizedBox(height: 36.h),
-                ],
-
-                // ── Current Subscription ──
-                Obx(() {
-                  final current = controller.getCurrentSubscribedPackage();
-                  if (current == null) return const SizedBox.shrink();
-                  return Column(
-                    children: [
-                      _CurrentPlanCard(
-                        package: current,
-                        isDark: isDark,
-                        mainColor: mainColor,
-                        isDesktop: isDesktop,
-                        controller: controller,
-                        context: context,
-                      ),
-                      SizedBox(height: 40.h),
-                    ],
-                  );
-                }),
-
-                // ── Section Title ──
-                Row(
-                  children: [
-                    Container(
-                      width: 4.w,
-                      height: 26.h,
-                      decoration: BoxDecoration(
-                        color: mainColor,
-                        borderRadius: BorderRadius.circular(2.r),
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Text(
-                      'Available Plans',
-                      style: TextStyle(
-                        color: isDark ? Colors.white : const Color(0xFF0F172A),
-                        fontSize: isDesktop ? 20.sp : 17.sp,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.3,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 24.h),
-
-                // ── Package List ──
-                Obx(() {
-                  if (controller.isLoading.value ||
-                      controller.isLoadingUserPackage.value) {
-                    return Center(
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 60.h),
-                        child: CircularProgressIndicator(
-                          color: mainColor,
-                          strokeWidth: 2.5,
-                        ),
-                      ),
-                    );
-                  }
-
-                  if (controller.allPackages.isEmpty) {
-                    return _EmptyState(isDark: isDark, mainColor: mainColor, isDesktop: isDesktop);
-                  }
-
-                  if (isDesktop) {
-                    return _DesktopPackageGrid(
-                      packages: controller.allPackages,
-                      isDark: isDark,
-                      mainColor: mainColor,
-                      isDesktop: isDesktop,
-                      controller: controller,
-                      onSubscribe: (id) => _handleSubscribe(id, isDark),
-                      context: context,
-                    );
-                  }
-
-                  return Column(
-                    children: controller.allPackages.map((pkg) {
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: 20.h),
-                        child: _PackageCard(
-                          package: pkg,
-                          isDark: isDark,
-                          mainColor: mainColor,
-                          isDesktop: false,
-                          controller: controller,
-                          onSubscribe: () => _handleSubscribe(pkg.id, isDark),
-                          context: context,
-                        ),
-                      );
-                    }).toList(),
-                  );
-                }),
-
-                SizedBox(height: 40.h),
-              ],
-            ),
-          ),
+        body: Responsive(
+          mobile: _buildMobileBody(context, isDark, mainColor),
+          tablet: _buildTabletBody(context, isDark, mainColor),
+          desktop: _buildDesktopBody(context, isDark, mainColor),
         ),
       );
     });
   }
 
-  AppBar _buildAppBar(bool isDark, Color mainColor, bool isDesktop, BuildContext context) {
+  // ── Mobile Layout ──
+  Widget _buildMobileBody(BuildContext context, bool isDark, Color mainColor) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ── Current Subscription ──
+            Obx(() {
+              final current = controller.getCurrentSubscribedPackage();
+              if (current == null) return const SizedBox.shrink();
+              return Column(
+                children: [
+                  _CurrentPlanCard(
+                    package: current,
+                    isDark: isDark,
+                    mainColor: mainColor,
+                    isDesktop: false,
+                    controller: controller,
+                    context: context,
+                  ),
+                  SizedBox(height: 28.h),
+                ],
+              );
+            }),
+
+            // ── Section Title ──
+            Row(
+              children: [
+                Container(
+                  width: 4.w,
+                  height: 24.h,
+                  decoration: BoxDecoration(
+                    color: mainColor,
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Text(
+                  'Available Plans',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20.h),
+
+            // ── Package List ──
+            Obx(() {
+              if (controller.isLoading.value || controller.isLoadingUserPackage.value) {
+                return Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 60.h),
+                    child: CircularProgressIndicator(color: mainColor, strokeWidth: 2.5),
+                  ),
+                );
+              }
+
+              if (controller.allPackages.isEmpty) {
+                return _EmptyState(isDark: isDark, mainColor: mainColor, isDesktop: false);
+              }
+
+              return Column(
+                children: controller.allPackages.map((pkg) {
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 16.h),
+                    child: _PackageCard(
+                      package: pkg,
+                      isDark: isDark,
+                      mainColor: mainColor,
+                      isDesktop: false,
+                      controller: controller,
+                      onSubscribe: () => _handleSubscribe(pkg.id, isDark),
+                      context: context,
+                    ),
+                  );
+                }).toList(),
+              );
+            }),
+
+            SizedBox(height: 32.h),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Tablet Layout ──
+  Widget _buildTabletBody(BuildContext context, bool isDark, Color mainColor) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 28.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ── Current Subscription ──
+            Obx(() {
+              final current = controller.getCurrentSubscribedPackage();
+              if (current == null) return const SizedBox.shrink();
+              return Column(
+                children: [
+                  _CurrentPlanCard(
+                    package: current,
+                    isDark: isDark,
+                    mainColor: mainColor,
+                    isDesktop: false,
+                    controller: controller,
+                    context: context,
+                  ),
+                  SizedBox(height: 36.h),
+                ],
+              );
+            }),
+
+            // ── Section Title ──
+            Row(
+              children: [
+                Container(
+                  width: 4.w,
+                  height: 26.h,
+                  decoration: BoxDecoration(
+                    color: mainColor,
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Text(
+                  'Available Plans',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 24.h),
+
+            // ── Package List - 2 Column Grid ──
+            Obx(() {
+              if (controller.isLoading.value || controller.isLoadingUserPackage.value) {
+                return Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 60.h),
+                    child: CircularProgressIndicator(color: mainColor, strokeWidth: 2.5),
+                  ),
+                );
+              }
+
+              if (controller.allPackages.isEmpty) {
+                return _EmptyState(isDark: isDark, mainColor: mainColor, isDesktop: false);
+              }
+
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 18.w,
+                  mainAxisSpacing: 18.h,
+                  childAspectRatio: 0.8,
+                ),
+                itemCount: controller.allPackages.length,
+                itemBuilder: (context, index) {
+                  return _PackageCard(
+                    package: controller.allPackages[index],
+                    isDark: isDark,
+                    mainColor: mainColor,
+                    isDesktop: false,
+                    controller: controller,
+                    onSubscribe: () => _handleSubscribe(controller.allPackages[index].id, isDark),
+                    context: context,
+                  );
+                },
+              );
+            }),
+
+            SizedBox(height: 40.h),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Desktop Layout ──
+  Widget _buildDesktopBody(BuildContext context, bool isDark, Color mainColor) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 80.w, vertical: 32.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ── Page Header ──
+            _PageHeader(isDark: isDark, mainColor: mainColor),
+            SizedBox(height: 36.h),
+
+            // ── Current Subscription ──
+            Obx(() {
+              final current = controller.getCurrentSubscribedPackage();
+              if (current == null) return const SizedBox.shrink();
+              return Column(
+                children: [
+                  _CurrentPlanCard(
+                    package: current,
+                    isDark: isDark,
+                    mainColor: mainColor,
+                    isDesktop: true,
+                    controller: controller,
+                    context: context,
+                  ),
+                  SizedBox(height: 40.h),
+                ],
+              );
+            }),
+
+            // ── Section Title ──
+            Row(
+              children: [
+                Container(
+                  width: 4.w,
+                  height: 26.h,
+                  decoration: BoxDecoration(
+                    color: mainColor,
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Text(
+                  'Available Plans',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 24.h),
+
+            // ── Package List - 3 Column Grid ──
+            Obx(() {
+              if (controller.isLoading.value || controller.isLoadingUserPackage.value) {
+                return Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 60.h),
+                    child: CircularProgressIndicator(color: mainColor, strokeWidth: 2.5),
+                  ),
+                );
+              }
+
+              if (controller.allPackages.isEmpty) {
+                return _EmptyState(isDark: isDark, mainColor: mainColor, isDesktop: true);
+              }
+
+              return _DesktopPackageGrid(
+                packages: controller.allPackages,
+                isDark: isDark,
+                mainColor: mainColor,
+                isDesktop: true,
+                controller: controller,
+                onSubscribe: (id) => _handleSubscribe(id, isDark),
+                context: context,
+              );
+            }),
+
+            SizedBox(height: 40.h),
+          ],
+        ),
+      ),
+    );
+  }
+
+  AppBar _buildAppBar(bool isDark, Color mainColor, BuildContext context) {
+    final isDesktop = Responsive.isDesktop(context);
     return AppBar(
       elevation: 0,
       backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
@@ -237,14 +407,32 @@ class _QuickTechPackagesState extends State<QuickTechPackages> {
       barrierDismissible: false,
       StatefulBuilder(
         builder: (context, setDialogState) {
+          final isMobile = Responsive.isMobile(context);
+          final isTablet = Responsive.isTablet(context);
           final isDesktop = Responsive.isDesktop(context);
+          
+          // Responsive dialog sizing
+          double horizontalPadding;
+          double dialogWidth;
+          if (isDesktop) {
+            horizontalPadding = 400.w;
+            dialogWidth = 600.w;
+          } else if (isTablet) {
+            horizontalPadding = 60.w;
+            dialogWidth = 500.w;
+          } else {
+            horizontalPadding = 16.w;
+            dialogWidth = double.infinity;
+          }
+          
           return Dialog(
             backgroundColor: Colors.transparent,
             insetPadding: EdgeInsets.symmetric(
-              horizontal: isDesktop ? 400.w : 20.w,
+              horizontal: horizontalPadding,
               vertical: 24.h,
             ),
             child: Container(
+              width: isDesktop ? dialogWidth : null,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: BorderRadius.circular(24.r),
@@ -265,7 +453,8 @@ class _QuickTechPackagesState extends State<QuickTechPackages> {
                     Container(
                       width: double.infinity,
                       padding: EdgeInsets.symmetric(
-                          vertical: 28.h, horizontal: 28.w),
+                          vertical: isDesktop ? 32.h : 28.h,
+                          horizontal: isDesktop ? 32.w : 28.w),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [mainColor, mainColor.withValues(alpha: 0.8)],
@@ -276,13 +465,14 @@ class _QuickTechPackagesState extends State<QuickTechPackages> {
                       child: Column(
                         children: [
                           Container(
-                            padding: EdgeInsets.all(14.w),
+                            padding: EdgeInsets.all(isDesktop ? 16.w : 14.w),
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(Icons.payment_rounded,
-                                color: Colors.white, size: 30.sp),
+                                color: Colors.white,
+                                size: isDesktop ? 32.sp : 30.sp),
                           ),
                           SizedBox(height: 14.h),
                           Text(
@@ -309,7 +499,7 @@ class _QuickTechPackagesState extends State<QuickTechPackages> {
                     // ── Form ──
                     Flexible(
                       child: SingleChildScrollView(
-                        padding: EdgeInsets.all(28.w),
+                        padding: EdgeInsets.all(isDesktop ? 32.w : 28.w),
                         child: Form(
                           key: formKey,
                           child: Column(
@@ -632,23 +822,45 @@ class _PlanStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _StatChip(
-          label: 'Prescriptions Left',
-          value: controller.getRemainingPrescriptions().toString(),
-          icon: Icons.description_rounded,
-          isDesktop: isDesktop,
-        ),
-        SizedBox(width: 14.w),
-        _StatChip(
-          label: 'Time Remaining',
-          value: controller.getTimeRemaining(),
-          icon: Icons.timer_rounded,
-          isDesktop: isDesktop,
-        ),
-      ],
-    );
+    // On desktop: show horizontally, on mobile/tablet: show vertically
+    if (isDesktop) {
+      return Row(
+        children: [
+          _StatChip(
+            label: 'Prescriptions Left',
+            value: controller.getRemainingPrescriptions().toString(),
+            icon: Icons.description_rounded,
+            isDesktop: isDesktop,
+          ),
+          SizedBox(width: 14.w),
+          _StatChip(
+            label: 'Time Remaining',
+            value: controller.getTimeRemaining(),
+            icon: Icons.timer_rounded,
+            isDesktop: isDesktop,
+          ),
+        ],
+      );
+    } else {
+      // Mobile/Tablet: stack vertically
+      return Column(
+        children: [
+          _StatChip(
+            label: 'Prescriptions Left',
+            value: controller.getRemainingPrescriptions().toString(),
+            icon: Icons.description_rounded,
+            isDesktop: isDesktop,
+          ),
+          SizedBox(height: 10.h),
+          _StatChip(
+            label: 'Time Remaining',
+            value: controller.getTimeRemaining(),
+            icon: Icons.timer_rounded,
+            isDesktop: isDesktop,
+          ),
+        ],
+      );
+    }
   }
 }
 
@@ -841,6 +1053,7 @@ class _PackageCardState extends State<_PackageCard> {
         child: Padding(
           padding: EdgeInsets.all(widget.isDesktop ? 28.w : 20.w),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Header Row ──
@@ -919,7 +1132,6 @@ class _PackageCardState extends State<_PackageCard> {
                 mainColor: widget.mainColor,
                 isDesktop: widget.isDesktop,
               ),
-              const Spacer(),
               SizedBox(height: 20.h),
 
               // ── CTA ──

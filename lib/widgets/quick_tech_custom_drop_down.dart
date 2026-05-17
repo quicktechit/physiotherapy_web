@@ -48,7 +48,11 @@ class QuickTechCustomDropDown<T> extends StatelessWidget {
   }) : super(key: key);
 
   /// Show snackbar when an item is selected
-  static void _showSelectionSnackBar(BuildContext context, String field, String value) {
+  static void _showSelectionSnackBar(
+    BuildContext context,
+    String field,
+    String value,
+  ) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('$field: $value'),
@@ -63,31 +67,36 @@ class QuickTechCustomDropDown<T> extends StatelessWidget {
     final themecontroller = locator.get<QuickTechThemeController>();
     final assessmentController = locator.get<QuickTechAssessmentController>();
 
-    final effectiveLabelStyle = labelStyle ?? myStyle(
-      14,
-      isDay
-          ? QuickTechAppColors.lightmaintextcolor.withValues(alpha: 0.7)
-          : QuickTechAppColors.darkmaintextcolor.withValues(alpha: 0.7),
-    );
+    final effectiveLabelStyle =
+        labelStyle ??
+        myStyle(
+          14,
+          isDay
+              ? QuickTechAppColors.lightmaintextcolor.withValues(alpha: 0.7)
+              : QuickTechAppColors.darkmaintextcolor.withValues(alpha: 0.7),
+        );
 
-    final effectiveItemStyle = itemStyle ?? myStyle(
-      14,
-      isDay
-          ? QuickTechAppColors.lightmaintextcolor
-          : QuickTechAppColors.darkmaintextcolor,
-    );
+    final effectiveItemStyle =
+        itemStyle ??
+        myStyle(
+          14,
+          isDay
+              ? QuickTechAppColors.lightmaintextcolor
+              : QuickTechAppColors.darkmaintextcolor,
+        );
 
-    final effectiveIconColor = iconColor ?? 
+    final effectiveIconColor =
+        iconColor ??
         (isDay
             ? QuickTechAppColors.lightmaintextcolor.withValues(alpha: 0.7)
             : QuickTechAppColors.darkmaintextcolor.withValues(alpha: 0.7));
 
-    final effectiveFillColor = fillColor ??
-        (isDay
-            ? QuickTechAppColors.bktxtfld
-            : QuickTechAppColors.bkdarktxtfld);
+    final effectiveFillColor =
+        fillColor ??
+        (isDay ? QuickTechAppColors.bktxtfld : QuickTechAppColors.bkdarktxtfld);
 
-    final effectiveDropdownColor = dropdownColor ??
+    final effectiveDropdownColor =
+        dropdownColor ??
         (isDay ? QuickTechAppColors.bktxtfld : QuickTechAppColors.black);
 
     return Container(
@@ -102,26 +111,53 @@ class QuickTechCustomDropDown<T> extends StatelessWidget {
           labelStyle: effectiveLabelStyle,
           fillColor: effectiveFillColor,
           filled: true,
-          prefixIcon: Icon(
-            icon,
-            color: effectiveIconColor,
-            size: 20,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
+          prefixIcon: Icon(icon, color: effectiveIconColor, size: 20),
+
+          // 👇 SAME STYLE AS TEXTFIELD
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: themecontroller.isDay.value
-                  ? QuickTechAppColors.lightmaincolor
-                  : QuickTechAppColors.darkmaincolor,
+              color: isDay ? const Color(0xFFE0E4EE) : Colors.grey[800]!,
+              width: 1.2,
             ),
           ),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: isDay ? const Color(0xFFE0E4EE) : Colors.grey[800]!,
+              width: 1.2,
+            ),
+          ),
+
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color:
+                  isDay
+                      ? QuickTechAppColors.lightmaincolor
+                      : QuickTechAppColors.darkmaincolor,
+              width: 1.8,
+            ),
+          ),
+
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.redAccent, width: 1.2),
+          ),
+
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.redAccent, width: 1.8),
+          ),
         ),
         initialValue: value,
         items: DropDownItems(effectiveItemStyle),
         onChanged: (T? newValue) {
-          if (enableOthersOption && newValue != null && newValue.toString() == othersText) {
-           assessmentController.showOthersDialog(
+          if (enableOthersOption &&
+              newValue != null &&
+              newValue.toString() == othersText) {
+            assessmentController.showOthersDialog(
               context,
               label: label,
               onChanged: (customValue) {
@@ -152,10 +188,7 @@ class QuickTechCustomDropDown<T> extends StatelessWidget {
     return displayItems.map((T item) {
       return DropdownMenuItem<T>(
         value: item,
-        child: Text(
-          item.toString(),
-          style: style,
-        ),
+        child: Text(item.toString(), style: style),
       );
     }).toList();
   }

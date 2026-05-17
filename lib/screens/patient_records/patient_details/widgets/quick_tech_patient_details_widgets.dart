@@ -4,6 +4,7 @@ import 'package:e_prescription/controllers/patient_controller/quick_tech_patient
 import 'package:e_prescription/controllers/theme_controller/quick_tech_theme_controller.dart';
 import 'package:e_prescription/locator.dart';
 import 'package:e_prescription/screens/pdf_prescription/quick_tech_pdf_prescription.dart';
+import 'package:e_prescription/screens/templates/quick_tech_templates_selection.dart';
 import 'package:e_prescription/services/auth_services/quick_tech_auth_storage_service.dart';
 import 'package:e_prescription/services/template_services/quick_tech_template_storage_service.dart';
 import 'package:flutter/material.dart';
@@ -19,26 +20,32 @@ final QuickTechThemeController themeController =
 Widget customDetilsTile(String title, String detail) {
   return Obx(() {
     final isDark = !themeController.isDay.value;
-    final mainColor = isDark
-        ? QuickTechAppColors.darkmaincolor
-        : QuickTechAppColors.lightmaincolor;
+    final mainColor =
+        isDark
+            ? QuickTechAppColors.darkmaincolor
+            : QuickTechAppColors.lightmaincolor;
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('$title ',
-              style: TextStyle(
-                  color: mainColor,
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w700)),
+          Text(
+            '$title ',
+            style: TextStyle(
+              color: mainColor,
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           Expanded(
-            child: Text(detail,
-                style: TextStyle(
-                  color: isDark ? Colors.white : const Color(0xFF0F172A),
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                )),
+            child: Text(
+              detail,
+              style: TextStyle(
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -47,7 +54,10 @@ Widget customDetilsTile(String title, String detail) {
 }
 
 Widget customPrescriptionListItem(
-    BuildContext context, int patientId, Map<String, dynamic> prescription) {
+  BuildContext context,
+  int patientId,
+  Map<String, dynamic> prescription,
+) {
   final prescriptionId = prescription['id'] ?? 5;
   final date = prescription['date'] ?? 'Unknown';
   final templateId = QuickTechTemplateStorageService.getSelectedTemplateId();
@@ -55,9 +65,10 @@ Widget customPrescriptionListItem(
 
   return Obx(() {
     final isDark = !themeController.isDay.value;
-    final mainColor = isDark
-        ? QuickTechAppColors.darkmaincolor
-        : QuickTechAppColors.lightmaincolor;
+    final mainColor =
+        isDark
+            ? QuickTechAppColors.darkmaincolor
+            : QuickTechAppColors.lightmaincolor;
 
     return _PrescriptionCard(
       prescriptionId: prescriptionId,
@@ -102,6 +113,9 @@ class _PrescriptionCardState extends State<_PrescriptionCard> {
     }
     if (widget.templateId == null) {
       Get.snackbar(
+        onTap: (snack) {
+          Get.to(() => QuickTechTemplatesSelection());
+        },
         'Template Required',
         'Please select a template first.',
         backgroundColor: widget.mainColor,
@@ -116,26 +130,37 @@ class _PrescriptionCardState extends State<_PrescriptionCard> {
 
     Get.dialog(
       Center(
-          child: CircularProgressIndicator(
-              color: widget.mainColor, strokeWidth: 2.5)),
+        child: CircularProgressIndicator(
+          color: widget.mainColor,
+          strokeWidth: 2.5,
+        ),
+      ),
       barrierDismissible: false,
     );
 
     try {
       final error = await patientController.fetchPrescriptionPreviewPdf(
-          widget.prescriptionId, widget.templateId, token);
-          
+        widget.prescriptionId,
+        widget.templateId,
+        token,
+      );
+
       Get.back();
       if (patientController.prescriptionPreviewPdfBytes.value != null) {
         Get.off(
-          () => PdfViewScreen(
-              pdfBytes: patientController.prescriptionPreviewPdfBytes.value!),
+          () => QuickTechPdfPrescription(
+            pdfBytes: patientController.prescriptionPreviewPdfBytes.value!,
+          ),
           transition: Transition.cupertino,
           duration: const Duration(milliseconds: 300),
         );
       } else if (error != null && error.isNotEmpty) {
-        Get.snackbar('Error', error,
-            backgroundColor: const Color(0xFFEF4444), colorText: Colors.white);
+        Get.snackbar(
+          'Error',
+          error,
+          backgroundColor: const Color(0xFFEF4444),
+          colorText: Colors.white,
+        );
       }
     } catch (e) {
       Get.back();
@@ -159,11 +184,12 @@ class _PrescriptionCardState extends State<_PrescriptionCard> {
             color: widget.isDark ? const Color(0xFF1E293B) : Colors.white,
             borderRadius: BorderRadius.circular(14.r),
             border: Border.all(
-              color: _hovered
-                  ? widget.mainColor.withValues(alpha: 0.5)
-                  : (widget.isDark
-                      ? Colors.white.withValues(alpha: 0.07)
-                      : const Color(0xFFE2E8F0)),
+              color:
+                  _hovered
+                      ? widget.mainColor.withValues(alpha: 0.5)
+                      : (widget.isDark
+                          ? Colors.white.withValues(alpha: 0.07)
+                          : const Color(0xFFE2E8F0)),
               width: _hovered ? 1.5 : 1,
             ),
             boxShadow: [
@@ -183,9 +209,11 @@ class _PrescriptionCardState extends State<_PrescriptionCard> {
                   color: widget.mainColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Icon(Icons.description_rounded,
-                    color: widget.mainColor,
-                    size: widget.isDesktop ? 18.sp : 16.sp),
+                child: Icon(
+                  Icons.description_rounded,
+                  color: widget.mainColor,
+                  size: widget.isDesktop ? 18.sp : 16.sp,
+                ),
               ),
               SizedBox(width: 14.w),
 
@@ -197,9 +225,10 @@ class _PrescriptionCardState extends State<_PrescriptionCard> {
                     Text(
                       'Prescription #${widget.prescriptionId}',
                       style: TextStyle(
-                        color: widget.isDark
-                            ? Colors.white
-                            : const Color(0xFF0F172A),
+                        color:
+                            widget.isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
                         fontSize: widget.isDesktop ? 14.sp : 13.sp,
                         fontWeight: FontWeight.w700,
                       ),
@@ -207,18 +236,20 @@ class _PrescriptionCardState extends State<_PrescriptionCard> {
                     SizedBox(height: 4.h),
                     Row(
                       children: [
-                        Icon(Icons.calendar_today_rounded,
-                            color: widget.isDark
-                                ? Colors.white38
-                                : Colors.black26,
-                            size: widget.isDesktop ? 11.sp : 10.sp),
+                        Icon(
+                          Icons.calendar_today_rounded,
+                          color:
+                              widget.isDark ? Colors.white38 : Colors.black26,
+                          size: widget.isDesktop ? 11.sp : 10.sp,
+                        ),
                         SizedBox(width: 4.w),
                         Text(
                           widget.date,
                           style: TextStyle(
-                            color: widget.isDark
-                                ? Colors.white.withValues(alpha: 0.45)
-                                : const Color(0xFF94A3B8),
+                            color:
+                                widget.isDark
+                                    ? Colors.white.withValues(alpha: 0.45)
+                                    : const Color(0xFF94A3B8),
                             fontSize: widget.isDesktop ? 11.sp : 10.sp,
                           ),
                         ),
@@ -229,47 +260,55 @@ class _PrescriptionCardState extends State<_PrescriptionCard> {
               ),
 
               // CTA
-              Obx(() => patientController.isPdfLoading.value
-                  ? SizedBox(
-                      width: 18.w,
-                      height: 18.h,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: widget.mainColor),
-                    )
-                  : AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 12.w, vertical: 8.h),
-                      decoration: BoxDecoration(
-                        color: _hovered
-                            ? widget.mainColor
-                            : widget.mainColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.visibility_rounded,
-                            color: _hovered
-                                ? Colors.white
-                                : widget.mainColor,
-                            size: widget.isDesktop ? 13.sp : 12.sp,
+              Obx(
+                () =>
+                    patientController.isPdfLoading.value
+                        ? SizedBox(
+                          width: 18.w,
+                          height: 18.h,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: widget.mainColor,
                           ),
-                          SizedBox(width: 5.w),
-                          Text(
-                            'View',
-                            style: TextStyle(
-                              color: _hovered
-                                  ? Colors.white
-                                  : widget.mainColor,
-                              fontSize: widget.isDesktop ? 11.sp : 10.sp,
-                              fontWeight: FontWeight.w700,
-                            ),
+                        )
+                        : AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 8.h,
                           ),
-                        ],
-                      ),
-                    )),
+                          decoration: BoxDecoration(
+                            color:
+                                _hovered
+                                    ? widget.mainColor
+                                    : widget.mainColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.visibility_rounded,
+                                color:
+                                    _hovered ? Colors.white : widget.mainColor,
+                                size: widget.isDesktop ? 13.sp : 12.sp,
+                              ),
+                              SizedBox(width: 5.w),
+                              Text(
+                                'View',
+                                style: TextStyle(
+                                  color:
+                                      _hovered
+                                          ? Colors.white
+                                          : widget.mainColor,
+                                  fontSize: widget.isDesktop ? 11.sp : 10.sp,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+              ),
             ],
           ),
         ),

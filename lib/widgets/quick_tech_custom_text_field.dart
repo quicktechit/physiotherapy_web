@@ -90,14 +90,14 @@ class QuickTechCustomTextField extends StatelessWidget {
         suffixIcon: suffixicon != null
             ? IconButton(
                 icon: Icon(suffixicon,
-                    color: suffixiconColor ?? Colors.grey[500], size: 20),
+                    color: suffixiconColor ?? mainColor, size: 20),
                 onPressed: onSuffixIconPressed,
                 splashRadius: 20,
               )
             : null,
         filled: true,
         fillColor: backcolor ??
-            (isDay ? const Color(0xFFF8F9FF) : const Color(0xFF1E2433)),
+            (isDay ? QuickTechAppColors.lightScaffoldColor : const Color(0xFF1E2433)),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(

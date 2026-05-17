@@ -1,10 +1,11 @@
 import 'package:e_prescription/const/quick_tech_app_colors.dart';
-import 'package:e_prescription/const/quick_tech_styles.dart';
+
 import 'package:e_prescription/controllers/authentication_controller/login_controller/quick_tech_login_controller.dart';
 import 'package:e_prescription/controllers/theme_controller/quick_tech_theme_controller.dart';
 import 'package:e_prescription/locator.dart';
+import 'package:e_prescription/responsive.dart';
 import 'package:e_prescription/screens/authentications/registration/quick_tech_registration.dart';
-import 'package:e_prescription/widgets/quick_tech_custom_button.dart';
+
 import 'package:e_prescription/widgets/quick_tech_custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,8 +20,8 @@ class QuickTechLogin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isDesktop = size.width > 900;
+ 
+    
 
     return PopScope(
       canPop: false,
@@ -32,18 +33,20 @@ class QuickTechLogin extends StatelessWidget {
       child: Obx(
         () => Scaffold(
           backgroundColor: themeController.isDay.value
-              ? const Color(0xFFF0F4FF)
-              : const Color(0xFF0D1117),
-          body: isDesktop
-              ? _buildDesktopLayout(context)
-              : _buildMobileLayout(context),
+              ? QuickTechAppColors.lightScaffoldColor
+              : QuickTechAppColors.darkScaffoldColor,
+          body: Responsive(
+            mobile: MobileLogin(context),
+            tablet: DesktopLogin(context),
+            desktop: DesktopLogin(context),
+          ),
         ),
       ),
     );
   }
 
   // ── Desktop: left brand panel + right form panel ──────────────────────────
-  Widget _buildDesktopLayout(BuildContext context) {
+  Widget DesktopLogin(BuildContext context) {
     final isDay = themeController.isDay.value;
     return Row(
       children: [
@@ -188,7 +191,7 @@ class QuickTechLogin extends StatelessWidget {
   }
 
   // ── Mobile: single centered card ─────────────────────────────────────────
-  Widget _buildMobileLayout(BuildContext context) {
+  Widget MobileLogin(BuildContext context) {
     final isDay = themeController.isDay.value;
     return Container(
       decoration: BoxDecoration(
@@ -196,8 +199,8 @@ class QuickTechLogin extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: isDay
-              ? [const Color(0xFFE8EFFF), const Color(0xFFF0F4FF)]
-              : [const Color(0xFF0D1117), const Color(0xFF161B27)],
+              ? [QuickTechAppColors.lightScaffoldColor,QuickTechAppColors.lightScaffoldColor]
+              : [QuickTechAppColors.darkScaffoldColor, const Color(0xFF161B27)],
         ),
       ),
       child: SafeArea(

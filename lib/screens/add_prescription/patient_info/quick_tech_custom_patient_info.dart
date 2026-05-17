@@ -1,10 +1,7 @@
 import 'package:e_prescription/const/const.dart';
-
-
-
+import 'package:e_prescription/widgets/quick_tech_custom_text_field.dart';
+import 'package:e_prescription/widgets/quick_tech_custom_drop_down.dart';
 import 'package:intl/intl.dart';
-
-import '../widgets/quick_tech_prescription_widgets.dart';
 
 
 final QuickTechThemeController themeController = locator.get<QuickTechThemeController>();
@@ -47,96 +44,46 @@ Widget customPatientInfo() {
             ),
           ),
           SizedBox(height: 8),
-          customTextField(onchanged: (value) => patientInfoController.patientName.value = value,
-
-            'Patient Name',
-            patientInfoController.patientName,
+          QuickTechCustomTextField(
+            label: 'Patient Name',
             icon: Icons.person_outline,
+            controller: patientInfoController.patientNameController,
             keyboardType: TextInputType.name,
+            onchanged: (value) => patientInfoController.patientName.value = value,
           ),
           SizedBox(height: 16),
-          customTextField(onchanged: (value) => patientInfoController.age.value = value,
-            'Age',
-            patientInfoController.age,
+          QuickTechCustomTextField(
+            label: 'Age',
             icon: Icons.cake_outlined,
+            controller: patientInfoController.ageController,
             keyboardType: TextInputType.number,
+            onchanged: (value) => patientInfoController.age.value = value,
           ),
           SizedBox(height: 16),
-          customTextField(onchanged: (value) => patientInfoController.phone.value = value,
-            'Phone',
-            patientInfoController.phone,
+          QuickTechCustomTextField(
+            label: 'Phone',
             icon: Icons.phone,
+            controller: patientInfoController.phoneController,
             keyboardType: TextInputType.phone,
+            onchanged: (value) => patientInfoController.phone.value = value,
           ),
-          SizedBox(height: 12 + 16),
+          SizedBox(height: 28),
           Obx(
-            () => DropdownButtonFormField<String>(onChanged: (value) => patientInfoController.gender.value = value ?? '',
-              initialValue:
-                  patientInfoController.gender.value.isEmpty
-                      ? null
-                      : patientInfoController.gender.value,
-              decoration: InputDecoration(
-                labelStyle: myStyle(
-                  14,
-                  themeController.isDay.value
-                      ? QuickTechAppColors.black2
-                      : QuickTechAppColors.whiteOpacity,
-                ),
-                labelText: 'Gender',
-                prefixIcon: Icon(
-                  Icons.transgender,
-                  color:
-                      themeController.isDay.value
-                          ? QuickTechAppColors.lightmaintextcolor
-                          : QuickTechAppColors.darkmaintextcolor,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(
-                    color:
-                        themeController.isDay.value
-                            ? QuickTechAppColors.lightmaincolor
-                            : QuickTechAppColors.darkmaincolor,
-                  ),
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  vertical: 14,
-                  horizontal: 12,
-                ),
-                fillColor:
-                    themeController.isDay.value
-                        ? QuickTechAppColors.white
-                        : QuickTechAppColors.bkdarktxtfld,
-                filled: true,
-              ),
-              dropdownColor:
-                  themeController.isDay.value
-                      ? QuickTechAppColors.white
-                      : QuickTechAppColors.bkdarktxtfld,
-              items:
-                  ['Male', 'Female', 'Other'].map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(
-                        value,
-                        style: myStyle(
-                          16,
-                          themeController.isDay.value
-                              ? QuickTechAppColors.lightmaintextcolor
-                              : QuickTechAppColors.darkmaintextcolor,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-  
-              style: TextStyle(fontSize: 16),
-              icon: Icon(Icons.arrow_drop_down),
-              isExpanded: true,
-              borderRadius: BorderRadius.circular(8),
+            () => QuickTechCustomDropDown<String>(
+              label: 'Gender',
+              items: ['Male', 'Female', 'Other'],
+              value: patientInfoController.gender.value.isEmpty
+                  ? null
+                  : patientInfoController.gender.value,
+              onChanged: (value) => patientInfoController.gender.value = value ?? '',
+              icon: Icons.transgender,
+              isDay: themeController.isDay.value,
+              iconColor: themeController.isDay.value
+                  ? QuickTechAppColors.lightmaincolor
+                  : QuickTechAppColors.darkmaincolor,
             ),
           ),
           SizedBox(height: 16),
-
           GestureDetector(
             onTap: () async {
               DateTime? selectedDate = await showDatePicker(
@@ -152,7 +99,7 @@ Widget customPatientInfo() {
                             themeController.isDay.value
                                 ? QuickTechAppColors.lightmaincolor
                                 : QuickTechAppColors.darkmaincolor,
-                        onPrimary: Colors.white, // Header text color
+                        onPrimary: Colors.white,
                         surface:
                             themeController.isDay.value
                                 ? QuickTechAppColors.lightScaffoldColor
@@ -161,7 +108,9 @@ Widget customPatientInfo() {
                             themeController.isDay.value
                                 ? QuickTechAppColors.lightmaintextcolor
                                 : QuickTechAppColors.darkmaintextcolor,
-                      ), dialogTheme: DialogThemeData(backgroundColor: themeController.isDay.value
+                      ),
+                      dialogTheme: DialogThemeData(
+                          backgroundColor: themeController.isDay.value
                               ? Colors.white
                               : QuickTechAppColors.black),
                     ),
@@ -170,81 +119,19 @@ Widget customPatientInfo() {
                 },
               );
               if (selectedDate != null) {
-                String formattedDate = DateFormat(
-                  'd-M-yyyy',
-                ).format(selectedDate);
+                String formattedDate = DateFormat('d-M-yyyy').format(selectedDate);
                 patientInfoController.date.value = selectedDate;
                 patientInfoController.dateContoller.text = formattedDate;
               }
             },
             child: AbsorbPointer(
-              child: TextFormField(
-                style: myStyle(
-                  14,
-                  themeController.isDay.value
-                      ? QuickTechAppColors.lightmaintextcolor
-                      : QuickTechAppColors.darkmaintextcolor,
-                ),
+              child: QuickTechCustomTextField(
+                label: 'Date',
+                icon: Icons.calendar_today,
                 controller: patientInfoController.dateContoller,
-                decoration: InputDecoration(
-                  labelStyle: TextStyle(
-                    color:
-                        themeController.isDay.value
-                            ? QuickTechAppColors.black2
-                            : QuickTechAppColors.whiteOpacity,
-                  ),
-                  labelText: 'Date ',
-                  prefixIcon: Icon(
-                    Icons.calendar_today,
-                    color:
-                        themeController.isDay.value
-                            ? QuickTechAppColors.lightmaintextcolor
-                            : QuickTechAppColors.darkmaintextcolor,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(
-                      color:
-                          themeController.isDay.value
-                              ? QuickTechAppColors.lightmaincolor
-                              : QuickTechAppColors.darkmaincolor,
-                    ),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 14,
-                    horizontal: 12,
-                  ),
-                  fillColor:
-                      themeController.isDay.value
-                          ? QuickTechAppColors.white
-                          : QuickTechAppColors.bkdarktxtfld,
-                  filled: true,
-                ),
               ),
             ),
           ),
-          // SizedBox(height: 20),
-          // ElevatedButton.icon(
-          //   onPressed: () {
-          //     final user = QuickTechAuthStorageService.getUser();
-          //     patientInfoController.updatePatientInfo(user!.id!);
-          //   },
-          //   icon: Icon(Icons.save, color: QuickTechAppColors.white),
-          //   label: Text(
-          //     "Generate Patient ID",
-          //     style: myStyle(14, QuickTechAppColors.white, FontWeight.bold),
-          //   ),
-          //   style: ElevatedButton.styleFrom(
-          //     backgroundColor:
-          //         themeController.isDay.value
-          //             ? QuickTechAppColors.lightmaincolor
-          //             : QuickTechAppColors.darkmaincolor,
-          //     padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-          //     shape: RoundedRectangleBorder(
-          //       borderRadius: BorderRadius.circular(10),
-          //     ),
-          //   ),
-          // ),
         ],
       ),
     ),

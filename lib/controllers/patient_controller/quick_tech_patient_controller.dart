@@ -1,6 +1,7 @@
 import 'package:e_prescription/services/auth_services/quick_tech_auth_storage_service.dart';
 import 'package:e_prescription/utils/api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:e_prescription/models/patient_model.dart';
@@ -112,22 +113,27 @@ class QuickTechPatientController extends GetxController {
           'Accept': 'application/json',
         },
       );
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['assessment_prescriptions'] != null) {
-          assessments.value = List<Map<String, dynamic>>.from(data['assessment_prescriptions']);
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          if (data['assessment_prescriptions'] != null) {
+            assessments.value = List<Map<String, dynamic>>.from(data['assessment_prescriptions']);
+          } else {
+            assessments.clear();
+          }
         } else {
+          assessmentError.value = 'Failed to fetch assessments. Status: ${response.statusCode}';
           assessments.clear();
         }
-      } else {
-        assessmentError.value = 'Failed to fetch assessments. Status: ${response.statusCode}';
-        assessments.clear();
-      }
+        isAssessmentLoading.value = false;
+      });
     } catch (e) {
-      assessmentError.value = 'Network error: ${e.toString()}';
-      assessments.clear();
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        assessmentError.value = 'Network error: ${e.toString()}';
+        assessments.clear();
+        isAssessmentLoading.value = false;
+      });
     }
-    isAssessmentLoading.value = false;
   }
 
   Future<void> fetchPrescriptions(int patientId, String token) async {
@@ -142,22 +148,27 @@ class QuickTechPatientController extends GetxController {
           'Accept': 'application/json',
         },
       );
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['patient_prescriptions'] != null) {
-          prescriptions.value = List<Map<String, dynamic>>.from(data['patient_prescriptions']);
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          if (data['patient_prescriptions'] != null) {
+            prescriptions.value = List<Map<String, dynamic>>.from(data['patient_prescriptions']);
+          } else {
+            prescriptions.clear();
+          }
         } else {
+          error.value = 'Failed to fetch prescriptions. Status: ${response.statusCode}';
           prescriptions.clear();
         }
-      } else {
-        error.value = 'Failed to fetch prescriptions. Status: ${response.statusCode}';
-        prescriptions.clear();
-      }
+        isLoading.value = false;
+      });
     } catch (e) {
-      error.value = 'Network error: ${e.toString()}';
-      prescriptions.clear();
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        error.value = 'Network error: ${e.toString()}';
+        prescriptions.clear();
+        isLoading.value = false;
+      });
     }
-    isLoading.value = false;
   }
 
   var patients = <Patient>[].obs;

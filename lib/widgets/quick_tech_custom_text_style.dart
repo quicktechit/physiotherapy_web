@@ -10,7 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class QuickTechAppTextStyle {
   static TextStyle headline1() {
-    return GoogleFonts.ubuntu(
+    return GoogleFonts.merriweather(
       textStyle: TextStyle(
         fontWeight: FontWeight.w900,
         color: QuickTechAppColors.black,
@@ -19,7 +19,7 @@ class QuickTechAppTextStyle {
     );
   }
   static TextStyle headline2() {
-    return GoogleFonts.ubuntu(
+    return GoogleFonts.merriweather(
       textStyle: TextStyle(
         fontWeight: FontWeight.bold,
         color: QuickTechAppColors.black,
@@ -28,7 +28,7 @@ class QuickTechAppTextStyle {
     );
   }
   static TextStyle headline3() {
-    return GoogleFonts.ubuntu(
+    return GoogleFonts.merriweather(
       textStyle: TextStyle(
         fontWeight: FontWeight.bold,
         color: QuickTechAppColors.black,
@@ -37,7 +37,7 @@ class QuickTechAppTextStyle {
     );
   }
   static TextStyle headline4() {
-    return GoogleFonts.ubuntu(
+    return GoogleFonts.merriweather(
       textStyle: TextStyle(
         fontWeight: FontWeight.bold,
         color: QuickTechAppColors.black,
@@ -46,7 +46,7 @@ class QuickTechAppTextStyle {
     );
   }
   static TextStyle bodyText1() {
-    return GoogleFonts.ubuntu(
+    return GoogleFonts.merriweather(
       textStyle: TextStyle(
         fontWeight: FontWeight.w600,
         color: QuickTechAppColors.black,
@@ -55,7 +55,7 @@ class QuickTechAppTextStyle {
     );
   }
   static TextStyle bodyText2() {
-    return GoogleFonts.ubuntu(
+    return GoogleFonts.merriweather(
       textStyle: TextStyle(
         fontWeight: FontWeight.normal,
         color: QuickTechAppColors.grey,
@@ -64,7 +64,7 @@ class QuickTechAppTextStyle {
     );
   }
   static TextStyle bodyText3() {
-    return GoogleFonts.ubuntu(
+    return GoogleFonts.merriweather(
       textStyle: TextStyle(
         fontWeight: FontWeight.normal,
         color: QuickTechAppColors.grey,
@@ -73,7 +73,7 @@ class QuickTechAppTextStyle {
     );
   }
   static TextStyle buttonText() {
-    return GoogleFonts.ubuntu(
+    return GoogleFonts.merriweather(
       textStyle: TextStyle(
         fontWeight: FontWeight.bold,
         color: QuickTechAppColors.white,

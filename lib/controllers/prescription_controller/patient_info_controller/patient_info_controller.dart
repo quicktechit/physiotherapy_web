@@ -56,9 +56,15 @@ class PatientInfoController extends GetxController {
   var age = ''.obs;
   var gender = ''.obs;
   var phone = ''.obs;
-  var patientId = 0.obs; 
+  var patientId = 0.obs;
   Rx<DateTime?> date = Rx<DateTime?>(null);
-  TextEditingController dateContoller = TextEditingController();
+  
+  // Initialize directly to avoid late initialization errors
+  final TextEditingController patientNameController = TextEditingController();
+  final TextEditingController ageController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController genderController = TextEditingController();
+  final TextEditingController dateContoller = TextEditingController();
 
   final RxBool isSaving = false.obs;
   DateTime? _cooldownUntil;
@@ -75,13 +81,28 @@ class PatientInfoController extends GetxController {
     return diff > 0 ? diff : 0;
   }
 
-  // final user = QuickTechAuthStorageService.getUser();
+  @override
+  void onInit() {
+    super.onInit();
+    
+    // Sync RxString with TextEditingController
+    ever(patientName, (value) => patientNameController.text = value);
+    ever(age, (value) => ageController.text = value);
+    ever(phone, (value) => phoneController.text = value);
+    ever(gender, (value) => genderController.text = value);
+    
+    clearAllData();
+  }
 
- @override
-void onInit() {
-  super.onInit();
-  clearAllData();
-}
+  @override
+  void onClose() {
+    patientNameController.dispose();
+    ageController.dispose();
+    phoneController.dispose();
+    genderController.dispose();
+    dateContoller.dispose();
+    super.onClose();
+  }
 
 
 Future<int> updatePatientInfo(int userId) async {
@@ -186,6 +207,12 @@ Future<int> updatePatientInfo(int userId) async {
       gender.value = returnedPatient['gender'] ?? '';
       phone.value = (returnedPatient['phone'] ).toString();
 
+      // Update controllers
+      patientNameController.text = returnedPatient['name'];
+      ageController.text = returnedPatient['age'] ?? '';
+      genderController.text = returnedPatient['gender'] ?? '';
+      phoneController.text = (returnedPatient['phone'] ).toString();
+
       try {
         date.value = DateFormat('yyyy-M-d').parseStrict(returnedPatient['prescription_date']);
       } catch (_) {
@@ -227,6 +254,11 @@ void clearAllData() {
   phone.value = '';
   patientId.value = 0;
   date.value = null;
+  
+  patientNameController.clear();
+  ageController.clear();
+  phoneController.clear();
+  genderController.clear();
   dateContoller.clear();
 }
 

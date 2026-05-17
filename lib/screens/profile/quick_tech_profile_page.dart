@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:e_prescription/const/const.dart';
 import 'package:e_prescription/const/quick_tech_app_colors.dart';
 import 'package:e_prescription/const/quick_tech_styles.dart';
 import 'package:e_prescription/const/web_image.dart';
@@ -84,7 +85,10 @@ class _QuickTechProfilePageState extends State<QuickTechProfilePage> {
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 800),
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width > 1200 ? 900 : 
+                            MediaQuery.of(context).size.width > 600 ? 800 : double.infinity,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -107,7 +111,7 @@ class _QuickTechProfilePageState extends State<QuickTechProfilePage> {
                     const SizedBox(height: 24),
                     // Bengali Info Card
                     _buildSectionCard(
-                      title: 'বাংলা তথ্য (Bengali Information)',
+                      title: 'বাংলা তথ্য ',
                       icon: FontAwesomeIcons.language,
                       tiles: [
                         _tileData(FontAwesomeIcons.user, 'ডাক্তারের নাম', profileController.bnFirstName.value, 'নাম নেই'),
@@ -148,89 +152,173 @@ class _QuickTechProfilePageState extends State<QuickTechProfilePage> {
 
   Widget _buildHeroCard() {
     final isDay = themeController.isDay.value;
-    return Container(
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        color: isDay ? Colors.white : QuickTechAppColors.darkScaffoldColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDay ? 0.07 : 0.25),
-            blurRadius: 24,
-            offset: const Offset(0, 6),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 500;
+        final imageSize = isMobile ? 80.0 : 100.0;
+
+        final padding = isMobile ? 20.0 : 28.0;
+        
+        return Container(
+          padding: EdgeInsets.all(padding),
+          decoration: BoxDecoration(
+            color: isDay ? Colors.white : QuickTechAppColors.darkScaffoldColor,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDay ? 0.07 : 0.25),
+                blurRadius: 24,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: QuickTechAppColors.lightmaincolor, width: 3),
-              boxShadow: [
-                BoxShadow(
-                  color: QuickTechAppColors.lightmaincolor.withValues(alpha: 0.25),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: ClipOval(
-              child: kIsWeb
-                  ? WebImage(
-                      imageUrl: "${Api.baseUrl}/${profileController.profilePhoto.value}",
-                      fit: BoxFit.cover,
-                    )
-                  : CachedNetworkImage(
-                      imageUrl: "${Api.baseUrl}/${profileController.profilePhoto.value}",
-                      fit: BoxFit.cover,
-                    ),
-            ),
-          ),
-          const SizedBox(width: 24),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  profileController.name.value.isNotEmpty
-                      ? profileController.name.value
-                      : 'No Name',
-                  style: myStyle(
-                    22,
-                    isDay ? QuickTechAppColors.lightmaintextcolor : QuickTechAppColors.darkmaintextcolor,
-                    FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                if (profileController.designation.value.isNotEmpty)
-                  Text(
-                    profileController.designation.value,
-                    style: myStyle(14, QuickTechAppColors.lightmaincolor, FontWeight.w600),
-                  ),
-                if (profileController.centerName.value.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(FontAwesomeIcons.building, size: 12,
-                          color: isDay ? Colors.grey[500] : Colors.grey[400]),
-                      const SizedBox(width: 6),
-                      Flexible(
-                        child: Text(
-                          profileController.centerName.value,
-                          style: TextStyle(fontSize: 13, color: isDay ? Colors.grey[600] : Colors.grey[400]),
-                        ),
+          child: isMobile
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: imageSize,
+                      height: imageSize,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: QuickTechAppColors.lightmaincolor, width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: QuickTechAppColors.lightmaincolor.withValues(alpha: 0.25),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
+                      child: ClipOval(
+                        child: kIsWeb
+                            ? WebImage(
+                                imageUrl: "${Api.baseUrl}/${profileController.profilePhoto.value}",
+                                fit: BoxFit.cover,
+                              )
+                            : CachedNetworkImage(
+                                imageUrl: "${Api.baseUrl}/${profileController.profilePhoto.value}",
+                                fit: BoxFit.cover,
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          profileController.name.value.isNotEmpty
+                              ? profileController.name.value
+                              : 'No Name',
+                          style: myStyle(
+                            14.sp,
+                            isDay ? QuickTechAppColors.lightmaintextcolor : QuickTechAppColors.darkmaintextcolor,
+                            FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        if (profileController.designation.value.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            profileController.designation.value,
+                            style: myStyle(12.sp, QuickTechAppColors.lightmaincolor, FontWeight.w600),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                        if (profileController.centerName.value.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(FontAwesomeIcons.building, size: 12,
+                                  color: isDay ? Colors.grey[500] : Colors.grey[400]),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  profileController.centerName.value,
+                                  style: TextStyle(fontSize: 12, color: isDay ? Colors.grey[600] : Colors.grey[400]),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Container(
+                      width: imageSize,
+                      height: imageSize,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: QuickTechAppColors.lightmaincolor, width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: QuickTechAppColors.lightmaincolor.withValues(alpha: 0.25),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: kIsWeb
+                            ? WebImage(
+                                imageUrl: "${Api.baseUrl}/${profileController.profilePhoto.value}",
+                                fit: BoxFit.cover,
+                              )
+                            : CachedNetworkImage(
+                                imageUrl: "${Api.baseUrl}/${profileController.profilePhoto.value}",
+                                fit: BoxFit.cover,
+                              ),
+                      ),
+                    ),
+                    SizedBox(width: padding),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            profileController.name.value.isNotEmpty
+                                ? profileController.name.value
+                                : 'No Name',
+                            style: myStyle(
+                              16.sp,
+                              isDay ? QuickTechAppColors.lightmaintextcolor : QuickTechAppColors.darkmaintextcolor,
+                              FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          if (profileController.designation.value.isNotEmpty)
+                            Text(
+                              profileController.designation.value,
+                              style: myStyle(12.sp, QuickTechAppColors.lightmaincolor, FontWeight.w600),
+                            ),
+                          if (profileController.centerName.value.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Icon(FontAwesomeIcons.building, size: 12,
+                                    color: isDay ? Colors.grey[500] : Colors.grey[400]),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    profileController.centerName.value,
+                                    style: TextStyle(fontSize: 13, color: isDay ? Colors.grey[600] : Colors.grey[400]),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+        );
+      },
     );
   }
 
@@ -280,72 +368,76 @@ class _QuickTechProfilePageState extends State<QuickTechProfilePage> {
             ),
           ),
           const Divider(height: 1),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 340,
-              mainAxisExtent: 76,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-            ),
-            itemCount: tiles.length,
-            itemBuilder: (context, index) {
-              final t = tiles[index];
-              final value = (t['value'] as String).isNotEmpty ? t['value'] as String : t['fallback'] as String;
-              final isEmpty = (t['value'] as String).isEmpty;
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: isDay ? const Color(0xFFF8F9FC) : Colors.white.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isDay ? const Color(0xFFE8EAF0) : Colors.white.withValues(alpha: 0.08),
-                  ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: constraints.maxWidth > 600 ? 2 : 1,
+                  mainAxisExtent: 76,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
                 ),
-                child: Row(
-                  children: [
-                    Icon(
-                      t['icon'] as IconData,
-                      size: 16,
-                      color: isEmpty
-                          ? Colors.grey[400]
-                          : QuickTechAppColors.lightmaincolor,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            t['label'] as String,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: isDay ? Colors.grey[500] : Colors.grey[400],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            value,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: isEmpty
-                                  ? (isDay ? Colors.grey[400] : Colors.grey[600])
-                                  : (isDay
-                                      ? QuickTechAppColors.lightmaintextcolor
-                                      : QuickTechAppColors.darkmaintextcolor),
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                itemCount: tiles.length,
+                itemBuilder: (context, index) {
+                  final t = tiles[index];
+                  final value = (t['value'] as String).isNotEmpty ? t['value'] as String : t['fallback'] as String;
+                  final isEmpty = (t['value'] as String).isEmpty;
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isDay ? const Color(0xFFF8F9FC) : Colors.white.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isDay ? const Color(0xFFE8EAF0) : Colors.white.withValues(alpha: 0.08),
                       ),
                     ),
-                  ],
-                ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          t['icon'] as IconData,
+                          size: 16,
+                          color: isEmpty
+                              ? Colors.grey[400]
+                              : QuickTechAppColors.lightmaincolor,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                t['label'] as String,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: isDay ? Colors.grey[500] : Colors.grey[400],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                value,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: isEmpty
+                                      ? (isDay ? Colors.grey[400] : Colors.grey[600])
+                                      : (isDay
+                                          ? QuickTechAppColors.lightmaintextcolor
+                                          : QuickTechAppColors.darkmaintextcolor),
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               );
             },
           ),

@@ -37,42 +37,142 @@ class _QuickTechSplashScreenState extends State<QuickTechSplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/images/mainlogo.png',
-              height: 250.h,
-              width: 250.w,
+      body: Responsive(
+        mobile: MobileSplash(context),
+        tablet: TabletSplash(context),
+        desktop: DesktopSplash(context),
+      ),
+    );
+  }
+
+  // ── Mobile Layout ──
+  Widget MobileSplash(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/images/mainlogo.png',
+            height: 200.h,
+            width: 200.w,
+          ),
+          SizedBox(height: 20.h),
+          Text(
+            'E-Prescription',
+            style: myStyle(
+              22.sp,
+              themeController.isDay.value
+                  ? QuickTechAppColors.lightmaincolor
+                  : QuickTechAppColors.darkmaincolor,
+              FontWeight.bold,
             ),
-            Text(
-              'E-Prescription',
-              style: myStyle(
-                Responsive.isDesktop(context)?28.sp:  26.sp,
-                themeController.isDay.value
-                    ? QuickTechAppColors.lightmaincolor
-                    : QuickTechAppColors.darkmaincolor,
-                FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 10.h),
-            // Tagline
-            Text(
+          ),
+          SizedBox(height: 8.h),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.w),
+            child: Text(
               'Digital Prescriptions for PhysioTherapists',
               textAlign: TextAlign.center,
               style: myStyle(
-                Responsive.isDesktop(context)?18.sp:  18.sp,
+                13.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightsecondarytextcolor
                     : QuickTechAppColors.darksecondarytextcolor,
-                FontWeight.bold,
+                FontWeight.w600,
               ),
             ),
-            SizedBox(height: 50.h),
-            CustomSpinner(),
-          ],
-        ),
+          ),
+          SizedBox(height: 40.h),
+          CustomSpinner(),
+        ],
+      ),
+    );
+  }
+
+  // ── Tablet Layout ──
+  Widget TabletSplash(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/images/mainlogo.png',
+            height: 260.h,
+            width: 260.w,
+          ),
+          SizedBox(height: 28.h),
+          Text(
+            'E-Prescription',
+            style: myStyle(
+              26.sp,
+              themeController.isDay.value
+                  ? QuickTechAppColors.lightmaincolor
+                  : QuickTechAppColors.darkmaincolor,
+              FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 10.h),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 32.w),
+            child: Text(
+              'Digital Prescriptions for PhysioTherapists',
+              textAlign: TextAlign.center,
+              style: myStyle(
+                15.sp,
+                themeController.isDay.value
+                    ? QuickTechAppColors.lightsecondarytextcolor
+                    : QuickTechAppColors.darksecondarytextcolor,
+                FontWeight.w600,
+              ),
+            ),
+          ),
+          SizedBox(height: 50.h),
+          CustomSpinner(),
+        ],
+      ),
+    );
+  }
+
+  // ── Desktop Layout ──
+  Widget DesktopSplash(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/images/mainlogo.png',
+            height: 320.h,
+            width: 320.w,
+          ),
+          SizedBox(height: 36.h),
+          Text(
+            'E-Prescription',
+            style: myStyle(
+              32.sp,
+              themeController.isDay.value
+                  ? QuickTechAppColors.lightmaincolor
+                  : QuickTechAppColors.darkmaincolor,
+              FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 12.h),
+          SizedBox(
+            width: 500.w,
+            child: Text(
+              'Digital Prescriptions for PhysioTherapists',
+              textAlign: TextAlign.center,
+              style: myStyle(
+                17.sp,
+                themeController.isDay.value
+                    ? QuickTechAppColors.lightsecondarytextcolor
+                    : QuickTechAppColors.darksecondarytextcolor,
+                FontWeight.w600,
+              ),
+            ),
+          ),
+          SizedBox(height: 60.h),
+          CustomSpinner(),
+        ],
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:io' as io;
+
 import 'package:e_prescription/const/quick_tech_app_colors.dart';
 import 'package:e_prescription/const/quick_tech_styles.dart';
 import 'package:e_prescription/const/web_image.dart';
@@ -9,10 +11,11 @@ import 'package:e_prescription/widgets/quick_tech_custom_button.dart';
 import 'package:e_prescription/widgets/quick_tech_custom_drawer.dart';
 import 'package:e_prescription/widgets/quick_tech_custom_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'dart:io';
+
 
 class QuickTechProfileUpdatePage extends StatefulWidget {
   const QuickTechProfileUpdatePage({super.key});
@@ -129,7 +132,10 @@ class _QuickTechProfileUpdatePageState extends State<QuickTechProfileUpdatePage>
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 800),
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width > 1200 ? 900 : 
+                          MediaQuery.of(context).size.width > 600 ? 800 : double.infinity,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -211,7 +217,7 @@ class _QuickTechProfileUpdatePageState extends State<QuickTechProfileUpdatePage>
 
                   // Bengali Info Card
                   _buildFormCard(
-                    title: 'বাংলা তথ্য (Bengali Information)',
+                    title: 'বাংলা তথ্য',
                     icon: FontAwesomeIcons.language,
                     fields: [
                       _FieldConfig('ডাক্তারের নাম (Doctor Name in Bengali)', bnFirstNameController, FontAwesomeIcons.user,
@@ -366,20 +372,34 @@ class _QuickTechProfileUpdatePageState extends State<QuickTechProfileUpdatePage>
   }
 
   Widget _buildProfileImage() {
-    if (_localImagePath != null && File(_localImagePath!).existsSync()) {
-      return Image.file(File(_localImagePath!), fit: BoxFit.cover);
-    } else if (profileController.profilePhoto.value.isNotEmpty) {
+    if (_localImagePath != null) {
+      if (kIsWeb) {
+        // On web, we can't use Image.file(), use WebImage or display placeholder
+        if (profileController.profilePhoto.value.isNotEmpty) {
+          final imageUrl = profileController.profilePhoto.value;
+          final url = imageUrl.startsWith('http')
+              ? imageUrl
+              : '${Api.baseUrl}/${imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl}';
+          return WebImage(imageUrl: url, fit: BoxFit.cover);
+        }
+      } else {
+        // On mobile/desktop, use Image.file()
+        if (io.File(_localImagePath!).existsSync()) {
+          return Image.file(io.File(_localImagePath!), fit: BoxFit.cover);
+        }
+      }
+    }
+    if (profileController.profilePhoto.value.isNotEmpty) {
       final imageUrl = profileController.profilePhoto.value;
       final url = imageUrl.startsWith('http')
           ? imageUrl
           : '${Api.baseUrl}/${imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl}';
-      return WebImage(imageUrl:   url, fit: BoxFit.cover);
-    } else {
-      return Container(
-        color: Colors.grey[200],
-        child: Icon(Icons.person, size: 56, color: Colors.grey[500]),
-      );
+      return WebImage(imageUrl: url, fit: BoxFit.cover);
     }
+    return Container(
+      color: Colors.grey[200],
+      child: Icon(Icons.person, size: 56, color: Colors.grey[500]),
+    );
   }
 }
 

@@ -1,5 +1,6 @@
 import 'package:e_prescription/const/quick_tech_app_colors.dart';
 import 'package:e_prescription/const/quick_tech_styles.dart';
+import 'package:e_prescription/const/web_image.dart';
 import 'package:e_prescription/controllers/package_controller/quick_tech_package_controller.dart';
 import 'package:e_prescription/controllers/profile_controller/quick_tech_profile_controller.dart';
 import 'package:e_prescription/controllers/theme_controller/quick_tech_theme_controller.dart';
@@ -41,26 +42,29 @@ Widget customDrawer(BuildContext context) {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 profileController.profilePhoto.value.isNotEmpty
-                    ? CircleAvatar(
-                        backgroundImage: NetworkImage(
-                          // profilePhoto from API starts with '/' so strip it
-                          // to avoid a double-slash in the URL.
-                          "${Api.baseUrl}/${profileController.profilePhoto.value.replaceFirst(RegExp(r'^/+'), '')}",
+                    ? ClipOval(
+                      child: SizedBox(
+                        width: 80.r,
+                        height: 80.r,
+                        child: WebImage(
+                          imageUrl:
+                              "${Api.baseUrl}/${profileController.profilePhoto.value}",
+                          fit: BoxFit.cover,
                         ),
-                        radius: 40.r,
-                      )
-                    : CircleAvatar(
-                        backgroundColor: QuickTechAppColors.white,
-                        radius: 40.r,
-                        backgroundImage: AssetImage('assets/images/mainlogo.png'),
                       ),
+                    )
+                    : CircleAvatar(
+                      backgroundColor: QuickTechAppColors.white,
+                      radius: 40.r,
+                      backgroundImage: AssetImage('assets/images/mainlogo.png'),
+                    ),
                 SizedBox(height: 8.h),
                 Text(
                   profileController.name.value.isNotEmpty
                       ? profileController.name.value
                       : 'Therapy Center',
                   style: myStyle(
-                    Responsive.isDesktop(context)?14.w: 14.sp,
+                    Responsive.isDesktop(context) ? 14.sp : 12.sp,
                     QuickTechAppColors.darkmaintextcolor,
                     FontWeight.bold,
                   ),
@@ -72,12 +76,12 @@ Widget customDrawer(BuildContext context) {
             title: Text(
               'Home',
               style: myStyle(
-                Responsive.isDesktop(context)?18.w:14.sp,
-                  themeController.isDay.value
-                      ? QuickTechAppColors.lightmaintextcolor
-                      : QuickTechAppColors.darkmaintextcolor,
-                  FontWeight.w600,
-                ),
+                Responsive.isDesktop(context) ? 18.sp : 14.sp,
+                themeController.isDay.value
+                    ? QuickTechAppColors.lightmaintextcolor
+                    : QuickTechAppColors.darkmaintextcolor,
+                FontWeight.w600,
+              ),
             ),
             onTap: () {
               Get.offNamed('/mainhome');
@@ -87,7 +91,7 @@ Widget customDrawer(BuildContext context) {
             title: Text(
               'Add Prescription',
               style: myStyle(
-                Responsive.isDesktop(context)?14.w:14,
+                Responsive.isDesktop(context) ? 14.sp : 14.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightmaintextcolor
                     : QuickTechAppColors.darkmaintextcolor,
@@ -96,7 +100,7 @@ Widget customDrawer(BuildContext context) {
             ),
             onTap: () {
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                Get.off(()=> QuickTechPrescriptionForm());
+                Get.off(() => QuickTechPrescriptionForm());
               });
             },
           ),
@@ -104,7 +108,7 @@ Widget customDrawer(BuildContext context) {
             title: Text(
               'Add Assessment',
               style: myStyle(
-                Responsive.isDesktop(context)?14.w: 14.sp,
+                Responsive.isDesktop(context) ? 14.sp : 12.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightmaintextcolor
                     : QuickTechAppColors.darkmaintextcolor,
@@ -119,7 +123,7 @@ Widget customDrawer(BuildContext context) {
             title: Text(
               'Patient List',
               style: myStyle(
-                Responsive.isDesktop(context)?14.w:14.sp,
+                Responsive.isDesktop(context) ? 14.sp : 14.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightmaintextcolor
                     : QuickTechAppColors.darkmaintextcolor,
@@ -135,7 +139,7 @@ Widget customDrawer(BuildContext context) {
             title: Text(
               'Packages',
               style: myStyle(
-                Responsive.isDesktop(context)?14.w:14.sp,
+                Responsive.isDesktop(context) ? 14.sp : 14.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightmaintextcolor
                     : QuickTechAppColors.darkmaintextcolor,
@@ -150,7 +154,7 @@ Widget customDrawer(BuildContext context) {
             title: Text(
               'Templates',
               style: myStyle(
-                Responsive.isDesktop(context)?14.w:14.sp,
+                Responsive.isDesktop(context) ? 14.sp : 14.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightmaintextcolor
                     : QuickTechAppColors.darkmaintextcolor,
@@ -165,7 +169,7 @@ Widget customDrawer(BuildContext context) {
             title: Text(
               'Profile',
               style: myStyle(
-                Responsive.isDesktop(context)?14.w: 14.sp,
+                Responsive.isDesktop(context) ? 14.sp : 12.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightmaintextcolor
                     : QuickTechAppColors.darkmaintextcolor,
@@ -180,7 +184,7 @@ Widget customDrawer(BuildContext context) {
             title: Text(
               'Settings',
               style: myStyle(
-                Responsive.isDesktop(context)?14.w: 14.sp,
+                Responsive.isDesktop(context) ? 14.sp : 12.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightmaintextcolor
                     : QuickTechAppColors.darkmaintextcolor,
@@ -195,7 +199,7 @@ Widget customDrawer(BuildContext context) {
             title: Text(
               'Logout',
               style: myStyle(
-                Responsive.isDesktop(context)?14.w:14.sp,
+                Responsive.isDesktop(context) ? 14.sp : 14.sp,
                 themeController.isDay.value
                     ? QuickTechAppColors.lightmaintextcolor
                     : QuickTechAppColors.darkmaintextcolor,
@@ -222,7 +226,6 @@ Widget customDrawer(BuildContext context) {
                     ),
               );
               if (shouldLogout == true) {
-                
                 final loginController = locator.get<QuickTechLoginController>();
                 await loginController.logout();
               }

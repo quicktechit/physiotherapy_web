@@ -1,5 +1,6 @@
 // quick_tech_home_page.dart
 import 'package:e_prescription/const/const.dart';
+import 'package:e_prescription/controllers/profile_controller/quick_tech_profile_controller.dart';
 import 'package:e_prescription/screens/homepage/widgets/quick_tech_blog_banner.dart';
 
 
@@ -13,7 +14,10 @@ class QuickTechHomePage extends StatefulWidget {
 class _QuickTechHomePageState extends State<QuickTechHomePage> {
   final themeController = locator.get<QuickTechThemeController>();
   final ScrollController _scrollController = ScrollController();
-
+final profileController=locator.get<QuickTechProfileController>();
+void initState() {
+    profileController.fetchProfile();
+  super.initState();}
   @override
   void dispose() {
     _scrollController.dispose();

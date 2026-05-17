@@ -16,7 +16,7 @@ void revokeBlobUrl(String url) {
 }
 
 /// Registers an <iframe> pointing at the blob URL and returns an HtmlElementView.
-Widget buildWebPdfView(String blobUrl) {
+Widget WebPdfView(String blobUrl) {
   final viewId = 'pdf-iframe-${blobUrl.hashCode}';
 
   // Register only once per unique URL
@@ -34,3 +34,5 @@ Widget buildWebPdfView(String blobUrl) {
     child: HtmlElementView(viewType: viewId),
   );
 }
+
+
