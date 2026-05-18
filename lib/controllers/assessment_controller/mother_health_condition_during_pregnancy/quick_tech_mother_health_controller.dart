@@ -108,7 +108,7 @@ bool isMotherHealthNull(){
   void updateBloodPressure(String? pressure) {
     if(pressure!=null){
       bloodPressure.value = pressure;
-    bloodPressureController.text = pressure;
+      // do NOT set bloodPressureController.text — it resets cursor on web
     }
     if(!bloodPressureOptions.contains(pressure)){
     bloodPressureOptions.add(pressure!);
@@ -117,32 +117,32 @@ bool isMotherHealthNull(){
 
   void updateDiabetes(String diabetesType) {
     diabetes.value = diabetesType;
-    diabetesController.text = diabetesType;
+    // do NOT set diabetesController.text — it resets cursor on web
   }
 
   void updateGestationalDiabetes(String condition) {
     gestationalDiabetes.value = condition;
-    gestationalDiabetesController.text = condition;
+    // do NOT set gestationalDiabetesController.text — it resets cursor on web
   }
 
   void updatePreeclampsia(String condition) {
     preeclampsia.value = condition;
-    preeclampsiaController.text = condition;
+    // do NOT set preeclampsiaController.text — it resets cursor on web
   }
 
   void updateInfection(String infectionStatus) {
     infection.value = infectionStatus;
-    infectionController.text = infectionStatus;
+    // do NOT set infectionController.text — it resets cursor on web
   }
 
   void updateBleeding(String bleedingStatus) {
     bleeding.value = bleedingStatus;
-    bleedingController.text = bleedingStatus;
+    // do NOT set bleedingController.text — it resets cursor on web
   }
 
   void updateAnxiety(String anxietyStatus) {
     anxiety.value = anxietyStatus;
-    anxietyController.text = anxietyStatus;
+    // do NOT set anxietyController.text — it resets cursor on web
   }
 
   // Method to clear all controllers (optional, for resetting form data)

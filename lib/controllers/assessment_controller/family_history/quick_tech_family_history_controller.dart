@@ -107,33 +107,33 @@ class QuickTechFamilyHistoryController extends GetxController {
 
   void updateHomeEnvironment(String environment) {
     homeEnvironment.value = environment;
-    homeenvitornmentController.text = environment;
+    // do NOT set homeenvitornmentController.text — it resets cursor on web
   }
 
   void updatenoofchildren(String children) {
     noofChildren.value = children;
-    noofChildrenController.text = children;
+    // do NOT set noofChildrenController.text — it resets cursor on web
   }
 
   void updateLactate(String lactate) {
     lactateCondition.value = lactate;
-    lactateConditionController.text = lactate;
+    // do NOT set lactateConditionController.text — it resets cursor on web
   }
 
   void updateCousinMarriage(String marriage) {
     firstcousinMarriage.value = marriage;
-    firstCousinMarrigeController.text = marriage;
+    // do NOT set firstCousinMarrigeController.text — it resets cursor on web
   }
 
   void updateDisabaled(String disabled) {
     anydisableperson.value = disabled;
-    anydisablepersonController.text = disabled;
+    // do NOT set anydisablepersonController.text — it resets cursor on web
   }
 
   void updatedPsychologicalCondition(String? psychologicalCoondition) {
     if(psychologicalCoondition!=null){
       psychologicalCondition.value=psychologicalCoondition;
-      psychologicalConditionController.text=psychologicalCoondition;
+      // do NOT set psychologicalConditionController.text — it resets cursor on web
       if(!psycologyOptions.contains(psychologicalCoondition)){
         psycologyOptions.add(psychologicalCoondition);
       }

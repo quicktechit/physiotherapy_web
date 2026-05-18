@@ -132,13 +132,13 @@ bool isBirthHIstoryNull(){
   // Update functions
   void updateBirthInjury(String injury) {
     birthInjury.value = injury;
-    birthInjuryController.text = injury;
+    // do NOT set birthInjuryController.text — it resets cursor on web
   }
 
   void updateBirthWeight(String? weight) {
     if(weight!=null){
       birthWeight.value=weight;
-      birthWeightController.text=weight;
+      // do NOT set birthWeightController.text — it resets cursor on web
       if(!birthWeightOptions.contains(weight)){
         birthWeightOptions.add(weight);
       }
@@ -148,33 +148,33 @@ bool isBirthHIstoryNull(){
 
   void updateComplication(String complications) {
     complication.value = complications;
-    complicationController.text = complications;
+    // do NOT set complicationController.text — it resets cursor on web
   }
 
   void updatePregnancyMaturity(String maturity) {
     pregnancyMaturity.value = maturity;
-    pregnancyMaturityController.text = maturity;
+    // do NOT set pregnancyMaturityController.text — it resets cursor on web
   }
 
   void updateDeliveryType(String type) {
     deliveryType.value = type;
-    deliveryTypeController.text = type;
+    // do NOT set deliveryTypeController.text — it resets cursor on web
   }
 
   void updateDeliveryPlace(String place) {
     deliveryPlace.value = place;
-    deliveryPlaceController.text = place;
+    // do NOT set deliveryPlaceController.text — it resets cursor on web
   }
 
   void updateNoOfLabor(String labor) {
     noOfLabor.value = labor;
-    noOfLaborController.text = labor;
+    // do NOT set noOfLaborController.text — it resets cursor on web
   }
 
   void updateLaborDuration(String? duration) {
    if(duration!=null){
      laborDuration.value = duration;
-    laborDurationController.text = duration;
+     // do NOT set laborDurationController.text — it resets cursor on web
    }
    if(!laborDurationOptions.contains(duration))
    laborDurationOptions.add(duration!);
@@ -182,13 +182,13 @@ bool isBirthHIstoryNull(){
 
   void updateChildPosition(String position) {
     childPosition.value = position;
-    childPositionController.text = position;
+    // do NOT set childPositionController.text — it resets cursor on web
   }
 
   void updateAfterBirthProblem(String? problem) {
     if(problem !=null){
       afterBirthProblem.value = problem;
-    afterBirthProblemController.text = problem;
+      // do NOT set afterBirthProblemController.text — it resets cursor on web
 
     }
     if(!afterBirthProblemOptions.contains(problem)){

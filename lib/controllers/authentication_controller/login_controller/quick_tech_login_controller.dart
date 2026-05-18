@@ -13,6 +13,24 @@ import 'dart:convert';
 import 'package:e_prescription/models/user_model/quick_tech_user_model.dart';
 
 class QuickTechLoginController extends GetxController {
+  // Lazy-initialized Google Sign-In
+  GoogleSignIn? _googleSignIn;
+
+  // Getter that ensures initialization
+  GoogleSignIn get googleSignInInstance {
+    if (_googleSignIn == null) {
+      if (kIsWeb) {
+        _googleSignIn = GoogleSignIn(
+          clientId: '637978940538-8ra2n5459golm1q22fo576om3pe3trfn.apps.googleusercontent.com',
+          scopes: ['email', 'profile'],
+        );
+      } else {
+        _googleSignIn = GoogleSignIn.standard();
+      }
+    }
+    return _googleSignIn!;
+  }
+
   Future<void> loginWithCredentials(String mobile, String password) async {
     if (validatePhoneNumber(mobile) != null ||
         validatePassword(password) != null) {
@@ -66,15 +84,9 @@ class QuickTechLoginController extends GetxController {
   Future<void> googleSignIn() async {
     try {
       isLoading(true);
-   
-      final GoogleSignIn googleSignIn = kIsWeb
-          ? GoogleSignIn(
-              clientId:
-                  const String.fromEnvironment('637978940538-8ra2n5459golm1q22fo576om3pe3trfn.apps.googleusercontent.com'),
-            )
-          : GoogleSignIn.standard();
-      await googleSignIn.signOut(); // Always show account picker
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      // Sign out first to always show account picker (reuse initialized instance)
+      await googleSignInInstance.signOut();
+      final GoogleSignInAccount? googleUser = await googleSignInInstance.signIn();
       if (googleUser == null) {
         isLoading(false);
         return; // User cancelled
@@ -104,12 +116,12 @@ class QuickTechLoginController extends GetxController {
           snackPosition: SnackPosition.BOTTOM,
         );
       }
-      } catch (e) {
-        Get.snackbar(
-          'Error',
-          'Google Sign-In failed: ${e.toString()}',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Google Sign-In failed: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       isLoading(false);
     }

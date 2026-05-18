@@ -584,7 +584,6 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
                                   
                                   // Store HTML format in both lists
                                   therapyController.customTherapies.add(htmlText);
-                                  therapyController.customTherapies.add(htmlText);
                                   therapyController.customTherapyControllers
                                       .add(TextEditingController(text: htmlText));
                                 }

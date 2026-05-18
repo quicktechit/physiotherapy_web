@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'package:e_prescription/screens/authentications/login/forgot_password/otp_verification/forgot_pass_otp.dart';
 import 'package:e_prescription/utils/api.dart';
@@ -9,7 +8,40 @@ import 'package:flutter/material.dart';
 class QuickTechForgotPassController extends GetxController {
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  TextEditingController otpcontroller = TextEditingController();
+
   final RxString resetErrorText = ''.obs;
+  final RxBool isLoading = false.obs;
+  final RxString errorMessage = ''.obs;
+  final RxString successMessage = ''.obs;
+  final RxString phoneNumber = ''.obs;
+  final RxBool otpSent = false.obs;
+  final RxString otp = ''.obs;
+
+  bool get isValidPhone => phoneNumber.value.length >= 10;
+  bool get isValidOtp => otp.value.length == 6;
+
+  @override
+  void onClose() {
+    passwordController.dispose();
+    confirmController.dispose();
+    phoneController.dispose();
+    otpcontroller.dispose();
+    super.onClose();
+  }
+
+  void _clearAllData() {
+    phoneNumber.value = '';
+    phoneController.clear();
+    otpcontroller.clear();
+    otp.value = '';
+    errorMessage.value = '';
+    successMessage.value = '';
+    otpSent.value = false;
+    resetErrorText.value = '';
+    isLoading.value = false;
+  }
 
   Future<void> resetPassword({required String mobile, required String passresetToken}) async {
     if (passwordController.text.isEmpty || confirmController.text.isEmpty) {
@@ -32,6 +64,9 @@ class QuickTechForgotPassController extends GetxController {
       );
       final data = jsonDecode(response.body);
       if (response.statusCode == 200 && data['message'] != null) {
+        _clearAllData();
+        passwordController.clear();
+        confirmController.clear();
         Get.snackbar('Success', data['message'], backgroundColor: Colors.green.shade100, colorText: Colors.black);
         Get.offAllNamed('/login');
       } else {
@@ -45,24 +80,18 @@ class QuickTechForgotPassController extends GetxController {
       isLoading.value = false;
     }
   }
-  TextEditingController phoneController = TextEditingController();
-  TextEditingController otpcontroller = TextEditingController();
-
-  final RxBool isLoading = false.obs;
-  final RxString errorMessage = ''.obs;
-  final RxString successMessage = ''.obs;
-  final phoneNumber = ''.obs;
-  final RxBool otpSent = false.obs;
-  final otp = ''.obs;
-
-  bool get isValidPhone => phoneNumber.value.length >= 10;
-  bool get isValidOtp => otp.value.length == 6;
 
   Future<void> sendOtp() async {
     try {
-      isLoading(true);
-      errorMessage('');
-      successMessage('');
+      isLoading.value = true;
+      errorMessage.value = '';
+      successMessage.value = '';
+
+      // Clear previous OTP data if resending
+      if (otpSent.value) {
+        otpcontroller.clear();
+        otp.value = '';
+      }
 
       final response = await http.post(
         Uri.parse(Api.forgetPassword),
@@ -71,9 +100,9 @@ class QuickTechForgotPassController extends GetxController {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200 && data['passresetToken'] != null) {
-        otpSent(true);
-        successMessage('OTP sent to ${phoneNumber.value}');
-        // Show snackbar with API response
+        otpSent.value = true;
+        successMessage.value = 'OTP sent to ${phoneNumber.value}';
+        
         Get.snackbar(
           'Success',
           '${data['message']}\nToken: ${data['passresetToken']}\nMobile: ${data['mobile']}',
@@ -81,33 +110,38 @@ class QuickTechForgotPassController extends GetxController {
           colorText: Colors.black,
           duration: const Duration(seconds: 4),
         );
-        // Navigate to OTP page, pass token and mobile
+        
         Get.to(() => ForgotPassOtp(), arguments: {
           'passresetToken': data['passresetToken'],
           'mobile': data['mobile'],
         });
       } else {
-        errorMessage(data['message'] ?? 'Failed to send OTP.');
+        errorMessage.value = data['message'] ?? 'Failed to send OTP.';
         Get.snackbar('Error', errorMessage.value, backgroundColor: Colors.red.shade100, colorText: Colors.black);
       }
     } catch (e) {
-      errorMessage('Failed to send OTP. Please try again.');
+      errorMessage.value = 'Failed to send OTP. Please try again.';
       Get.snackbar('Error', errorMessage.value, backgroundColor: Colors.red.shade100, colorText: Colors.black);
     } finally {
-      isLoading(false);
+      isLoading.value = false;
     }
   }
 
   Future<void> verifyOtp() async {
     try {
-      isLoading(true);
-      errorMessage('');
+      isLoading.value = true;
+      errorMessage.value = '';
       await Future.delayed(const Duration(seconds: 2));
       Get.toNamed('/reset-password', arguments: phoneNumber.value);
     } catch (e) {
-      errorMessage('Invalid OTP. Please try again.');
+      errorMessage.value = 'Invalid OTP. Please try again.';
     } finally {
-      isLoading(false);
+      isLoading.value = false;
     }
+  }
+
+  // Clear data when going back to forgot password screen
+  void resetForgotPasswordState() {
+    _clearAllData();
   }
 }

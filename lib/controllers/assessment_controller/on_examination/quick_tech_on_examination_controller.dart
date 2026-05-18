@@ -433,7 +433,7 @@ class QuickTechOnExaminationController extends GetxController {
 
   void updateBloodPressure(String pressure) {
     bloodPressure.value = pressure;
-    bloodPressureController.text = pressure;
+    // do NOT set bloodPressureController.text — it resets cursor on web
   }
 
   void updateInflammatorySigns(List<String> signs) =>
@@ -474,18 +474,18 @@ class QuickTechOnExaminationController extends GetxController {
       bowelBladderControl.value = type;
 
   void updateLimbOrOrganAbsence(String info) {
-    limborganabsenseController.text = info;
     limbOrOrganAbsence.value = info;
+    // do NOT set limborganabsenseController.text — it resets cursor on web
   }
 
   void updateBalancingCondition(String condition) {
-    balancingCoordinatingController.text = condition;
     balancingCondition.value = condition;
+    // do NOT set balancingCoordinatingController.text — it resets cursor on web
   }
 
   void updateOthers(String info) {
-    othersController.text = info;
     others.value = info;
+    // do NOT set othersController.text — it resets cursor on web
   }
 
   // -----------------------------

@@ -68,7 +68,7 @@ class QuickTechRange0fMotionController extends GetxController {
   var oxfordmuscleOptions = ['0', '1', '2', '3', '4', '5'].obs;
   void updateOxfordMuscle(String muscle) {
     oxfordMuscle.value = muscle;
-    oxfordmuscleController.text = muscle;
+    // do NOT set oxfordmuscleController.text — it resets cursor on web
   }
     bool isRangeofMotionnull() {
   return (uppermovementController.text.isNotEmpty) ||

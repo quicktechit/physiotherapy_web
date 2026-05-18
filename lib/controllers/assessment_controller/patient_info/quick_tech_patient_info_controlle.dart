@@ -183,14 +183,14 @@ final QuickTechThemeController themeController = locator.get<QuickTechThemeContr
   }
 
   void updateBirthDate(String date) {
-    birthDateController.text = date;
+    // do NOT set birthDateController.text — it resets cursor on web
     update();
   }
 
   void updateOccupation(String? newOccupation) {
     if (newOccupation != null) {
       occupation.value = newOccupation;
-      occupationController.text = newOccupation;
+      // do NOT set occupationController.text — it resets cursor on web
 
       if (!occupationOptions.contains(newOccupation)) {
         occupationOptions.add(newOccupation);
@@ -200,7 +200,7 @@ final QuickTechThemeController themeController = locator.get<QuickTechThemeContr
 
   void updateMaritalStatus(String status) {
     maritalStatus.value = status;
-    maritalStatusController.text = status;
+    // do NOT set maritalStatusController.text — it resets cursor on web
   }
 
   void updateBirthRegistrationNo(String registrationNo) {
@@ -209,17 +209,17 @@ final QuickTechThemeController themeController = locator.get<QuickTechThemeContr
 
   void updateEducationOfPatient(String education) {
     educationOfPatient.value = education;
-    educationOfPatientController.text = education;
+    // do NOT set educationOfPatientController.text — it resets cursor on web
   }
 
   void updateEducationOfGuardian(String education) {
     educationOfGuardian.value = education;
-    educationOfGuardianController.text = education;
+    // do NOT set educationOfGuardianController.text — it resets cursor on web
   }
 
   void updateSex(String gender) {
     sex.value = gender;
-    sexController.text = gender;
+    // do NOT set sexController.text — it resets cursor on web
   }
 
   // Method to get all patient data as a model

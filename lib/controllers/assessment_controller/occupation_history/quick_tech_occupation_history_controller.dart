@@ -95,7 +95,7 @@ Future<int> storeOccupationHistory({required int patientId}) async {
   void updateTypesofWork(String? work) {
     if(work !=null){
       typeOfWork.value=work;
-      typeOfWorkController.text=work;
+      // do NOT set typeOfWorkController.text — it resets cursor on web
       if(!typesofworkoptions.contains(work)){
         typesofworkoptions.add(work);
       }
@@ -105,17 +105,17 @@ Future<int> storeOccupationHistory({required int patientId}) async {
 
   void updateStairMoving(String moving) {
     stairMoving.value = moving;
-    stairMovingController.text = moving;
+    // do NOT set stairMovingController.text — it resets cursor on web
   }
 
   void updatelumberInvolvemnt(String involvement) {
     lumbarInvolvement.value = involvement;
-    lumbarInvolvementController.text = involvement;
+    // do NOT set lumbarInvolvementController.text — it resets cursor on web
   }
 
   void updatebrainWork(String brainworks) {
     brainWork.value = brainworks;
-    brainWorkController.text = brainworks;
+    // do NOT set brainWorkController.text — it resets cursor on web
   }
 
   // Method to clear all controllers (optional, for resetting form data)

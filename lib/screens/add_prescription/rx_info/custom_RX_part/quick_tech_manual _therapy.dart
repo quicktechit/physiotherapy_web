@@ -612,7 +612,6 @@ class _CustomManualTherapyInfoState extends State<CustomManualTherapyInfo> {
                                   
                                   // Store HTML format in both lists
                                   therapyController.customTherapies.add(htmlText);
-                                  therapyController.customTherapies.add(htmlText);
                                   therapyController.customTherapyControllers
                                       .add(TextEditingController(text: htmlText));
                                 }

@@ -115,7 +115,7 @@ class QuickTechMusclePowerController extends GetxController {
 
   void updateOxfordMuscle(String muscle) {
     oxfordMuscle.value = muscle;
-    oxfordmuscleController.text = muscle;
+    // do NOT set oxfordmuscleController.text — it resets cursor on web
   }
 
 
