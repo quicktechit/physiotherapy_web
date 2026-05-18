@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:e_prescription/services/auth_services/quick_tech_auth_storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -156,12 +156,16 @@ class MainDiagnosisController extends ChangeNotifier {
   List<String> durations,
   List<String> frequencies,
   List<String> leftRights, {
+  bool isChild = false,
   OnExaminationController? onExaminationController,
   String? itemName,
 }) {
   final id = source['id'];
   if (id == null) return;
   targetIds.add(id.toString());
+
+  // Children only add their ID to diagChildcatIds - no positional arrays
+  if (isChild) return;
 
   String? value;
 
@@ -253,7 +257,7 @@ class MainDiagnosisController extends ChangeNotifier {
               durations,
               frequencies,
               leftRights,
-              // For children, we do not use the details field
+              isChild: true,
             );
           }
         }
@@ -418,11 +422,11 @@ class MainDiagnosisController extends ChangeNotifier {
           subcategoryValues.add('');
           durations.add('');
           frequencies.add('');
+          leftRights.add(leftRight ?? '');
         }
         if (childcatId != null) {
           diagChildcatIds.add(childcatId.toString());
         }
-        leftRights.add(leftRight ?? '');
       }
 
       // --- Add Previous Therapy (PreviousTherapyHistoryController) ---
@@ -437,11 +441,11 @@ class MainDiagnosisController extends ChangeNotifier {
           subcategoryValues.add('');
           durations.add(details['duration']?.toString() ?? '');
           frequencies.add(details['frequency']?.toString() ?? '');
+          leftRights.add('');
         }
         if (childcatId != null) {
           diagChildcatIds.add(childcatId.toString());
         }
-        leftRights.add('');
       }
       for (final option in previousTherapyController.selectedElectrotherapy) {
         addTherapyOption(option);
@@ -454,9 +458,11 @@ class MainDiagnosisController extends ChangeNotifier {
       }
 
     
-// Note: others from previous therapy are just free-form text
-      // They don't map to diagnosis category IDs, so we skip them here
-      // Only add database entries with valid IDs to the standard arrays
+// Add others from previous therapy as a custom newSubCat entry
+      if (previousTherapyController.others.value.isNotEmpty &&
+          previousTherapyController.previousTherapyCategoryId != null) {
+        // Will be added after collecting other custom entries
+      }
 
       // Collect custom new subcategories typed by the user (not in DB)
       final List<Map<String, dynamic>> newSubCats = [];
@@ -477,6 +483,15 @@ class MainDiagnosisController extends ChangeNotifier {
       collectCustom(referredToController.customNewReferredTo);
       collectCustom(disabilityTypesController.customNewDisabilityTypes);
       collectCustom(diagnosisController.customNewDiagnosis);
+      
+      // Add others from previous therapy if present
+      if (previousTherapyController.others.value.isNotEmpty &&
+          previousTherapyController.previousTherapyCategoryId != null) {
+        newSubCats.add({
+          'diagnosis_category_id': previousTherapyController.previousTherapyCategoryId,
+          'name': previousTherapyController.others.value,
+        });
+      }
       
       // Guard: prevent API call with COMPLETELY empty diagnosis data
       // Now we check if there's ANY data: DB entries OR custom entries

@@ -224,8 +224,8 @@ class _TherapyNestedOption extends StatelessWidget {
                           controlAffinity: ListTileControlAffinity.leading,
                           contentPadding: EdgeInsets.zero,
                         ),
-                        if (isElectro && isSelected)
-                          _ElectroTherapyDetails(option, isDay),
+                        if (isSelected)
+                          _TherapyDetails(option, isDay),
                       ],
                     );
                   }).toList(),
@@ -237,7 +237,7 @@ class _TherapyNestedOption extends StatelessWidget {
   }
 }
 
-Widget _ElectroTherapyDetails(Map<String, dynamic> therapy, bool isDay) {
+Widget _TherapyDetails(Map<String, dynamic> therapy, bool isDay) {
   final id = therapy['id'].toString();
   return Obx(() {
     return Padding(

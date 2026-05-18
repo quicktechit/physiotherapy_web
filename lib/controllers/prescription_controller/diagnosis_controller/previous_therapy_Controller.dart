@@ -1,4 +1,4 @@
-import 'package:e_prescription/controllers/prescription_controller/diagnosis_controller/assestive_device_controller.dart';
+﻿import 'package:e_prescription/controllers/prescription_controller/diagnosis_controller/assestive_device_controller.dart';
 import 'package:e_prescription/controllers/prescription_controller/diagnosis_controller/cheif_complain_controller.dart';
 import 'package:e_prescription/controllers/prescription_controller/diagnosis_controller/diagnosis_controller.dart';
 import 'package:e_prescription/controllers/prescription_controller/diagnosis_controller/disability_types_controller.dart';
@@ -46,6 +46,7 @@ class PreviousTherapyHistoryController extends GetxController {
   }.obs;
   var others = ''.obs;
   var othersDetails = ''.obs;
+  int? previousTherapyCategoryId;
 
   var electrotherapyOptions = <Map<String, dynamic>>[].obs;
 var manualTherapyOptions = <Map<String, dynamic>>[].obs;
@@ -67,6 +68,7 @@ var additionalTherapyOptions = <Map<String, dynamic>>[].obs;
           orElse: () => null,
         );
         if (prevTherapyCategory != null) {
+          previousTherapyCategoryId = prevTherapyCategory['id'] as int?;
           final subcategories = prevTherapyCategory['diagnosis_subcategories'] as List<dynamic>;
       for (var sub in subcategories) {
   final subName = sub['name'] as String;
