@@ -43,14 +43,14 @@ class QuickTechImageSlider extends StatelessWidget {
               final imgSrc = sliderController.imgList[index];
               return imgSrc.startsWith('http')
                   ? (kIsWeb
-                      ? WebImage(imageUrl: imgSrc, fit: BoxFit.cover)
+                      ? WebImage(imageUrl: imgSrc, fit: BoxFit.fill)
                       : CachedNetworkImage(
                           imageUrl: imgSrc,
-                          fit: BoxFit.cover,
+                          fit: BoxFit.fill,
                           width: double.infinity,
                         ))
                   : Image.asset(imgSrc,
-                      fit: BoxFit.cover, width: double.infinity);
+                      fit: BoxFit.fill, width: double.infinity);
             },
             options: CarouselOptions(
               height: isDesktop ? 480.h : 220.h,

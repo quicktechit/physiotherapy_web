@@ -44,7 +44,7 @@ class QuickTechCustomMainButtons extends StatelessWidget {
         lottie: 'assets/animations/assessment.json',
         gradient:  [QuickTechAppColors.lightmaincolor, QuickTechAppColors.lightmaincolor],
         onTap: () => Get.toNamed('/addassessment'),
-        isWide: false,
+        isWide: true,
       ),
       ActionCardData(
         title: 'Patient List',

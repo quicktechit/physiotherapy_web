@@ -76,7 +76,7 @@ Widget customSummaryInfo(bool? isPreview) {
             ? QuickTechAppColors.lightmaintextcolor
             : QuickTechAppColors.white;
     final accentColor = QuickTechAppColors.lightmaincolor;
-    // final dividerColor = accentColor.withOpacity(0.2);
+    // final dividerColor = accentColor.withValues(alpha:0.2);
     // Check Electrotherpy is selected or not
     bool hasElectrotherapySelection = electrotherapyController
         .selectedParameters

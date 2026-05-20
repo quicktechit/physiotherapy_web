@@ -224,7 +224,8 @@ class _TherapyNestedOption extends StatelessWidget {
                           controlAffinity: ListTileControlAffinity.leading,
                           contentPadding: EdgeInsets.zero,
                         ),
-                        if (isSelected)
+                        // Show therapy details form only for Electrotherapy
+                        if (isSelected && isElectro)
                           _TherapyDetails(option, isDay),
                       ],
                     );

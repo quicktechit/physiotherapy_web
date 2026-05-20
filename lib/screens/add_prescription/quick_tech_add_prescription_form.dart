@@ -258,15 +258,15 @@ class _QuickTechPrescriptionFormState extends State<QuickTechPrescriptionForm>
                     children: [
                       SingleChildScrollView(
                         padding: EdgeInsets.all(16.0),
-                        child: customPatientInfo(),
+                        child: customPatientInfo(context),
                       ),
                       SingleChildScrollView(
                         padding: EdgeInsets.all(16.0),
-                        child: customDiagnosisInfo(),
+                        child: customDiagnosisInfo(context),
                       ),
                       SingleChildScrollView(
                         padding: EdgeInsets.all(16.0),
-                        child: customRxPart(),
+                        child: customRxPart(context),
                       ),
                     ],
                   ),

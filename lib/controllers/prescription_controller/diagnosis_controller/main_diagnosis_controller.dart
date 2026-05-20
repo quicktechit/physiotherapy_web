@@ -18,119 +18,15 @@ import 'package:e_prescription/controllers/prescription_controller/diagnosis_con
 import 'package:e_prescription/controllers/prescription_controller/diagnosis_controller/optimized_advice_controller.dart';
 import 'package:e_prescription/controllers/prescription_controller/patient_info_controller/patient_info_controller.dart';
 import 'package:e_prescription/locator.dart';
-
-// Models
-class PresDiagnosisChildcategory {
-  final int id;
-  final String diagnosisCategoryId;
-  final String diagnosisSubcategoryId;
-  final String type;
-  final String name;
-  final String createdAt;
-  final String updatedAt;
-
-  PresDiagnosisChildcategory({
-    required this.id,
-    required this.diagnosisCategoryId,
-    required this.diagnosisSubcategoryId,
-    required this.type,
-    required this.name,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  factory PresDiagnosisChildcategory.fromJson(Map<String, dynamic> json) {
-    return PresDiagnosisChildcategory(
-      id: json['id'],
-      diagnosisCategoryId: json['diagnosis_category_id'],
-      diagnosisSubcategoryId: json['diagnosis_subcategory_id'],
-      type: json['type'],
-      name: json['name'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-    );
-  }
-}
-
-class PresDiagnosisSubcategory {
-  final int id;
-  final String diagnosisCategoryId;
-  final String type;
-  final String name;
-  final String createdAt;
-  final String updatedAt;
-  final List<PresDiagnosisChildcategory> diagnosisChildcategories;
-
-  PresDiagnosisSubcategory({
-    required this.id,
-    required this.diagnosisCategoryId,
-    required this.type,
-    required this.name,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.diagnosisChildcategories,
-  });
-
-  factory PresDiagnosisSubcategory.fromJson(Map<String, dynamic> json) {
-    var childList = json['diagnosis_childcategories'] as List?;
-    List<PresDiagnosisChildcategory> children =
-        childList != null
-            ? childList.map((e) => PresDiagnosisChildcategory.fromJson(e)).toList()
-            : [];
-    return PresDiagnosisSubcategory(
-      id: json['id'],
-      diagnosisCategoryId: json['diagnosis_category_id'],
-      type: json['type'],
-      name: json['name'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-      diagnosisChildcategories: children,
-    );
-  }
-}
-
-// Place addDiagnosisItems and related helpers here, outside the model classes
-
-
-class PresDiagnosisCategory {
-  final int id;
-  final String name;
-  final String createdAt;
-  final String updatedAt;
-  final List<PresDiagnosisSubcategory> diagnosisSubcategories;
-
-  PresDiagnosisCategory({
-    required this.id,
-    required this.name,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.diagnosisSubcategories,
-  });
-
-  factory PresDiagnosisCategory.fromJson(Map<String, dynamic> json) {
-    var subList = json['diagnosis_subcategories'] as List?;
-    List<PresDiagnosisSubcategory> subs =
-        subList != null
-            ? subList.map((e) => PresDiagnosisSubcategory.fromJson(e)).toList()
-            : [];
-    return PresDiagnosisCategory(
-      id: json['id'],
-      name: json['name'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-      diagnosisSubcategories: subs,
-    );
-  }
-}
+import 'package:e_prescription/models/prescription/diagnosis_category_response.dart';
 
 // Controller
 class MainDiagnosisController extends ChangeNotifier {
-  List<PresDiagnosisCategory> diagnosisCategories = [];
+  List<DiagnosisCategories> diagnosisCategories = [];
   bool isLoading = false;
   String? error;
 
   Future<int> storeAllDiagnosisData() async {
-    debugPrint('>>> DIAGNOSIS STORE CALLED [${DateTime.now().toString()}]');
     try {
       final cheifComplainController = locator.get<CheifComplainController>();
       final onExaminationController = locator.get<OnExaminationController>();
@@ -149,68 +45,55 @@ class MainDiagnosisController extends ChangeNotifier {
         return value.toString();
       }
 
-   void appendDiagnosisEntry(
-  List<String> targetIds,
-  Map<String, dynamic> source,
-  List<String> subcategoryValues,
-  List<String> durations,
-  List<String> frequencies,
-  List<String> leftRights, {
-  bool isChild = false,
-  OnExaminationController? onExaminationController,
-  String? itemName,
-}) {
-  final id = source['id'];
-  if (id == null) return;
-  targetIds.add(id.toString());
+      final diagnosisEntries = <Map<String, String>>[];
 
-  // Children only add their ID to diagChildcatIds - no positional arrays
-  if (isChild) return;
+      String _resolveSubcategoryValue(
+        Map<String, dynamic> source, {
+        OnExaminationController? onExaminationController,
+        String? itemName,
+      }) {
+        if (onExaminationController != null && itemName != null) {
+          final map = onExaminationController.onExaminationMap[itemName];
+          if (map != null && map['type'] == 'With Value') {
+            final rxString = onExaminationController.examinationValues[itemName];
+            if (rxString != null && rxString.value.isNotEmpty) {
+              return rxString.value;
+            }
+          }
+        }
 
-  String? value;
+        final subcategoryValue = source['subcategory_value'];
+        if (subcategoryValue != null &&
+            subcategoryValue.toString().isNotEmpty) {
+          return subcategoryValue.toString();
+        }
 
-  if (onExaminationController != null && itemName != null) {
-    final map = onExaminationController.onExaminationMap[itemName];
-    debugPrint('DEBUG appendDiagnosisEntry: itemName=$itemName | map exists=${map != null} | type=${map?['type']}');
-    if (map != null && map['type'] == 'With Value') {
-      final rxString = onExaminationController.examinationValues[itemName];
-      debugPrint('DEBUG: Got RxString for $itemName | exists=${rxString != null} | value="${rxString?.value}"');
-      if (rxString != null && rxString.value.isNotEmpty) {
-        value = rxString.value;
-        debugPrint('DEBUG: Setting value to "${rxString.value}" for $itemName');
+        return '';
       }
-    }
-  } else {
-    // only take subcategory_value when it’s present
-    if (source['subcategory_value'] != null &&
-        source['subcategory_value'].toString().isNotEmpty) {
-      value = source['subcategory_value'].toString();
-    }
-  }
 
-  // Always add a value (empty string if none) to maintain array alignment
-  subcategoryValues.add(value ?? '');
-
-  // Always add duration/frequency/left_right to maintain array alignment
-  String duration = _valueOrEmpty(source['duration']);
-  String frequency = _valueOrEmpty(source['frequency']);
-  String leftRight = _valueOrEmpty(source['left_right']);
-  
-  durations.add(duration);
-  frequencies.add(frequency);
-  leftRights.add(leftRight);
-}
+      void appendDiagnosisEntry({
+        required dynamic subcategoryId,
+        dynamic childcategoryId,
+        String subcategoryValue = '',
+        String duration = '',
+        String frequency = '',
+        String leftRight = '',
+      }) {
+        if (subcategoryId == null) return;
+        diagnosisEntries.add({
+          'diagSubcatId': subcategoryId.toString(),
+          'diagChildcatId': childcategoryId?.toString() ?? '',
+          'subcategory_value': subcategoryValue,
+          'duration': duration,
+          'frequency': frequency,
+          'left_right': leftRight,
+        });
+      }
 
       void addDiagnosisItems(
         Iterable<String> selectedItems,
         Map<String, Map<String, dynamic>> dataMap,
         Map<String, List<String>> subMap,
-        List<String> diagSubcatIds,
-        List<String> diagChildcatIds,
-        List<String> subcategoryValues,
-        List<String> durations,
-        List<String> frequencies,
-        List<String> leftRights,
         {OnExaminationController? onExaminationController}
       ) {
         if (selectedItems.isEmpty) return;
@@ -222,19 +105,26 @@ class MainDiagnosisController extends ChangeNotifier {
             continue;
           }
 
-          appendDiagnosisEntry(
-            diagSubcatIds,
+          final childSelections = subMap[item] ?? const <String>[];
+          final subcategoryValue = _resolveSubcategoryValue(
             subcategoryData,
-            subcategoryValues,
-            durations,
-            frequencies,
-            leftRights,
             onExaminationController: onExaminationController,
             itemName: item,
           );
+          final duration = _valueOrEmpty(subcategoryData['duration']);
+          final frequency = _valueOrEmpty(subcategoryData['frequency']);
+          final leftRight = _valueOrEmpty(subcategoryData['left_right']);
 
-          final childSelections = subMap[item] ?? const <String>[];
-          if (childSelections.isEmpty) continue;
+          if (childSelections.isEmpty) {
+            appendDiagnosisEntry(
+              subcategoryId: subcategoryData['id'],
+              subcategoryValue: subcategoryValue,
+              duration: duration,
+              frequency: frequency,
+              leftRight: leftRight,
+            );
+            continue;
+          }
 
           final children =
               (subcategoryData['children'] as List?)?.cast<Map<String, dynamic>>();
@@ -251,36 +141,27 @@ class MainDiagnosisController extends ChangeNotifier {
             if (childData == null) continue;
 
             appendDiagnosisEntry(
-              diagChildcatIds,
-              childData,
-              subcategoryValues,
-              durations,
-              frequencies,
-              leftRights,
-              isChild: true,
+              subcategoryId: subcategoryData['id'],
+              childcategoryId: childData['id'],
+              subcategoryValue: subcategoryValue,
+              duration: duration,
+              frequency: frequency,
+              leftRight: leftRight,
             );
           }
         }
       }
 
-      // Prepare arrays for bulk data
-      List<String> diagSubcatIds = [];
-      List<String> diagChildcatIds = [];
-      List<String> subcategoryValues = [];
-      List<String> durations = [];
-      List<String> frequencies = [];
-      List<String> leftRights = [];
-
-      // chiefComplaintCategory is Rxn<PresDiagnosisCategory>, so use .value
       final chiefComplaintMap = <String, Map<String, dynamic>>{};
       final chiefCategory =
           cheifComplainController.chiefComplaintCategory.value;
       if (chiefCategory != null) {
-        for (final sub in chiefCategory.diagnosisSubcategories) {
-          chiefComplaintMap[sub.name] = {
+        for (final sub in chiefCategory.diagnosisSubcategories ?? <DiagnosisSubcategories>[]) {
+          if (sub.name == null) continue;
+          chiefComplaintMap[sub.name!] = {
             'id': sub.id,
             'children':
-                sub.diagnosisChildcategories
+                (sub.diagnosisChildcategories ?? <DiagnosisChildcategories>[])
                     .map(
                       (child) => {
                         'id': child.id,
@@ -295,110 +176,48 @@ class MainDiagnosisController extends ChangeNotifier {
         cheifComplainController.selectedComplaints,
         chiefComplaintMap,
         cheifComplainController.selectedSubComplaints,
-        diagSubcatIds,
-        diagChildcatIds,
-        subcategoryValues,
-        durations,
-        frequencies,
-        leftRights,
       );
-      // DEBUG: Log On Examination state
-      debugPrint('=== ON EXAMINATION DEBUG ===');
-      debugPrint('selectedExaminations: ${onExaminationController.selectedExaminations}');
-      debugPrint('examinationValues: ${onExaminationController.examinationValues}');
-      for (var exam in onExaminationController.selectedExaminations) {
-        final examData = onExaminationController.onExaminationMap[exam];
-        debugPrint('Exam: $exam | Type: ${examData?['type']} | Value: ${onExaminationController.examinationValues[exam]?.value}');
-      }
-      
+
       addDiagnosisItems(
         onExaminationController.selectedExaminations,
         onExaminationController.onExaminationMap,
         onExaminationController.selectedSubExaminations,
-        diagSubcatIds,
-        diagChildcatIds,
-        subcategoryValues,
-        durations,
-        frequencies,
-        leftRights,
         onExaminationController: onExaminationController,
       );
       addDiagnosisItems(
         radiologicalFindingsController.selectedRadioLogicalFindings,
         radiologicalFindingsController.radiologicalFindingsMap,
         radiologicalFindingsController.selectedsubRadiologicalFindings,
-        diagSubcatIds,
-        diagChildcatIds,
-        subcategoryValues,
-        durations,
-        frequencies,
-        leftRights,
       );
       addDiagnosisItems(
         primaryMedicalHistoryController.selectedMedicalHistory,
         primaryMedicalHistoryController.medicalHistoryMap,
         primaryMedicalHistoryController.selectedsubMedicalHistory,
-        diagSubcatIds,
-        diagChildcatIds,
-        subcategoryValues,
-        durations,
-        frequencies,
-        leftRights,
       );
       addDiagnosisItems(
         drugHistoryController.selectedDrugHistory,
         drugHistoryController.drugHistoryMap,
         drugHistoryController.selectedsubDrugHistory,
-        diagSubcatIds,
-        diagChildcatIds,
-        subcategoryValues,
-        durations,
-        frequencies,
-        leftRights,
       );
       addDiagnosisItems(
         assistiveDeviceController.selectedAssestiveDevice,
         assistiveDeviceController.assestiveDeviceMap,
         assistiveDeviceController.selectedsubAssestiveDevice,
-        diagSubcatIds,
-        diagChildcatIds,
-        subcategoryValues,
-        durations,
-        frequencies,
-        leftRights,
       );
       addDiagnosisItems(
         referredToController.selectedReferredTo,
         referredToController.referredToMap,
         referredToController.selectedsubReferredTo,
-        diagSubcatIds,
-        diagChildcatIds,
-        subcategoryValues,
-        durations,
-        frequencies,
-        leftRights,
       );
       addDiagnosisItems(
         disabilityTypesController.selecteddisabilityTypes,
         disabilityTypesController.disabilityTypesMap,
         disabilityTypesController.selectedSubDisabilityTypes,
-        diagSubcatIds,
-        diagChildcatIds,
-        subcategoryValues,
-        durations,
-        frequencies,
-        leftRights,
       );
       addDiagnosisItems(
         diagnosisController.selectedDiagnosis,
         diagnosisController.diagnosisMap,
         diagnosisController.selectedsubDiagnosis,
-        diagSubcatIds,
-        diagChildcatIds,
-        subcategoryValues,
-        durations,
-        frequencies,
-        leftRights,
       );
 
 
@@ -418,14 +237,11 @@ class MainDiagnosisController extends ChangeNotifier {
         final subcatId = optimizedAdviceController.testSubcategoryMapping[testName];
         final childcatId = optimizedAdviceController.testChildcategoryMapping[testName];
         if (subcatId != null) {
-          diagSubcatIds.add(subcatId.toString());
-          subcategoryValues.add('');
-          durations.add('');
-          frequencies.add('');
-          leftRights.add(leftRight ?? '');
-        }
-        if (childcatId != null) {
-          diagChildcatIds.add(childcatId.toString());
+          appendDiagnosisEntry(
+            subcategoryId: subcatId,
+            childcategoryId: childcatId,
+            leftRight: leftRight ?? '',
+          );
         }
       }
 
@@ -436,15 +252,15 @@ class MainDiagnosisController extends ChangeNotifier {
         final subcatId = option['subcategory_id'];
         final childcatId = option['id'];
         if (subcatId != null) {
-          diagSubcatIds.add(subcatId.toString());
           final details = previousTherapyController.therapyDetails[childcatId.toString()] ?? {};
-          subcategoryValues.add('');
-          durations.add(details['duration']?.toString() ?? '');
-          frequencies.add(details['frequency']?.toString() ?? '');
-          leftRights.add('');
-        }
-        if (childcatId != null) {
-          diagChildcatIds.add(childcatId.toString());
+          appendDiagnosisEntry(
+            subcategoryId: subcatId,
+            childcategoryId: childcatId,
+            subcategoryValue: '',
+            duration: details['duration']?.toString() ?? '',
+            frequency: details['frequency']?.toString() ?? '',
+            leftRight: '',
+          );
         }
       }
       for (final option in previousTherapyController.selectedElectrotherapy) {
@@ -492,12 +308,149 @@ class MainDiagnosisController extends ChangeNotifier {
           'name': previousTherapyController.others.value,
         });
       }
+
+      final validChildIds = <String>{};
+
+      void addValidChildIdsFromDataMap(Map<String, Map<String, dynamic>> dataMap) {
+        for (final subcategory in dataMap.values) {
+          final children =
+              (subcategory['children'] as List?)?.cast<Map<String, dynamic>>() ??
+                  const <Map<String, dynamic>>[];
+          for (final child in children) {
+            final childId = child['id'];
+            if (childId != null) {
+              validChildIds.add(childId.toString());
+            }
+          }
+        }
+      }
+
+      addValidChildIdsFromDataMap(chiefComplaintMap);
+      addValidChildIdsFromDataMap(onExaminationController.onExaminationMap);
+      addValidChildIdsFromDataMap(radiologicalFindingsController.radiologicalFindingsMap);
+      addValidChildIdsFromDataMap(primaryMedicalHistoryController.medicalHistoryMap);
+      addValidChildIdsFromDataMap(drugHistoryController.drugHistoryMap);
+      addValidChildIdsFromDataMap(assistiveDeviceController.assestiveDeviceMap);
+      addValidChildIdsFromDataMap(referredToController.referredToMap);
+      addValidChildIdsFromDataMap(disabilityTypesController.disabilityTypesMap);
+      addValidChildIdsFromDataMap(diagnosisController.diagnosisMap);
+
+      validChildIds.addAll(
+        optimizedAdviceController.testChildcategoryMapping.values
+            .where((id) => id > 0)
+            .map((id) => id.toString()),
+      );
+      validChildIds.addAll(
+        previousTherapyController.selectedElectrotherapy
+            .map((item) => item['id'])
+            .where((id) => id != null)
+            .map((id) => id.toString()),
+      );
+      validChildIds.addAll(
+        previousTherapyController.selectedManualTherapy
+            .map((item) => item['id'])
+            .where((id) => id != null)
+            .map((id) => id.toString()),
+      );
+      validChildIds.addAll(
+        previousTherapyController.selectedAdditionalTherapies
+            .map((item) => item['id'])
+            .where((id) => id != null)
+            .map((id) => id.toString()),
+      );
+
+      final skippedInvalidChildIds = <String>[];
+
+      List<Map<String, dynamic>> _therapySelectionSnapshot(
+        List<Map<String, dynamic>> selections,
+      ) {
+        return selections.map((item) {
+          final childId = item['id']?.toString() ?? '';
+          final details = previousTherapyController.therapyDetails[childId] ?? {};
+          return {
+            'subcategory_id': item['subcategory_id'],
+            'child_id': item['id'],
+            'name': item['name'],
+            'duration': details['duration']?.toString() ?? '',
+            'frequency': details['frequency']?.toString() ?? '',
+            'isRegular': details['isRegular'],
+          };
+        }).toList();
+      }
+
+      final selectedSnapshot = <String, dynamic>{
+        'chiefComplaint': {
+          'selected': cheifComplainController.selectedComplaints.toList(),
+          'selectedChildren': cheifComplainController.selectedSubComplaints,
+          'custom': cheifComplainController.customNewComplaints,
+        },
+        'onExamination': {
+          'selected': onExaminationController.selectedExaminations.toList(),
+          'selectedChildren': onExaminationController.selectedSubExaminations,
+          'values': onExaminationController.examinationValues.map(
+            (key, value) => MapEntry(key, value.value),
+          ),
+          'custom': onExaminationController.customNewExaminations,
+        },
+        'radiologicalFindings': {
+          'selected': radiologicalFindingsController.selectedRadioLogicalFindings.toList(),
+          'selectedChildren':
+              radiologicalFindingsController.selectedsubRadiologicalFindings,
+          'custom': radiologicalFindingsController.customNewRadiologicalFindings,
+        },
+        'primaryMedicalHistory': {
+          'selected': primaryMedicalHistoryController.selectedMedicalHistory.toList(),
+          'selectedChildren': primaryMedicalHistoryController.selectedsubMedicalHistory,
+          'custom': primaryMedicalHistoryController.customNewMedicalHistory,
+        },
+        'drugHistory': {
+          'selected': drugHistoryController.selectedDrugHistory.toList(),
+          'selectedChildren': drugHistoryController.selectedsubDrugHistory,
+          'custom': drugHistoryController.customNewDrugHistory,
+        },
+        'assistiveDevice': {
+          'selected': assistiveDeviceController.selectedAssestiveDevice.toList(),
+          'selectedChildren': assistiveDeviceController.selectedsubAssestiveDevice,
+          'custom': assistiveDeviceController.customNewAssestiveDevice,
+        },
+        'referredTo': {
+          'selected': referredToController.selectedReferredTo.toList(),
+          'selectedChildren': referredToController.selectedsubReferredTo,
+          'custom': referredToController.customNewReferredTo,
+        },
+        'disabilityTypes': {
+          'selected': disabilityTypesController.selecteddisabilityTypes.toList(),
+          'selectedChildren': disabilityTypesController.selectedSubDisabilityTypes,
+          'custom': disabilityTypesController.customNewDisabilityTypes,
+        },
+        'diagnosis': {
+          'selected': diagnosisController.selectedDiagnosis.toList(),
+          'selectedChildren': diagnosisController.selectedsubDiagnosis,
+          'custom': diagnosisController.customNewDiagnosis,
+        },
+        'advice': {
+          'selectedTests': optimizedAdviceController.selectedTests.toList(),
+        },
+        'previousTherapy': {
+          'electrotherapy': _therapySelectionSnapshot(
+            previousTherapyController.selectedElectrotherapy,
+          ),
+          'manualTherapy': _therapySelectionSnapshot(
+            previousTherapyController.selectedManualTherapy,
+          ),
+          'additionalTherapies': _therapySelectionSnapshot(
+            previousTherapyController.selectedAdditionalTherapies,
+          ),
+          'others': previousTherapyController.others.value,
+        },
+        'skippedInvalidChildIds': skippedInvalidChildIds,
+      };
+
+      debugPrint('DIAGNOSIS SELECTED: ${jsonEncode(selectedSnapshot)}');
       
       // Guard: prevent API call with COMPLETELY empty diagnosis data
       // Now we check if there's ANY data: DB entries OR custom entries
-      if (diagSubcatIds.isEmpty &&
-          diagChildcatIds.isEmpty &&
-          subcategoryValues.isEmpty &&
+      if (diagnosisEntries.isEmpty &&
           newSubCats.isEmpty) {
         Get.snackbar(
           'Error',
@@ -528,26 +481,49 @@ class MainDiagnosisController extends ChangeNotifier {
       request.fields['add_type'] = addType;
       if (date != null) request.fields['date'] = date;
 
-      for (int i = 0; i < diagSubcatIds.length; i++) {
-        request.fields['diagSubcatIds[$i]'] = diagSubcatIds[i];
-      }
-      for (int i = 0; i < diagChildcatIds.length; i++) {
-        request.fields['diagChildcatIds[$i]'] = diagChildcatIds[i];
-      }
-      for (int i = 0; i < subcategoryValues.length; i++) {
-        request.fields['subcategory_value[$i]'] = subcategoryValues[i];
-        if (subcategoryValues[i].isNotEmpty) {
-          debugPrint('DEBUG: subcategory_value[$i] = "${subcategoryValues[i]}"');
+      int childIndex = 0;
+      int valueIndex = 0;
+      int durationIndex = 0;
+      int frequencyIndex = 0;
+      int leftRightIndex = 0;
+
+      for (int i = 0; i < diagnosisEntries.length; i++) {
+        final entry = diagnosisEntries[i];
+        request.fields['diagSubcatIds[$i]'] = entry['diagSubcatId'] ?? '';
+
+        final childId = entry['diagChildcatId'] ?? '';
+        if (childId.isNotEmpty) {
+          if (validChildIds.contains(childId)) {
+            request.fields['diagChildcatIds[$childIndex]'] = childId;
+            childIndex++;
+          } else {
+            skippedInvalidChildIds.add(childId);
+          }
         }
-      }
-      for (int i = 0; i < durations.length; i++) {
-        request.fields['duration[$i]'] = durations[i];
-      }
-      for (int i = 0; i < frequencies.length; i++) {
-        request.fields['frequency[$i]'] = frequencies[i];
-      }
-      for (int i = 0; i < leftRights.length; i++) {
-        request.fields['left_right[$i]'] = leftRights[i];
+
+        final subcategoryValue = entry['subcategory_value'] ?? '';
+        if (subcategoryValue.isNotEmpty) {
+          request.fields['subcategory_value[$valueIndex]'] = subcategoryValue;
+          valueIndex++;
+        }
+
+        final duration = entry['duration'] ?? '';
+        if (duration.isNotEmpty) {
+          request.fields['duration[$durationIndex]'] = duration;
+          durationIndex++;
+        }
+
+        final frequency = entry['frequency'] ?? '';
+        if (frequency.isNotEmpty) {
+          request.fields['frequency[$frequencyIndex]'] = frequency;
+          frequencyIndex++;
+        }
+
+        final leftRight = entry['left_right'] ?? '';
+        if (leftRight.isNotEmpty) {
+          request.fields['left_right[$leftRightIndex]'] = leftRight;
+          leftRightIndex++;
+        }
       }
       // New custom subcategories – sent as newSubCats[i][diagnosis_category_id] & newSubCats[i][name]
       for (int i = 0; i < newSubCats.length; i++) {
@@ -556,18 +532,12 @@ class MainDiagnosisController extends ChangeNotifier {
         request.fields['newSubCats[$i][name]'] = newSubCats[i]['name'];
       }
 
-      debugPrint('=== DIAGNOSIS API REQUEST [${DateTime.now().toString()}] ===');
-      debugPrint('URL: $url');
-      debugPrint('Total entries: ${diagSubcatIds.length} DB + ${newSubCats.length} custom');
-      debugPrint('Fields: ${request.fields}');
+      debugPrint('DIAGNOSIS REQUEST: ${jsonEncode(request.fields)}');
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
 
-      debugPrint('=== DIAGNOSIS API RESPONSE [${DateTime.now().toString()}] ===');
-      debugPrint('Status Code: ${response.statusCode}');
-      debugPrint('Response Headers: ${response.headers}');
-      debugPrint('Response Body: ${response.body}');
+      debugPrint('DIAGNOSIS RESPONSE [${response.statusCode}]: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         Get.snackbar(
@@ -577,14 +547,8 @@ class MainDiagnosisController extends ChangeNotifier {
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
-        print("Diagnosis:${response.body}");
-        print('Diagnosis data stored successfully.');
-        debugPrint('<<< DIAGNOSIS STORE SUCCESS [Status: ${response.statusCode}]');
         return response.statusCode;
       } else {
-        final errorMsg = 'Failed to store diagnosis data (Status: ${response.statusCode})\nEndpoint: ${Api.updateDiagnosis}\nResponse: ${response.body}';
-        print(errorMsg);
-        debugPrint('<<< DIAGNOSIS STORE FAILED [Status: ${response.statusCode}]');
         Get.snackbar(
           'Error',
           'Failed to store diagnosis. Status: ${response.statusCode}',
@@ -595,8 +559,7 @@ class MainDiagnosisController extends ChangeNotifier {
         return response.statusCode;
       }
     } catch (e) {
-      debugPrint('<<< DIAGNOSIS STORE EXCEPTION: $e');
-      debugPrint('Error storing diagnosis data: $e');
+      debugPrint('DIAGNOSIS RESPONSE [EXCEPTION]: $e');
       return 500;
     }
   
@@ -633,18 +596,13 @@ class MainDiagnosisController extends ChangeNotifier {
     isLoading = true;
     error = null;
     notifyListeners();
-    final url = Uri.parse(
-      '${Api.baseUrl}/api/diagnosis/categories/with/all',
-    );
+    final url = Uri.parse(Api.getDiagnosis);
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final List<dynamic> categoriesJson = data['diagnosis_categories'] ?? [];
+        final data = json.decode(response.body) as Map<String, dynamic>;
         diagnosisCategories =
-            categoriesJson
-                .map((e) => PresDiagnosisCategory.fromJson(e))
-                .toList();
+            DiagnosisCategoryResponse.fromJson(data).diagnosisCategories ?? [];
       } else {
         error = 'Failed to load data: ${response.statusCode}';
       }

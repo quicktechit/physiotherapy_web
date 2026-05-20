@@ -1,7 +1,9 @@
 
 import 'package:e_prescription/const/quick_tech_app_colors.dart';
+import 'package:e_prescription/controllers/theme_controller/quick_tech_theme_controller.dart';
+import 'package:e_prescription/locator.dart';
 
-import 'package:e_prescription/screens/add_prescription/diagnosis/widget/on_examination_widget.dart';
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -18,6 +20,7 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeController= locator.get<QuickTechThemeController>();
     final isDesktop = Responsive.isDesktop(context);
     return Row(
       children: [
@@ -188,7 +191,7 @@ class CardText extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Open',
+              'Click here',
               style: TextStyle(
                 color: data.textColor,
                 fontSize: isDesktop ? 13.sp : 11.sp,

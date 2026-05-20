@@ -166,7 +166,7 @@ class _QuickTechBlogBannerState extends State<QuickTechBlogBanner> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Read Blogs',
+            'Read Now',
             style: TextStyle(
               color: Colors.white,
               fontSize: isDesktop ? 14.sp : 12.sp,

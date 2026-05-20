@@ -407,7 +407,7 @@ class _QuickTechPackagesState extends State<QuickTechPackages> {
       barrierDismissible: false,
       StatefulBuilder(
         builder: (context, setDialogState) {
-          final isMobile = Responsive.isMobile(context);
+         
           final isTablet = Responsive.isTablet(context);
           final isDesktop = Responsive.isDesktop(context);
           

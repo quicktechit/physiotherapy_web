@@ -39,6 +39,7 @@ class QuicktechmainPrescriptionControllr extends GetxController {
     final hasExtraTherapies = electrotherapyController.getFilledExtraElectrotherapies().isNotEmpty;
     if (hasElectroSelection || hasExtraTherapies) {
       try {
+        final selectedElectroOptions = <Map<String, dynamic>>[];
         List<int> electroTherapyIds = [];
         List<String> therapyTime = [];
         List<String> totalTreatmentTime = [];
@@ -61,17 +62,15 @@ class QuicktechmainPrescriptionControllr extends GetxController {
         // Loop through selected electrotherapies
         for (var category
             in electrotherapyController.electrotherapyCategories) {
-          print('DEBUG: Processing category: ${category.name}');
           for (var option in category.options) {
             final params =
                 electrotherapyController.selectedParameters[option.name] ?? {};
-            print('DEBUG: Processing option: ${option.name}');
-            print(
-              'DEBUG: Full selectedParameters map: ${electrotherapyController.selectedParameters}',
-            );
             if (params.isNotEmpty) {
-              print('DEBUG: Option "${option.name}" has params: $params');
-              print('DEBUG: params.keys = ${params.keys.toList()}');
+              selectedElectroOptions.add({
+                'id': option.id,
+                'name': option.name,
+                'params': Map<String, dynamic>.from(params),
+              });
 
               electroTherapyIds.add(option.id);
 
@@ -86,9 +85,6 @@ class QuicktechmainPrescriptionControllr extends GetxController {
 
               // ✅ FIXED AREA OPTIONS - Always use stored Area IDs
               final areaIds = params[ElectroParamKeys.kAreaIds];
-              print(
-                'DEBUG: areaIds value = $areaIds, type = ${areaIds?.runtimeType}',
-              );
               if (areaIds is List && areaIds.isNotEmpty) {
                 // Filter out nulls and ensure all are integers
                 final validIds = (areaIds)
@@ -96,21 +92,17 @@ class QuicktechmainPrescriptionControllr extends GetxController {
                     .toList();
                 if (validIds.isNotEmpty) {
                   areaMulti.add(validIds);
-                  print('DEBUG: Added to areaMulti (list of IDs): $validIds');
                   areaSingleList.add(null);
                 } else {
                   areaMulti.add(null);
                   areaSingleList.add(null);
-                  print('DEBUG: No valid area IDs found');
                 }
               } else if (areaIds is int) {
                 areaSingleList.add(areaIds.toString());
                 areaMulti.add([areaIds]);
-                print('DEBUG: Added single area ID to areaMulti: [$areaIds]');
               } else {
                 areaMulti.add([]);
                 areaSingleList.add(null);
-                print('DEBUG: No area IDs in params (areaIds was: $areaIds)');
               }
 
               // Optional values (all as arrays)
@@ -140,32 +132,7 @@ class QuicktechmainPrescriptionControllr extends GetxController {
           }
         }
 
-        final electroBody = {
-          "patient_id": patientInfoController.patientId.value,
-          "electroTherapyIds": electroTherapyIds,
-          "therapy_time": therapyTime,
-          "total_treatment_time": totalTreatmentTime,
-          "visiting_frequency": visitingFrequency,
-          "frequency": frequency,
-          "area_multi": areaMultiFlat.isNotEmpty ? areaMultiFlat : null,
-          "area_single": firstNonNull(areaSingleList),
-          "pulse_duration": pulseDuration,
-          "traction_weight": tractionWeight,
-          "hold_time": holdTime,
-          "rest_time": restTime,
-          "pulse_ratio": firstNonNull(pulseRatioList),
-          "intensity": firstNonNull(intensityList),
-          "pulse_width": pulseWidthList,
-          "pulse_rate": pulseRateList,
-          "average_watt": averageWattList,
-          "type_of_irr": firstNonNull(typeOfIrrList),
-          "distance": firstNonNull(distanceList),
-        };
-
-        print('DEBUG: electroBody = ${jsonEncode(electroBody)}');
-
         if (electroTherapyIds.isEmpty && !hasExtraTherapies) {
-          print('Skipped Electrotherapy API call: no filled parameters and no extra therapies.');
         } else {
           // ✅ FIX: Manually build form-encoded body to support MULTIPLE values per key
           // (http.MultipartRequest.fields is a Map and can't have duplicate keys)
@@ -234,8 +201,15 @@ class QuicktechmainPrescriptionControllr extends GetxController {
             bodyParts.add('newElectroTherapy[]=${Uri.encodeQueryComponent(therapy)}');
           }
 
+          final electroSelectedSnapshot = {
+            'patient_id': patientInfoController.patientId.value,
+            'selected': selectedElectroOptions,
+            'newElectroTherapy': extraTherapies,
+          };
+          debugPrint('RX ELECTRO SELECTED: ${jsonEncode(electroSelectedSnapshot)}');
+
           final body = bodyParts.join('&');
-          print('DEBUG: Electro request body = $body');
+          debugPrint('RX ELECTRO REQUEST: $body');
 
           try {
             final electroResponse = await http.post(
@@ -247,14 +221,11 @@ class QuicktechmainPrescriptionControllr extends GetxController {
               body: body,
             );
 
-            print('DEBUG: Electro Response status: ${electroResponse.statusCode}');
-            print('DEBUG: Electro Response body: ${electroResponse.body}');
+            debugPrint('RX ELECTRO RESPONSE [${electroResponse.statusCode}]: ${electroResponse.body}');
 
             if (electroResponse.statusCode == 200 || electroResponse.statusCode == 201) {
               storedTherapies.add("Electrotherapy");
-              print('Electrotherapy stored: ${electroResponse.body}');
             } else {
-              print('Electrotherapy storage failed: ${electroResponse.body}');
               errorMessages.add("Electrotherapy: ${electroResponse.body}");
             }
           } catch (e) {
@@ -352,53 +323,7 @@ class QuicktechmainPrescriptionControllr extends GetxController {
       final patientId = patientInfoController.patientId.value;
       if (patientId == '0') {
         errorMessages.add("Invalid patient ID. Cannot submit other therapy without patient.");
-        print('ERROR: Invalid patient_id = $patientId');
       } else {
-        /// ✅ NEW: Build payload with indexed custom therapies
-        Map<String, dynamic> payload = {
-          "patient_id": patientId,
-        };
-
-        /// Only add these if they have data (avoid sending empty arrays)
-        if (manualSpeechIds.isNotEmpty) {
-          payload["manualSpeechIds[]"] = manualSpeechIds;
-        }
-        if (therapySubcategoryIds.isNotEmpty) {
-          payload["therapySubcategoryIds[]"] = therapySubcategoryIds;
-        }
-        
-        /// Only add notes if there are corresponding therapies
-        if (notes.isNotEmpty) {
-          /// Use notes list as-is (can contain nulls) to match therapySubcategoryIds length
-          payload["note[]"] = notes;
-        }
-
-        /// ✅ NEW: Add custom therapies with indexed array format
-        int customTherapyIndex = 0;
-
-        // Add Manual custom therapies
-        for (var therapy in manualCustom) {
-          payload['otherTherapy[$customTherapyIndex][new_manual_speech_name]'] = therapy;
-          payload['otherTherapy[$customTherapyIndex][new_manual_speech_type]'] = 'Manual Therapy';
-          customTherapyIndex++;
-        }
-
-        // Add Miscellaneous custom therapies
-        for (var therapy in miscCustom) {
-          payload['otherTherapy[$customTherapyIndex][new_manual_speech_name]'] = therapy;
-          payload['otherTherapy[$customTherapyIndex][new_manual_speech_type]'] = 'Miscellaneous Therapy';
-          customTherapyIndex++;
-        }
-
-        // Add Speech Language custom therapies
-        for (var therapy in speechCustom) {
-          payload['otherTherapy[$customTherapyIndex][new_manual_speech_name]'] = therapy;
-          payload['otherTherapy[$customTherapyIndex][new_manual_speech_type]'] = 'Speech Language Therapy';
-          customTherapyIndex++;
-        }
-
-        print('DEBUG: Other therapy payload = $payload');
-
         try {
           /// ✅ FIX: Manually build form-encoded body to support MULTIPLE values per key
           final bodyParts = <String>[];
@@ -434,12 +359,34 @@ class QuicktechmainPrescriptionControllr extends GetxController {
           }
           for (var therapy in speechCustom) {
             bodyParts.add('otherTherapy[$customTherapyIndex][new_manual_speech_name]=${Uri.encodeQueryComponent(therapy)}');
-            bodyParts.add('otherTherapy[$customTherapyIndex][new_manual_speech_type]=${Uri.encodeQueryComponent('Speech Language Therapy')}');
+            bodyParts.add('otherTherapy[$customTherapyIndex][new_manual_speech_type]=${Uri.encodeQueryComponent('Speech and Language Therapy')}');
             customTherapyIndex++;
           }
 
+          final otherSelectedSnapshot = {
+            'patient_id': patientId,
+            'manualSpeechIds': manualSpeechIds,
+            'therapySubcategoryIds': therapySubcategoryIds,
+            'note': notes,
+            'otherTherapy': [
+              ...manualCustom.map((item) => {
+                    'new_manual_speech_name': item,
+                    'new_manual_speech_type': 'Manual Therapy',
+                  }),
+              ...miscCustom.map((item) => {
+                    'new_manual_speech_name': item,
+                    'new_manual_speech_type': 'Miscellaneous Therapy',
+                  }),
+              ...speechCustom.map((item) => {
+                    'new_manual_speech_name': item,
+                    'new_manual_speech_type': 'Speech and Language Therapy',
+                  }),
+            ],
+          };
+          debugPrint('RX OTHER SELECTED: ${jsonEncode(otherSelectedSnapshot)}');
+
           final body = bodyParts.join('&');
-          print('DEBUG: Other therapy request body = $body');
+          debugPrint('RX OTHER REQUEST: $body');
 
           final response = await http.post(
             Uri.parse(Api.updateotherallPresc),
@@ -450,22 +397,18 @@ class QuicktechmainPrescriptionControllr extends GetxController {
             body: body,
           );
 
-          print('DEBUG: Response status: ${response.statusCode}');
-          print('DEBUG: Response body: ${response.body}');
+          debugPrint('RX OTHER RESPONSE [${response.statusCode}]: ${response.body}');
 
           if (response.statusCode == 200 || response.statusCode == 201) {
             /// ✅ FIX: Check BOTH standard therapies AND custom therapies
             if (manualTherapyController.selectedTherapies.isNotEmpty || manualCustom.isNotEmpty) {
               storedTherapies.add("Manual Therapy");
-              manualTherapyController.printSelectedTherapiesData();
             }
             if (miscellaneousTherapyController.selectedTherapies.isNotEmpty || miscCustom.isNotEmpty) {
               storedTherapies.add("Miscellaneous Therapy");
-              miscellaneousTherapyController.printSelectedTherapiesData();
             }
             if (speechLanguageTherapyController.selectedTherapies.isNotEmpty || speechCustom.isNotEmpty) {
               storedTherapies.add("Speech Language Therapy");
-              speechLanguageTherapyController.printSelectedTherapiesData();
             }
           } else {
             errorMessages.add(
@@ -523,7 +466,6 @@ class QuicktechmainPrescriptionControllr extends GetxController {
           });
         });
       } catch (e) {
-        print('Warning clearing text controllers: $e');
       }
 
       // Clear manual therapy selections - use proper method
@@ -535,9 +477,7 @@ class QuicktechmainPrescriptionControllr extends GetxController {
       // Clear speech language therapy selections
       speechLanguageTherapyController.clearAllSelections();
 
-      print('All RX data cleared successfully.');
     } catch (e) {
-      print('Error clearing RX data: $e');
     }
   }
 }

@@ -323,8 +323,8 @@ class QuickTechLoginController extends GetxController {
     await QuickTechAuthStorageService.clear();
     QuickTechTemplateStorageService.clearSelectedTemplateId();
     // Remove ALL controllers properly
-    Get.deleteAll(force: true);
-
+    //Get.deleteAll(force: true);
+await QuickTechAuthStorageService.clear();
     // Navigate fresh
     Get.offAllNamed('/login');
 

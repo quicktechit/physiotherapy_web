@@ -13,6 +13,7 @@ import 'package:e_prescription/utils/api.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:e_prescription/locator.dart';
+import 'package:e_prescription/models/prescription/diagnosis_category_response.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -168,34 +169,33 @@ class OptimizedAdviceController extends GetxController {
   Future<void> fetchAdviceOptions() async {
     isLoadingAdviceOptions.value = true;
     try {
-      final response = await http.get(Uri.parse('${Api.getDiagnosis}'));
+      final response = await http.get(Uri.parse(Api.getDiagnosis));
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final categories = data['diagnosis_categories'] as List<dynamic>;
-        final adviceCategory = categories.firstWhere(
-          (cat) => cat['name'] == 'Advice',
-          orElse: () => null,
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        final parsed = DiagnosisCategoryResponse.fromJson(data);
+        final categories = parsed.diagnosisCategories ?? [];
+        final adviceCategory = categories.firstWhereOrNull(
+          (cat) => cat.name == 'Advice',
         );
         if (adviceCategory != null) {
-          final subcategories =
-              adviceCategory['diagnosis_subcategories'] as List<dynamic>;
+          final subcategories = adviceCategory.diagnosisSubcategories ?? [];
           var tempHasSide = <String>[];
           for (var sub in subcategories) {
-            final subName = sub['name'] as String;
-            final childList = sub['diagnosis_childcategories'] as List<dynamic>;
-            final List<String> childNames =
-                childList.map((c) => c['name'] as String).toList();
+            final subName = sub.name ?? '';
+            if (subName.isEmpty) continue;
+            final childList = sub.diagnosisChildcategories ?? [];
+            final List<String> childNames = childList.map((c) => c.name ?? '').where((n) => n.isNotEmpty).toList();
             // Find which child options have type 'With Left/Right'
             for (var c in childList) {
-    final childName = c['name'] as String;
-    final childId = c['id'] as int;
-    testChildcategoryMapping[childName] = childId;
-    testSubcategoryMapping[childName] = sub['id']; // subcategory id
-    if (c['type'] == 'With Left/Right') {
-      tempHasSide.add(childName);
-    }
-  }
-
+              final childName = c.name ?? '';
+              if (childName.isEmpty) continue;
+              final childId = c.id ?? 0;
+              testChildcategoryMapping[childName] = childId;
+              testSubcategoryMapping[childName] = sub.id ?? 0;
+              if (c.type == 'With Left/Right') {
+                tempHasSide.add(childName);
+              }
+            }
             if (subName == 'X ray of') {
               xrayOptions.value = childNames;
             } else if (subName == 'MRI of') {

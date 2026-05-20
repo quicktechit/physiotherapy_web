@@ -8,7 +8,13 @@ class QuickTechAuthStorageService {
   static const _userKey = 'user';
 
   static Future<void> saveToken(String token) async {
-    await _storage.write(_tokenKey, token);
+    try {
+      await _storage.write(_tokenKey, token);
+      print('[STORAGE] ✅ Token saved: ${token.substring(0, 20)}...');
+      print('[STORAGE] Verifying write... reading back: ${_storage.read(_tokenKey)?.toString().substring(0, 20) ?? 'NULL'}...');
+    } catch (e) {
+      print('[STORAGE] ❌ Error saving token: $e');
+    }
   }
 
   static String? getToken() {
@@ -21,18 +27,37 @@ class QuickTechAuthStorageService {
   }
 
   static Future<void> saveUser(QuickTechUserModel user) async {
-    await _storage.write(_userKey, user.toRawJson());
+    try {
+      await _storage.write(_userKey, user.toRawJson());
+      print('[STORAGE] ✅ User saved: ${user.firstName}');
+    } catch (e) {
+      print('[STORAGE] ❌ Error saving user: $e');
+    }
   }
 
   static QuickTechUserModel? getUser() {
-    final userJson = _storage.read(_userKey);
-    if (userJson == null) return null;
-    return QuickTechUserModel.fromRawJson(userJson);
+    try {
+      final userJson = _storage.read(_userKey);
+      if (userJson == null) {
+        print('[STORAGE] User not found in storage');
+        return null;
+      }
+      print('[STORAGE] User found: $userJson');
+      return QuickTechUserModel.fromRawJson(userJson);
+    } catch (e) {
+      print('[STORAGE] ❌ Error reading user: $e');
+      return null;
+    }
   }
 
   static Future<void> clear() async {
-    await _storage.remove(_tokenKey);
-    await _storage.remove(_userKey);
+    try {
+      await _storage.remove(_tokenKey);
+      await _storage.remove(_userKey);
+      print('[STORAGE] ✅ Storage cleared');
+    } catch (e) {
+      print('[STORAGE] ❌ Error clearing storage: $e');
+    }
   }
 
   /// Handle 401 Unauthorized response: clear storage, logout user, redirect to login

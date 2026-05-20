@@ -1,7 +1,7 @@
 import 'package:e_prescription/const/quick_tech_app_colors.dart';
 import 'package:e_prescription/const/quick_tech_styles.dart';
 import 'package:e_prescription/controllers/assessment_controller/quick_tech_assessment_controller.dart';
-import 'package:e_prescription/controllers/theme_controller/quick_tech_theme_controller.dart';
+
 import 'package:flutter/material.dart';
 import 'package:e_prescription/locator.dart';
 
@@ -64,7 +64,7 @@ class QuickTechCustomDropDown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themecontroller = locator.get<QuickTechThemeController>();
+   
     final assessmentController = locator.get<QuickTechAssessmentController>();
 
     final effectiveLabelStyle =

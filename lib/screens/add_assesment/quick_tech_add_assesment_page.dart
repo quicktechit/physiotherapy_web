@@ -34,7 +34,7 @@ import 'package:e_prescription/widgets/quick_tech_custom_button.dart';
 import 'package:e_prescription/widgets/quick_tech_custom_drawer.dart';
 import 'package:e_prescription/services/quick_tech_patient_draft_storage_service.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import 'package:get/get.dart';
 import 'package:e_prescription/locator.dart';
 
@@ -273,12 +273,12 @@ class _QuickTechAddAssesmentPageState extends State<QuickTechAddAssesmentPage> w
               style: myStyle(18, QuickTechAppColors.white, FontWeight.bold),
             ),
             actions: [
-              IconButton(
-                icon: Icon(FontAwesomeIcons.filePdf, color: QuickTechAppColors.white),
-                onPressed: () {
-                Get.toNamed('/assessmentPdf');
-                },
-              ),
+              // IconButton(
+              //   icon: Icon(FontAwesomeIcons.filePdf, color: QuickTechAppColors.white),
+              //   onPressed: () {
+              //   Get.toNamed('/assessmentPdf');
+              //   },
+              // ),
               IconButton(
                 icon: Icon(Icons.preview, color: QuickTechAppColors.white),
                 onPressed: () {

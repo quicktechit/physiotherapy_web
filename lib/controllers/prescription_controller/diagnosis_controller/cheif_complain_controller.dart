@@ -11,6 +11,7 @@ import 'package:e_prescription/controllers/prescription_controller/patient_info_
 
 
 import 'package:e_prescription/controllers/prescription_controller/diagnosis_controller/main_diagnosis_controller.dart';
+import 'package:e_prescription/models/prescription/diagnosis_category_response.dart';
 
 import 'package:e_prescription/controllers/prescription_controller/diagnosis_controller/optimized_advice_controller.dart';
 import 'package:e_prescription/controllers/prescription_controller/diagnosis_controller/previous_therapy_Controller.dart';
@@ -49,7 +50,7 @@ class CheifComplainController extends GetxController {
   var customNewComplaints = <Map<String, dynamic>>[].obs;
 
   // Diagnosis model data
-  var chiefComplaintCategory = Rxn<PresDiagnosisCategory>();
+  var chiefComplaintCategory = Rxn<DiagnosisCategories>();
   var isLoadingChiefComplaints = false.obs;
   var filteredChiefComplaints = <String>[].obs;
   int? chiefComplaintCategoryId;
@@ -59,7 +60,8 @@ class CheifComplainController extends GetxController {
     final query = searchText.trim().toLowerCase();
     final complaints =
         chiefComplaintCategory.value?.diagnosisSubcategories
-            .map((e) => e.name)
+            ?.map((e) => e.name ?? '')
+            .where((n) => n.isNotEmpty)
             .toList() ??
         [];
     if (query.isEmpty) {
@@ -93,13 +95,14 @@ class CheifComplainController extends GetxController {
             orElse: () => throw 'Chief Complaint category not found. Available: ${mainDiagnosisController.diagnosisCategories.map((c) => c.name).join(", ")}',
           );
       
-      print('[ChiefComplainController] Found Chief Complaint category with ${chiefCategory.diagnosisSubcategories.length} subcategories');
+      print('[ChiefComplainController] Found Chief Complaint category with ${chiefCategory.diagnosisSubcategories?.length ?? 0} subcategories');
       
       chiefComplaintCategoryId = chiefCategory.id;
       chiefComplaintCategory.value = chiefCategory;
       filteredChiefComplaints.value =
           chiefComplaintCategory.value?.diagnosisSubcategories
-              .map((e) => e.name)
+              ?.map((e) => e.name ?? '')
+              .where((n) => n.isNotEmpty)
               .toList() ??
           [];
       print('[ChiefComplainController] Loaded ${filteredChiefComplaints.length} complaints');
@@ -163,7 +166,7 @@ class CheifComplainController extends GetxController {
       // If it's not a known subcategory fetched from the API, track it as a new entry
       final knownNames =
           chiefComplaintCategory.value?.diagnosisSubcategories
-              .map((s) => s.name)
+              ?.map((s) => s.name)
               .toSet() ??
           {};
       if (!knownNames.contains(complaint) && chiefComplaintCategoryId != null) {
@@ -226,9 +229,13 @@ class CheifComplainController extends GetxController {
   // Helper to get sub-complaints for a chief complaint using model
   List<String> getSubComplaints(String chiefComplaintName) {
     final subcategory = chiefComplaintCategory.value?.diagnosisSubcategories
-        .firstWhereOrNull((sub) => sub.name == chiefComplaintName);
+        ?.firstWhereOrNull((sub) => sub.name == chiefComplaintName);
     if (subcategory != null) {
-      return subcategory.diagnosisChildcategories.map((c) => c.name).toList();
+      return subcategory.diagnosisChildcategories
+              ?.map((c) => c.name ?? '')
+              .where((n) => n.isNotEmpty)
+              .toList() ??
+          [];
     }
     return [];
   }

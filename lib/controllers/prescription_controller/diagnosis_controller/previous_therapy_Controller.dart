@@ -16,6 +16,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:e_prescription/locator.dart';
+import 'package:e_prescription/models/prescription/diagnosis_category_response.dart';
 final PatientInfoController patientInfoController = locator.get<PatientInfoController>();
 final cheifComplainController = locator.get<CheifComplainController>();
 final onExaminationController = locator.get<OnExaminationController>();
@@ -58,41 +59,38 @@ var additionalTherapyOptions = <Map<String, dynamic>>[].obs;
   Future<void> fetchTherapyOptions() async {
     isLoadingTherapyOptions.value = true;
     try {
-      final response = await http.get(Uri.parse('${Api.getDiagnosis}'));
+      final response = await http.get(Uri.parse(Api.getDiagnosis));
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final categories = data['diagnosis_categories'] as List<dynamic>;
-
-        final prevTherapyCategory = categories.firstWhere(
-          (cat) => cat['name'] == 'Previous Therapy History',
-          orElse: () => null,
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        final parsed = DiagnosisCategoryResponse.fromJson(data);
+        final categories = parsed.diagnosisCategories ?? [];
+        final prevTherapyCategory = categories.firstWhereOrNull(
+          (cat) => cat.name == 'Previous Therapy History',
         );
         if (prevTherapyCategory != null) {
-          previousTherapyCategoryId = prevTherapyCategory['id'] as int?;
-          final subcategories = prevTherapyCategory['diagnosis_subcategories'] as List<dynamic>;
-      for (var sub in subcategories) {
-  final subName = sub['name'] as String;
-  final subId = sub['id'] as int;
-  final childList = sub['diagnosis_childcategories'] as List<dynamic>;
-
-  final List<Map<String, dynamic>> childOptions = childList.map((c) {
-    return {
-      'id': c['id'],
-      'name': c['name'],
-      'subcategory_id': subId,
-      'category_id': prevTherapyCategory['id'],
-    };
-  }).toList();
-
-  if (subName == 'Electrotherapy') {
-    electrotherapyOptions.value = childOptions;
-  } else if (subName == 'Manual Therapy') {
-    manualTherapyOptions.value = childOptions;
-  } else if (subName == 'Other Therapies') {
-    additionalTherapyOptions.value = childOptions;
-  }
-}
-
+          previousTherapyCategoryId = prevTherapyCategory.id;
+          final subcategories = prevTherapyCategory.diagnosisSubcategories ?? [];
+          for (var sub in subcategories) {
+            final subName = sub.name ?? '';
+            if (subName.isEmpty) continue;
+            final subId = sub.id ?? 0;
+            final childList = sub.diagnosisChildcategories ?? [];
+            final List<Map<String, dynamic>> childOptions = childList.map((c) {
+              return {
+                'id': c.id,
+                'name': c.name,
+                'subcategory_id': subId,
+                'category_id': prevTherapyCategory.id,
+              };
+            }).toList();
+            if (subName == 'Electrotherapy') {
+              electrotherapyOptions.value = childOptions;
+            } else if (subName == 'Manual Therapy') {
+              manualTherapyOptions.value = childOptions;
+            } else if (subName == 'Other Therapies') {
+              additionalTherapyOptions.value = childOptions;
+            }
+          }
         }
       }
     } catch (e) {

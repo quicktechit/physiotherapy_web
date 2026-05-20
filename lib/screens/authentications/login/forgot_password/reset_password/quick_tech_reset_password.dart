@@ -1,7 +1,7 @@
 import 'package:e_prescription/const/const.dart';
-import 'package:e_prescription/responsive.dart';
+
 import 'package:e_prescription/widgets/quick_tech_custom_text_field.dart';
-import 'package:e_prescription/widgets/quick_tech_custom_button.dart';
+
 
 class QuickTechResetPassword extends StatefulWidget {
   final String mobile;

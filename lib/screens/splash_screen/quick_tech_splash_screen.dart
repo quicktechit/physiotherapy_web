@@ -25,12 +25,19 @@ class _QuickTechSplashScreenState extends State<QuickTechSplashScreen> {
   final QuickTechThemeController themeController =
       locator.get<QuickTechThemeController>();
 
+  bool _started = false;
+
   @override
   void initState() {
     super.initState();
-    // Call startNavigation in initState, not in build(), so it fires exactly
-    // once and does not reschedule on hot-restart / rebuild.
-    splashScreenController.startNavigation();
+
+    // ✅ SAFE: ensures only once after UI fully built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_started) {
+        _started = true;
+        splashScreenController.startNavigation();
+      }
+    });
   }
 
   @override

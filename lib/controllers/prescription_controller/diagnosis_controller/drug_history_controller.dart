@@ -17,6 +17,7 @@ import 'package:e_prescription/controllers/prescription_controller/diagnosis_con
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:e_prescription/locator.dart';
+import 'package:e_prescription/models/prescription/diagnosis_category_response.dart';
 final PatientInfoController patientInfoController = locator.get<PatientInfoController>();
 final cheifComplainController = locator.get<CheifComplainController>();
 final onExaminationController = locator.get<OnExaminationController>();
@@ -203,25 +204,26 @@ requestData['left_right'] = leftRights;
     if (drugHistoryMap.isNotEmpty) return; // Already loaded
     isLoadingDrugHistory.value = true;
     try {
-      final response = await http.get(Uri.parse('${Api.getDiagnosis}'));
+      final response = await http.get(Uri.parse(Api.getDiagnosis));
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final categories = data['diagnosis_categories'] as List<dynamic>;
-        final drugCategory = categories.firstWhere(
-          (cat) => cat['name'] == 'Drug History',
-          orElse: () => null,
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        final parsed = DiagnosisCategoryResponse.fromJson(data);
+        final categories = parsed.diagnosisCategories ?? [];
+        final drugCategory = categories.firstWhereOrNull(
+          (cat) => cat.name == 'Drug History',
         );
-          if (drugCategory != null) {
-          drugHistoryCategoryId.value = drugCategory['id'] as int? ?? 0;
-          final subcategories = drugCategory['diagnosis_subcategories'] as List<dynamic>;
+        if (drugCategory != null) {
+          drugHistoryCategoryId.value = drugCategory.id ?? 0;
+          final subcategories = drugCategory.diagnosisSubcategories ?? [];
           final Map<String, Map<String, dynamic>> tempMap = {};
           for (var sub in subcategories) {
-            final subName = sub['name'] as String;
-            final subId = sub['id'];
-            final childList = sub['diagnosis_childcategories'] as List<dynamic>;
+            final subName = sub.name ?? '';
+            if (subName.isEmpty) continue;
+            final subId = sub.id;
+            final childList = sub.diagnosisChildcategories ?? [];
             final List<Map<String, dynamic>> childData = childList.map((c) => {
-              'id': c['id'],
-              'name': c['name'],
+              'id': c.id,
+              'name': c.name,
             }).toList();
             tempMap[subName] = {
               'id': subId,

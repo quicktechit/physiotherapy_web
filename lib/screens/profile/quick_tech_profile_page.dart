@@ -1,18 +1,16 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:e_prescription/const/const.dart';
-import 'package:e_prescription/const/quick_tech_app_colors.dart';
-import 'package:e_prescription/const/quick_tech_styles.dart';
+
 import 'package:e_prescription/const/web_image.dart';
-import 'package:e_prescription/controllers/theme_controller/quick_tech_theme_controller.dart';
-import 'package:e_prescription/locator.dart';
+
 import 'package:e_prescription/screens/profile/profile_update/quick_tech_profile_update.dart';
 import 'package:e_prescription/utils/api.dart';
-import 'package:e_prescription/widgets/quick_tech_custom_button.dart';
+
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get.dart';
+
 import 'package:e_prescription/controllers/profile_controller/quick_tech_profile_controller.dart';
 
 class QuickTechProfilePage extends StatefulWidget {
