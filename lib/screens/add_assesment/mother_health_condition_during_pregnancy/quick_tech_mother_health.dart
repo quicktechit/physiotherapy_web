@@ -34,7 +34,7 @@ Widget MotherHealthCondition() {
         children: [
           assessmentHeader(
             mainColor: mainColor,
-            title: 'Mother Health During Pregnancy',
+            title: 'Mother Health..',
             icon: Icons.pregnant_woman,
           ),
           const SizedBox(height: 16),
