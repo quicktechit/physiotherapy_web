@@ -1,5 +1,5 @@
 import 'package:e_prescription/const/quick_tech_app_colors.dart';
-import 'package:e_prescription/const/quick_tech_styles.dart';
+
 import 'package:e_prescription/controllers/theme_controller/quick_tech_theme_controller.dart';
 import 'package:e_prescription/models/assessment/patient_info.dart';
 import 'package:e_prescription/services/auth_services/quick_tech_auth_storage_service.dart';
@@ -27,62 +27,67 @@ class QuickTechPatientInfoController extends GetxController {
 
   // API endpoint
   final String apiUrl = '${Api.updateAssessmentPatientInfo}';
+Future<int> postPatientInfo() async {
+  final token = await getBearerToken();
+  final patient = getPatientInfo();
 
-  // Use this api to Post Patient Info
-  Future<int> postPatientInfo() async {
-    final token = await getBearerToken();
-    final patient = getPatientInfo();
-    final Map<String, dynamic> data = {
-      "name": patient.patientName,
-      "father_name": patient.fatherName,
-      "mother_name": patient.motherName,
-      "spouse_name": patient.spouseName,
-      "age": patient.age.toString(),
-      "gender": patient.sex,
-      "occupation": patient.occupation,
-      "marital_status": patient.maritalStatus,
-      "blood_group": patient.bloodGroup,
-      "guardian_name": patient.guardianName,
-      "voter_id": patient.voterID,
-      "date_of_birth": birthDateController.text,
-      "birth_registration": patient.birthRegistrationNo,
-      "disability_id": patient.disabilityID,
-      "patient_education": patient.educationOfPatient,
-      "guardian_education": patient.educationOfGuardian,
-      "phone": patient.phone,
-    };
-    try {
-      final response = await retryRequest(() => http.post(
-            Uri.parse(apiUrl),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $token',
-            },
-            body: jsonEncode(data),
-          ),
-          maxAttempts: 5,
-          initialDelay: const Duration(seconds: 2));
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        print("Patient Info Uploaded Successfully:");
-        print(jsonEncode(responseData["patient"]));
+  final Map<String, String> fields = {
+    "name": patient.patientName,
+    "father_name": patient.fatherName,
+    "mother_name": patient.motherName,
+    "spouse_name": patient.spouseName,
+    "age": patient.age.toString(),
+    "gender": patient.sex,
+    "occupation": patient.occupation,
+    "marital_status": patient.maritalStatus,
+    "blood_group": patient.bloodGroup,
+    "guardian_name": patient.guardianName,
+    "voter_id": patient.voterID,
+    "date_of_birth": birthDateController.text,
+    "birth_registration": patient.birthRegistrationNo,
+    "disability_id": patient.disabilityID,
+    "patient_education": patient.educationOfPatient,
+    "guardian_education": patient.educationOfGuardian,
+    "phone": patient.phone,
+  };
 
-        if (responseData["patient"] != null && responseData["patient"]["id"] != null) {
-          patientId.value = int.tryParse(responseData["patient"]["id"].toString());
-        }
-        print("Successfully Patient Info Stored");
+  debugPrint("📤 Request fields: ${jsonEncode(fields)}");
 
-      } else {
-        print("Failed to upload patient info. Status: ${response.statusCode}");
-        print("Response body: ${response.body}");
+  try {
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse(apiUrl),
+    );
+    request.headers['Authorization'] = 'Bearer $token';
+    request.fields.addAll(fields);
+
+    final streamed = await retryRequest(
+      () async {
+        final r = http.MultipartRequest('POST', Uri.parse(apiUrl));
+        r.headers['Authorization'] = 'Bearer $token';
+        r.fields.addAll(fields);
+        return http.Response.fromStream(await r.send());
+      },
+      maxAttempts: 5,
+      initialDelay: const Duration(seconds: 2),
+    );
+
+    debugPrint("📥 Response [${streamed.statusCode}]: ${streamed.body}");
+
+    if (streamed.statusCode == 200 || streamed.statusCode == 201) {
+      final responseData = jsonDecode(streamed.body);
+      if (responseData["patient"]?["id"] != null) {
+        patientId.value = int.tryParse(responseData["patient"]["id"].toString());
+        debugPrint("✅ Patient ID saved: ${patientId.value}");
       }
-      return response.statusCode;
-    } catch (e) {
-      print("Error: $e");
-      return 500;
     }
 
+    return streamed.statusCode;
+  } catch (e, stack) {
+    debugPrint("❌ Error: $e\n$stack");
+    return 500;
   }
+}
 
   TextEditingController patientNameController = TextEditingController();
   TextEditingController fatherNameController = TextEditingController();
@@ -222,59 +227,64 @@ final QuickTechThemeController themeController = locator.get<QuickTechThemeContr
     // do NOT set sexController.text — it resets cursor on web
   }
 
-  // Method to get all patient data as a model
-  PatientInfo getPatientInfo() {
-    return PatientInfo(
-      patientName: patientNameController.text,
-      age: age.value,
-      fatherName: fatherNameController.text,
-      motherName: motherNameController.text,
-      phone: phoneController.text,
-      birthDate: DateTime.now(),
-      spouseName: spouseNameController.text,
-      voterID: voterIDController.text,
-      occupation: occupationController.text,
-      maritalStatus: maritalStatusController.text,
-      disabilityID: disabilityIDController.text,
-      educationOfPatient: educationOfPatientController.text,
-      bloodGroup: bloodGroupController.text,
-      educationOfGuardian: educationOfGuardianController.text,
-      guardianName: guardianNameController.text,
-      birthRegistrationNo: birthRegistrationNoController.text,
-      sex: sexController.text,
-    );
-  }
+PatientInfo getPatientInfo() {
+  return PatientInfo(
+    patientName: patientNameController.text,
+    age: age.value,
+    fatherName: fatherNameController.text,
+    motherName: motherNameController.text,
+    phone: phoneController.text,
+    birthDate: DateTime.now(),
+    spouseName: spouseNameController.text,
+    voterID: voterIDController.text,
+    occupation: occupation.value ?? '',         // ✅ Rx value
+    maritalStatus: maritalStatus.value ?? '',   // ✅ Rx value
+    disabilityID: disabilityIDController.text,
+    educationOfPatient: educationOfPatient.value ?? '',   // ✅ Rx value
+    bloodGroup: bloodGroupController.text,
+    educationOfGuardian: educationOfGuardian.value ?? '', // ✅ Rx value
+    guardianName: guardianNameController.text,
+    birthRegistrationNo: birthRegistrationNoController.text,
+    sex: sex.value ?? '',  // ✅ Rx value
+  );
+}
 Future<void> selectDateOfBirth(BuildContext context) async {
   DateTime? pickedDate = await showDatePicker(
     context: context,
     initialDate: DateTime.now(),
     firstDate: DateTime(1900),
     lastDate: DateTime.now(),
-    builder: (BuildContext context, Widget? child) {
+    builder: (context, child) {
       return Theme(
         data: Theme.of(context).copyWith(
           colorScheme: ColorScheme.light(
             primary: themeController.isDay.value
                 ? QuickTechAppColors.lightmaincolor
                 : QuickTechAppColors.darkmaincolor,
-            onPrimary: Colors.white, // Header text color
+            onPrimary: Colors.white,
             surface: themeController.isDay.value
                 ? QuickTechAppColors.lightScaffoldColor
                 : QuickTechAppColors.darkScaffoldColor,
-            onSurface: themeController.isDay.value?QuickTechAppColors.lightmaintextcolor:QuickTechAppColors.darkmaintextcolor, 
-         
-          ), dialogTheme: DialogThemeData(backgroundColor: themeController.isDay.value
-              ? Colors.white
-              : QuickTechAppColors.black),
-      
-       
-      ), child: child!,);
+            onSurface: themeController.isDay.value
+                ? QuickTechAppColors.lightmaintextcolor
+                : QuickTechAppColors.darkmaintextcolor,
+          ),
+          dialogTheme: DialogThemeData(
+            backgroundColor: themeController.isDay.value ? Colors.white : QuickTechAppColors.black,
+          ),
+        ),
+        child: child!,
+      );
     },
   );
 
   if (pickedDate != null) {
-    String formattedDate = dateFormat(pickedDate);
-    updateBirthDate(formattedDate);
+    // ✅ Format as yyyy-MM-dd for API + update controller so UI shows it
+    final formatted = "${pickedDate.year.toString().padLeft(4, '0')}-"
+        "${pickedDate.month.toString().padLeft(2, '0')}-"
+        "${pickedDate.day.toString().padLeft(2, '0')}";
+    birthDateController.text = formatted; // ✅ This was missing — fixes date not showing
+    update();
   }
 }
   // Function to clear all patient information fields

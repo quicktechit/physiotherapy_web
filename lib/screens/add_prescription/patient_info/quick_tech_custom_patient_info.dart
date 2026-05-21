@@ -13,7 +13,7 @@ Widget customPatientInfo(BuildContext context) {
   // ==========================================
   
   Widget nameField = QuickTechCustomTextField(
-    label: 'Patient Name',
+    label: 'Patient Name*',
     icon: Icons.person_outline,
     controller: patientInfoController.patientNameController,
     keyboardType: TextInputType.name,
@@ -29,7 +29,7 @@ Widget customPatientInfo(BuildContext context) {
   );
 
   Widget phoneField = QuickTechCustomTextField(
-    label: 'Phone',
+    label: 'Phone*',
     icon: Icons.phone,
     controller: patientInfoController.phoneController,
     keyboardType: TextInputType.phone,

@@ -3,10 +3,12 @@ import 'package:e_prescription/locator.dart';
 import 'package:e_prescription/services/auth_services/quick_tech_auth_storage_service.dart';
 import 'package:e_prescription/utils/api.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:e_prescription/services/quick_tech_retry_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:e_prescription/controllers/assessment_controller/on_examination/reflex/quick_tech_reflex_controller.dart';
+import 'package:e_prescription/controllers/assessment_controller/patient_info/quick_tech_patient_info_controlle.dart';
 
 // Inflammatory Sign Model
 class InflammatorySignModel {
@@ -214,9 +216,12 @@ class BowelBladderModel {
 
 /// CONTROLLER
 class QuickTechOnExaminationController extends GetxController {
-  var token=QuickTechAuthStorageService.getToken();
+  var token = QuickTechAuthStorageService.getToken();
   // Prevent duplicate fetches
   bool _dataFetched = false;
+  final QuickTechPatientInfoController patientInfoController = locator.get<QuickTechPatientInfoController>();
+  var isStoringOnExamination = false.obs;
+  var onExaminationError = ''.obs;
   // ...existing code...
   // -----------------------------
   // TEXT CONTROLLERS
@@ -439,13 +444,15 @@ class QuickTechOnExaminationController extends GetxController {
   void updateInflammatorySigns(List<String> signs) =>
       inflammatorySign.value = signs;
 
-  void updateReflex(RxMap<String, List<String>> selectedReflexes) {
+  void updateReflex(Map<String, List<String>> selectedReflexes) {
     var reflexMap = <String, String>{};
     selectedReflexes.forEach((title, options) {
-      reflexMap[title] = options.join(", ");
+      if (options.isNotEmpty) {
+        reflexMap[title] = options.join(", ");
+      }
     });
     reflex.value = reflexMap;
-    reflexController.text = reflexMap.toString();
+    debugPrint('✅ Reflex data synced: $reflexMap');
   }
 
   void updateSensory(String? grade) {
@@ -879,8 +886,9 @@ class QuickTechOnExaminationController extends GetxController {
       if (selected != null && selected.isNotEmpty) {
         final subcategories = tendon.reflexSubcategories ?? [];
         for (final option in selected) {
+          // Match by numericValue since that's what the checkbox displays
           final subcat = subcategories.firstWhereOrNull(
-            (sub) => sub.textValue == option,
+            (sub) => (sub.numericValue ?? '') == option || (sub.textValue ?? '') == option,
           );
           if (subcat != null && subcat.id != null) {
             ids.add(subcat.id!);

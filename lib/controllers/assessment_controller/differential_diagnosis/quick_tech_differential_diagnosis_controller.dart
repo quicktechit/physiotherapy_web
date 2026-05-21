@@ -38,7 +38,7 @@ class QuickTechDifferentialDiagnosisController extends GetxController {
   Future<int> storeAssessmentDiagnosis() async {
     final url = '${Api.baseUrl}/api/assess/diagnosis/store';
     final patientId = patientInfoController.currentPatientId ?? patientInfoController.patientId.value;
-    final subcategoryValues = selectedDiagnosis.map((d) => getDetailsController(d).value).toList();
+    final subcategoryValues = selectedDiagnosis.map((d) => getDetailsController(d).text).toList();
     final diagSubcatIds = selectedDiagnosis.map((d) {
       final sub = diagnosisCategory.value?.subCategories.firstWhereOrNull((s) => s.name == d);
       return sub?.id;
@@ -82,17 +82,17 @@ class QuickTechDifferentialDiagnosisController extends GetxController {
   }
   final QuickTechAssessmentController assessmentController = locator.get<QuickTechAssessmentController>();
   TextEditingController diagnosisSearchController = TextEditingController();
+  TextEditingController bodyTemperatureController = TextEditingController();
+  TextEditingController musclePowerController = TextEditingController();
+  TextEditingController fractureAtController = TextEditingController();
+  TextEditingController dislocationOfController = TextEditingController();
+  
   var diagnosisText = ''.obs;
   var isDiagnosisDropdownOpen = false.obs;
   var selectedDiagnosis = <String>[].obs;
   var selectedsubDiagnosis = <String, List<String>>{}.obs;
   var otherDiagnosis = ''.obs;
   var diagnosisList = <dynamic>[];
-  //
-  var bodytemparture = ''.obs;
-  var musclepower = ''.obs;
-  var factureAt = ''.obs;
-  var dislocationOf = ''.obs;
 
   var diagnosisCategory = Rxn<DiagnosisCategorys>();
   var isLoading = false.obs;
@@ -123,18 +123,18 @@ class QuickTechDifferentialDiagnosisController extends GetxController {
         onExamination == 'Facture at' ||
         onExamination == 'Dislocation of';
   }
-  RxString getDetailsController(String onExamination) {
+  
+  TextEditingController getDetailsController(String onExamination) {
     if (onExamination == 'Body temperature') {
-      return bodytemparture;
+      return bodyTemperatureController;
     } else if (onExamination == 'Muscle power average') {
-      return musclepower;
+      return musclePowerController;
     } else if (onExamination == 'Facture at') {
-      return factureAt;
+      return fractureAtController;
     } else if (onExamination == 'Dislocation of') {
-      return dislocationOf;
+      return dislocationOfController;
     }
-    ;
-    return RxString('');
+    return TextEditingController();
   }
   //For Suggested Assestive Device
   List<String> get filtereddiagnosis {
@@ -203,10 +203,10 @@ class QuickTechDifferentialDiagnosisController extends GetxController {
   void clearDifferentialDiagnosis() {
     selectedDiagnosis.clear();
     selectedsubDiagnosis.clear();
-    bodytemparture.value = '';
-    musclepower.value = '';
-    factureAt.value = '';
-    dislocationOf.value = '';
+    bodyTemperatureController.clear();
+    musclePowerController.clear();
+    fractureAtController.clear();
+    dislocationOfController.clear();
     diagnosisText.value = '';
     isDiagnosisDropdownOpen.value = false;
     update();

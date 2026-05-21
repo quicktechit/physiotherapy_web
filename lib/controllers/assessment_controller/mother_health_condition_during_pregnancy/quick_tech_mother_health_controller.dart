@@ -105,7 +105,7 @@ bool isMotherHealthNull(){
   /// Standardized: returns true when section has data to display
   bool hasData() => isMotherHealthNull();
   // Update functions for each field
-  void updateBloodPressure(String? pressure) {
+  void updateBloodPressure(dynamic pressure) {
     if(pressure!=null){
       bloodPressure.value = pressure;
       // do NOT set bloodPressureController.text — it resets cursor on web

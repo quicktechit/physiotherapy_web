@@ -1,4 +1,4 @@
-import 'dart:convert';
+
 
 import 'package:e_prescription/services/auth_services/quick_tech_auth_storage_service.dart';
 import 'package:e_prescription/utils/api.dart';
@@ -14,39 +14,38 @@ bool _isSaving = false;
 
 Future<int> storeOccupationHistory({required int patientId}) async {
   if (_isSaving) {
-    print("Already saving — blocked duplicate call");
+    debugPrint("Already saving — blocked duplicate call");
     return 0;
   }
-
   _isSaving = true;
 
   try {
     final token = QuickTechAuthStorageService.getToken();
-    final url = Uri.parse('${Api.baseUrl}/api/occupation/history/update');
 
-    final body = {
-      'patient_id': patientId,
-      'type_of_work': typeOfWorkController.text,
-      'stair_moving': stairMovingController.text,
-      'lumbar_involvement': lumbarInvolvementController.text,
-      'brain_work': brainWorkController.text,
+    final fields = {
+      'patient_id': patientId.toString(),
+      'type_of_work': typeOfWork.value ?? '',       // ✅ Rx value
+      'stair_moving': stairMoving.value ?? '',      // ✅ Rx value
+      'lumbar_involvement': lumbarInvolvement.value ?? '', // ✅ Rx value
+      'brain_work': brainWork.value ?? '',          // ✅ Rx value
     };
 
-    final headers = {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json',
-    };
+    debugPrint("📤 Occupation History Request: $fields");
 
-    final response = await retryRequest(() => http.post(
-          url,
-          body: jsonEncode(body),
-          headers: headers,
-        ));
+    final response = await retryRequest(() async {
+      final r = http.MultipartRequest(
+        'POST',
+        Uri.parse('${Api.baseUrl}/api/occupation/history/update'),
+      );
+      r.headers['Authorization'] = 'Bearer $token';
+      r.fields.addAll(fields);
+      return http.Response.fromStream(await r.send());
+    });
 
-    print('Occupation history status: ${response.statusCode}');
+    debugPrint("📥 Response [${response.statusCode}]: ${response.body}");
     return response.statusCode;
-  } catch (e) {
-    print('Error storing occupation history: $e');
+  } catch (e, stack) {
+    debugPrint("❌ Error: $e\n$stack");
     return 500;
   } finally {
     _isSaving = false;
@@ -92,15 +91,14 @@ Future<int> storeOccupationHistory({required int patientId}) async {
   /// Standardized: returns true when section has data to display
   bool hasData() => isOccupationHistoryNull();
 
-  void updateTypesofWork(String? work) {
-    if(work !=null){
-      typeOfWork.value=work;
+  void updateTypesofWork(dynamic work) {
+    if(work != null){
+      typeOfWork.value = work;
       // do NOT set typeOfWorkController.text — it resets cursor on web
       if(!typesofworkoptions.contains(work)){
         typesofworkoptions.add(work);
       }
     }
-
   }
 
   void updateStairMoving(String moving) {

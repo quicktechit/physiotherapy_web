@@ -967,7 +967,7 @@ class _DesktopPackageGrid extends StatelessWidget {
         crossAxisCount: packages.length >= 3 ? 3 : packages.length,
         crossAxisSpacing: 24.w,
         mainAxisSpacing: 24.h,
-        childAspectRatio: 0.75,
+        childAspectRatio: 1.15,
       ),
       itemCount: packages.length,
       itemBuilder: (context, index) {

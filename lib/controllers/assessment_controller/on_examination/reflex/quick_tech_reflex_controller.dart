@@ -3,6 +3,7 @@ import 'package:e_prescription/models/assessment/reflex/reflex_model.dart';
 import 'package:e_prescription/utils/api.dart';
 
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:e_prescription/locator.dart';
 import 'package:http/http.dart' as http;
@@ -116,7 +117,18 @@ class QuickTechReflexController extends GetxController {
     }
     selectedOptions.refresh();
     selectedReflexIds.refresh();
-    onExaminationController.updateReflex(selectedOptions);  
+    
+    // Convert to the format expected by OnExaminationController
+    final Map<String, List<String>> reflexData = {};
+    selectedOptions.forEach((key, value) {
+      if (value.isNotEmpty) {
+        reflexData[key] = List<String>.from(value);
+      }
+    });
+    
+    // Call update method with correct type (Map, not RxMap)
+    onExaminationController.updateReflex(reflexData);
+    debugPrint('✅ Reflex selection updated: $reflexData');
   }
 
   bool isOptionSelected(String title, String option) {

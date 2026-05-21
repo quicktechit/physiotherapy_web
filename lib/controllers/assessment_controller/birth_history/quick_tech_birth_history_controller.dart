@@ -135,7 +135,7 @@ bool isBirthHIstoryNull(){
     // do NOT set birthInjuryController.text — it resets cursor on web
   }
 
-  void updateBirthWeight(String? weight) {
+  void updateBirthWeight(dynamic weight) {
     if(weight!=null){
       birthWeight.value=weight;
       // do NOT set birthWeightController.text — it resets cursor on web
@@ -171,7 +171,7 @@ bool isBirthHIstoryNull(){
     // do NOT set noOfLaborController.text — it resets cursor on web
   }
 
-  void updateLaborDuration(String? duration) {
+  void updateLaborDuration(dynamic duration) {
    if(duration!=null){
      laborDuration.value = duration;
      // do NOT set laborDurationController.text — it resets cursor on web
@@ -185,7 +185,7 @@ bool isBirthHIstoryNull(){
     // do NOT set childPositionController.text — it resets cursor on web
   }
 
-  void updateAfterBirthProblem(String? problem) {
+  void updateAfterBirthProblem(dynamic problem) {
     if(problem !=null){
       afterBirthProblem.value = problem;
       // do NOT set afterBirthProblemController.text — it resets cursor on web

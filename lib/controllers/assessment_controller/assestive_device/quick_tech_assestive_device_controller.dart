@@ -1,14 +1,16 @@
 import 'dart:convert';
-import 'package:e_prescription/controllers/assessment_controller/differential_diagnosis/quick_tech_differential_diagnosis_controller.dart';
 import 'package:e_prescription/controllers/assessment_controller/patient_info/quick_tech_patient_info_controlle.dart';
 import 'package:e_prescription/controllers/assessment_controller/quick_tech_assessment_controller.dart';
+import 'package:e_prescription/services/auth_services/quick_tech_auth_storage_service.dart';
 import 'package:e_prescription/utils/api.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:e_prescription/locator.dart';
 import 'package:http/http.dart' as http;
 import 'package:e_prescription/services/quick_tech_retry_service.dart';
-  final QuickTechPatientInfoController patientInfoController = locator.get<QuickTechPatientInfoController>();
+
+var token = QuickTechAuthStorageService.getToken();
+final QuickTechPatientInfoController patientInfoController = locator.get<QuickTechPatientInfoController>();
 class QuickTechAssestiveDeviceController extends GetxController {
 
   bool _categoryLoaded = false;
@@ -32,13 +34,13 @@ class QuickTechAssestiveDeviceController extends GetxController {
 
   final QuickTechAssessmentController assessmentController = locator.get<QuickTechAssessmentController>();
   TextEditingController assestiveDeviceSearchController = TextEditingController();
+  TextEditingController bodyTemperatureController = TextEditingController();
+  TextEditingController musclePowerController = TextEditingController();
+  TextEditingController fractureAtController = TextEditingController();
+  TextEditingController dislocationOfController = TextEditingController();
+  
   var assestiveDeviceText = ''.obs;
   var isAssestiveDeviceDropdownOpen = false.obs;
-  
-  var bodytemparture = ''.obs;
-  var musclepower = ''.obs;
-  var factureAt = ''.obs;
-  var dislocationOf = ''.obs;
   
   var selectedAssestiveDevice = <String>[].obs;
   var assestiveDeviceDataList = <dynamic>[].obs;
@@ -75,17 +77,17 @@ class QuickTechAssestiveDeviceController extends GetxController {
         onExamination == 'Dislocation of';
   }
 
-  RxString getDetailsController(String onExamination) {
+  TextEditingController getDetailsController(String onExamination) {
     if (onExamination == 'Body temperature') {
-      return bodytemparture;
+      return bodyTemperatureController;
     } else if (onExamination == 'Muscle power average') {
-      return musclepower;
+      return musclePowerController;
     } else if (onExamination == 'Facture at') {
-      return factureAt;
+      return fractureAtController;
     } else if (onExamination == 'Dislocation of') {
-      return dislocationOf;
+      return dislocationOfController;
     }
-    return RxString('');
+    return TextEditingController();
   }
 
   List<String> get filteredassestiveDevice {
@@ -223,20 +225,20 @@ class QuickTechAssestiveDeviceController extends GetxController {
 
   // Method to get details for a specific device
   String? getDeviceDetails(String device) {
-    if (device == 'Body temperature') return bodytemparture.value;
-    if (device == 'Muscle power average') return musclepower.value;
-    if (device == 'Facture at') return factureAt.value;
-    if (device == 'Dislocation of') return dislocationOf.value;
+    if (device == 'Body temperature') return bodyTemperatureController.text;
+    if (device == 'Muscle power average') return musclePowerController.text;
+    if (device == 'Facture at') return fractureAtController.text;
+    if (device == 'Dislocation of') return dislocationOfController.text;
     return null;
   }
 
   void clearAssestiveDevice() {
     selectedAssestiveDevice.clear();
     selectedsubAssestiveDevice.clear();
-    bodytemparture.value = '';
-    musclepower.value = '';
-    factureAt.value = '';
-    dislocationOf.value = '';
+    bodyTemperatureController.clear();
+    musclePowerController.clear();
+    fractureAtController.clear();
+    dislocationOfController.clear();
     assestiveDeviceText.value = '';
     isAssestiveDeviceDropdownOpen.value = false;
     update();

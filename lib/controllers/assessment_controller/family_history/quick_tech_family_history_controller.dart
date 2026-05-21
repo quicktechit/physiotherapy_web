@@ -130,7 +130,7 @@ class QuickTechFamilyHistoryController extends GetxController {
     // do NOT set anydisablepersonController.text — it resets cursor on web
   }
 
-  void updatedPsychologicalCondition(String? psychologicalCoondition) {
+  void updatedPsychologicalCondition(dynamic psychologicalCoondition) {
     if(psychologicalCoondition!=null){
       psychologicalCondition.value=psychologicalCoondition;
       // do NOT set psychologicalConditionController.text — it resets cursor on web

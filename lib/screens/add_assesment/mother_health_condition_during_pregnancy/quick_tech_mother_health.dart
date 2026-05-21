@@ -1,111 +1,94 @@
 import 'package:e_prescription/const/quick_tech_app_colors.dart';
-import 'package:e_prescription/const/quick_tech_styles.dart';
 import 'package:e_prescription/controllers/assessment_controller/mother_health_condition_during_pregnancy/quick_tech_mother_health_controller.dart';
-
 import 'package:e_prescription/controllers/theme_controller/quick_tech_theme_controller.dart';
-import 'package:e_prescription/widgets/quick_tech_custom_drop_down.dart';
+import 'package:e_prescription/screens/add_assesment/widgets/quick_tech_assessment_widgets.dart';
+import 'package:e_prescription/responsive.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:e_prescription/locator.dart';
 
 Widget MotherHealthCondition() {
   final QuickTechThemeController themeController = locator.get<QuickTechThemeController>();
-  final QuickTechMotherHealthController healthConditionController = locator.get<QuickTechMotherHealthController>();
-  
-  return Column(
-    children: [
-      Text(
-        'Mother Health Condition During Pregnancy',
-        style: myStyle(
-          20,
-          themeController.isDay.value
-              ? QuickTechAppColors.lightmaincolor
-              : QuickTechAppColors.darkmaincolor,
-          FontWeight.bold,
-        ),
-      ),
-      SizedBox(height: 15),
-      
-      // Blood Pressure Dropdown
-      QuickTechCustomDropDown(
-        label: 'Blood pressure',
-        items: healthConditionController.bloodPressureOptions,
-        value: healthConditionController.bloodPressure.value,
-        onChanged: healthConditionController.updateBloodPressure,
-        icon: Icons.favorite,
-        isDay: themeController.isDay.value,
-              enableOthersOption: true,
-            dialogTitle: "Add Blood Pressure",
-            dialogHint: "Enter Blood Pressure",
-      ),
-      SizedBox(height: 10),
+  final QuickTechMotherHealthController c = locator.get<QuickTechMotherHealthController>();
 
-      // Diabetes Dropdown
-      QuickTechCustomDropDown(
-        label: 'Diabetes mellitus',
-        items: healthConditionController.diabetesOptions,
-        value: healthConditionController.diabetes.value,
-        onChanged: (value) => healthConditionController.updateDiabetes(value!),
-        icon: Icons.accessibility,
-        isDay: themeController.isDay.value,
-      ),
-      SizedBox(height: 10),
+  return Obx(() {
+    final isDay = themeController.isDay.value;
+    final mainColor = isDay ? QuickTechAppColors.lightmaincolor : QuickTechAppColors.darkmaincolor;
 
-      // Gestational Diabetes Dropdown
-      QuickTechCustomDropDown(
-        label: 'Gestational Diabetes',
-        items: healthConditionController.diabetesOptions, // Reusing diabetesOptions as for gestational
-        value: healthConditionController.gestationalDiabetes.value,
-        onChanged: (value) => healthConditionController.updateGestationalDiabetes(value!),
-        icon: Icons.sick_outlined,
-        isDay: themeController.isDay.value,
-      ),
-      SizedBox(height: 10),
+    final fields = [
+      assessmentDropdown(label: 'Blood pressure', items: c.bloodPressureOptions, value: c.bloodPressure.value, onChanged: c.updateBloodPressure, icon: Icons.favorite, isDay: isDay, enableOthers: true, dialogTitle: "Add Blood Pressure", dialogHint: "Enter Blood Pressure"),
+      assessmentDropdown(label: 'Diabetes mellitus', items: c.diabetesOptions, value: c.diabetes.value, onChanged: (v) => c.updateDiabetes(v!), icon: Icons.accessibility, isDay: isDay),
+      assessmentDropdown(label: 'Gestational Diabetes', items: c.diabetesOptions, value: c.gestationalDiabetes.value, onChanged: (v) => c.updateGestationalDiabetes(v!), icon: Icons.sick_outlined, isDay: isDay),
+      assessmentDropdown(label: 'Preeclampsia', items: c.preeclampsiaOptions, value: c.preeclampsia.value, onChanged: (v) => c.updatePreeclampsia(v!), icon: Icons.warning, isDay: isDay),
+      assessmentDropdown(label: 'Infection', items: c.infectionOptions, value: c.infection.value, onChanged: (v) => c.updateInfection(v!), icon: Icons.medical_services, isDay: isDay),
+      assessmentDropdown(label: 'Bleeding', items: c.bleedingOptions, value: c.bleeding.value, onChanged: (v) => c.updateBleeding(v!), icon: Icons.bloodtype, isDay: isDay),
+      assessmentDropdown(label: 'Anxiety or stress', items: c.anxietyOptions, value: c.anxiety.value, onChanged: (v) => c.updateAnxiety(v!), icon: Icons.sentiment_very_dissatisfied, isDay: isDay),
+    ];
 
-      // Preeclampsia Dropdown
-      QuickTechCustomDropDown(
-        label: 'Preeclampsia',
-        items: healthConditionController.preeclampsiaOptions,
-        value: healthConditionController.preeclampsia.value,
-        onChanged: (value) => healthConditionController.updatePreeclampsia(value!),
-        icon: Icons.warning,
-        isDay: themeController.isDay.value,
+    // Mobile
+    Widget mobile() => SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          assessmentHeader(
+            mainColor: mainColor,
+            title: 'Mother Health During Pregnancy',
+            icon: Icons.pregnant_woman,
+          ),
+          const SizedBox(height: 16),
+          assessmentGrid(fields: fields, cols: 1),
+        ],
       ),
-      SizedBox(height: 10),
+    );
 
-      // Infection Dropdown
-      QuickTechCustomDropDown(
-        label: 'Infection',
-        items: healthConditionController.infectionOptions,
-        value: healthConditionController.infection.value,
-        onChanged: (value) => healthConditionController.updateInfection(value!),
-        icon: Icons.medical_services,
-        isDay: themeController.isDay.value,
+    // Tablet
+    Widget tablet() => SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          assessmentHeader(
+            mainColor: mainColor,
+            title: 'Mother Health During Pregnancy',
+            icon: Icons.pregnant_woman,
+          ),
+          const SizedBox(height: 20),
+          assessmentCard(
+            color: mainColor,
+            title: 'Health Conditions',
+            icon: Icons.pregnant_woman,
+            child: assessmentGrid(fields: fields, cols: 2),
+          ),
+        ],
       ),
-      SizedBox(height: 10),
+    );
 
-      // Bleeding Dropdown
-      QuickTechCustomDropDown(
-        label: 'Bleeding',
-        items: healthConditionController.bleedingOptions,
-        value: healthConditionController.bleeding.value,
-        onChanged: (value) => healthConditionController.updateBleeding(value!),
-        icon: Icons.bloodtype,
-        isDay: themeController.isDay.value,
+    // Desktop
+    Widget desktop() => SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          assessmentHeader(
+            mainColor: mainColor,
+            title: 'Mother Health During Pregnancy',
+            icon: Icons.pregnant_woman,
+          ),
+          const SizedBox(height: 24),
+          assessmentCard(
+            color: mainColor,
+            title: 'Health Conditions',
+            icon: Icons.pregnant_woman,
+            child: assessmentGrid(fields: fields, cols: 3),
+          ),
+        ],
       ),
-      SizedBox(height: 10),
+    );
 
-      // Anxiety or Stress Dropdown
-      QuickTechCustomDropDown(
-        label: 'Anxiety or stress',
-        items: healthConditionController.anxietyOptions,
-        value: healthConditionController.anxiety.value,
-        onChanged: (value) => healthConditionController.updateAnxiety(value!),
-        icon: Icons.sentiment_very_dissatisfied,
-        isDay: themeController.isDay.value,
-      ),
-      SizedBox(height: 10),
-       
-    ],
-    crossAxisAlignment: CrossAxisAlignment.start,
-  );
+    return Responsive(mobile: mobile(), tablet: tablet(), desktop: desktop());
+  });
 }
