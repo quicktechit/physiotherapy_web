@@ -3,7 +3,6 @@ import 'package:e_prescription/const/quick_tech_app_colors.dart';
 import 'package:e_prescription/controllers/theme_controller/quick_tech_theme_controller.dart';
 import 'package:e_prescription/locator.dart';
 import 'package:e_prescription/models/patient_model.dart';
-import 'package:e_prescription/screens/patient_records/patient_details/quick_tech_patients_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -15,9 +14,10 @@ Widget customPatientCard({required Patient patient}) {
 
   return Obx(() {
     final isDark = !themeController.isDay.value;
-    final mainColor = isDark
-        ? QuickTechAppColors.darkmaincolor
-        : QuickTechAppColors.lightmaincolor;
+    final mainColor =
+        isDark
+            ? QuickTechAppColors.darkmaincolor
+            : QuickTechAppColors.lightmaincolor;
     final isMale = patient.gender == 'Male';
 
     return _PatientCardWidget(
@@ -58,7 +58,7 @@ class _PatientCardWidgetState extends State<_PatientCardWidget> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
-        onTap: () => Get.off(() => QuickTechPatientsDetails(patient: widget.patient)),
+        onTap: () => Get.toNamed('/patientdetails', arguments: widget.patient),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 220),
           margin: EdgeInsets.only(bottom: isDesktop ? 0 : 12.h),
@@ -67,9 +67,10 @@ class _PatientCardWidgetState extends State<_PatientCardWidget> {
             color: widget.isDark ? const Color(0xFF1E293B) : Colors.white,
             borderRadius: BorderRadius.circular(16.r),
             border: Border.all(
-              color: _hovered
-                  ? widget.mainColor.withValues(alpha: 0.4)
-                  : Colors.transparent,
+              color:
+                  _hovered
+                      ? widget.mainColor.withValues(alpha: 0.4)
+                      : Colors.transparent,
               width: 1.5,
             ),
             boxShadow: [
@@ -90,9 +91,16 @@ class _PatientCardWidgetState extends State<_PatientCardWidget> {
                   height: isDesktop ? 48.w : 46.w,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: widget.isMale
-                          ? [const Color(0xFF1A56DB), const Color(0xFF3B82F6)]
-                          : [const Color(0xFFEC4899), const Color(0xFFF472B6)],
+                      colors:
+                          widget.isMale
+                              ? [
+                                const Color(0xFF1A56DB),
+                                const Color(0xFF3B82F6),
+                              ]
+                              : [
+                                const Color(0xFFEC4899),
+                                const Color(0xFFF472B6),
+                              ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -117,9 +125,10 @@ class _PatientCardWidgetState extends State<_PatientCardWidget> {
                       Text(
                         widget.patient.name,
                         style: TextStyle(
-                          color: widget.isDark
-                              ? Colors.white
-                              : const Color(0xFF0F172A),
+                          color:
+                              widget.isDark
+                                  ? Colors.white
+                                  : const Color(0xFF0F172A),
                           fontSize: isDesktop ? 14.sp : 13.sp,
                           fontWeight: FontWeight.w700,
                         ),
@@ -131,12 +140,14 @@ class _PatientCardWidgetState extends State<_PatientCardWidget> {
                         children: [
                           _InfoChip(
                             label: widget.patient.gender,
-                            icon: widget.isMale
-                                ? Icons.male_rounded
-                                : Icons.female_rounded,
-                            color: widget.isMale
-                                ? const Color(0xFF1A56DB)
-                                : const Color(0xFFEC4899),
+                            icon:
+                                widget.isMale
+                                    ? Icons.male_rounded
+                                    : Icons.female_rounded,
+                            color:
+                                widget.isMale
+                                    ? const Color(0xFF1A56DB)
+                                    : const Color(0xFFEC4899),
                             isDark: widget.isDark,
                             isDesktop: isDesktop,
                           ),
@@ -161,7 +172,9 @@ class _PatientCardWidgetState extends State<_PatientCardWidget> {
                   children: [
                     Container(
                       padding: EdgeInsets.symmetric(
-                          horizontal: 8.w, vertical: 4.h),
+                        horizontal: 8.w,
+                        vertical: 4.h,
+                      ),
                       decoration: BoxDecoration(
                         color: widget.mainColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6.r),
@@ -179,18 +192,17 @@ class _PatientCardWidgetState extends State<_PatientCardWidget> {
                     Text(
                       widget.patient.date.toString().split(' ')[0],
                       style: TextStyle(
-                        color: widget.isDark
-                            ? Colors.white.withValues(alpha: 0.4)
-                            : const Color(0xFF94A3B8),
+                        color:
+                            widget.isDark
+                                ? Colors.white.withValues(alpha: 0.4)
+                                : const Color(0xFF94A3B8),
                         fontSize: isDesktop ? 10.sp : 9.sp,
                       ),
                     ),
                     SizedBox(height: 4.h),
                     Icon(
                       Icons.arrow_forward_ios_rounded,
-                      color: widget.isDark
-                          ? Colors.white30
-                          : Colors.black26,
+                      color: widget.isDark ? Colors.white30 : Colors.black26,
                       size: isDesktop ? 12.sp : 11.sp,
                     ),
                   ],

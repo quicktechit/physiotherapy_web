@@ -3,7 +3,6 @@ import 'package:e_prescription/const/quick_tech_app_colors.dart';
 import 'package:e_prescription/controllers/patient_controller/quick_tech_patient_controller.dart';
 import 'package:e_prescription/controllers/theme_controller/quick_tech_theme_controller.dart';
 import 'package:e_prescription/locator.dart';
-import 'package:e_prescription/screens/pdf_prescription/quick_tech_pdf_prescription.dart';
 import 'package:e_prescription/screens/templates/quick_tech_templates_selection.dart';
 import 'package:e_prescription/services/auth_services/quick_tech_auth_storage_service.dart';
 import 'package:e_prescription/services/template_services/quick_tech_template_storage_service.dart';
@@ -147,12 +146,10 @@ class _PrescriptionCardState extends State<_PrescriptionCard> {
 
       Get.back();
       if (patientController.prescriptionPreviewPdfBytes.value != null) {
-        Get.off(
-          () => QuickTechPdfPrescription(
-            pdfBytes: patientController.prescriptionPreviewPdfBytes.value!,
-          ),
-          transition: Transition.cupertino,
-          duration: const Duration(milliseconds: 300),
+        Get.offNamed(
+          '/pdfprescription',
+          arguments: patientController.prescriptionPreviewPdfBytes.value!,
+      
         );
       } else if (error != null && error.isNotEmpty) {
         Get.snackbar(

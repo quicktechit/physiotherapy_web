@@ -26,8 +26,134 @@ class MainDiagnosisController extends ChangeNotifier {
   bool isLoading = false;
   String? error;
 
+  List<String> _getMissingChildSelections() {
+    final cheifComplainController = locator.get<CheifComplainController>();
+    final onExaminationController = locator.get<OnExaminationController>();
+    final radiologicalFindingsController =
+        locator.get<RadiologicalFindingsController>();
+    final primaryMedicalHistoryController =
+        locator.get<PrimaryMedicalHistoryController>();
+    final drugHistoryController = locator.get<DrugHistoryController>();
+    final assistiveDeviceController = locator.get<AssestiveDeviceController>();
+    final referredToController = locator.get<ReferredToController>();
+    final disabilityTypesController = locator.get<DisabilityTypesController>();
+    final diagnosisController = locator.get<DiagnosisController>();
+
+    final missingChildSelections = <String>[];
+
+    void addMissingItems(
+      Iterable<String> selectedItems,
+      Map<String, Map<String, dynamic>> dataMap,
+      Map<String, List<String>> subMap,
+    ) {
+      for (final item in selectedItems) {
+        final subcategoryData = dataMap[item];
+        if (subcategoryData == null) continue;
+
+        final childSelections = subMap[item] ?? const <String>[];
+        final children =
+            (subcategoryData['children'] as List?)?.cast<Map<String, dynamic>>() ??
+                const <Map<String, dynamic>>[];
+
+        if (children.isNotEmpty && childSelections.isEmpty) {
+          missingChildSelections.add(item);
+        }
+      }
+    }
+
+    final chiefComplaintMap = <String, Map<String, dynamic>>{};
+    final chiefCategory = cheifComplainController.chiefComplaintCategory.value;
+    if (chiefCategory != null) {
+      for (final sub
+          in chiefCategory.diagnosisSubcategories ??
+              <DiagnosisSubcategories>[]) {
+        if (sub.name == null) continue;
+        chiefComplaintMap[sub.name!] = {
+          'id': sub.id,
+          'children':
+              (sub.diagnosisChildcategories ?? <DiagnosisChildcategories>[])
+                  .map(
+                    (child) => {
+                      'id': child.id,
+                      'name': child.name,
+                    },
+                  )
+                  .toList(),
+        };
+      }
+    }
+
+    addMissingItems(
+      cheifComplainController.selectedComplaints,
+      chiefComplaintMap,
+      cheifComplainController.selectedSubComplaints,
+    );
+    addMissingItems(
+      onExaminationController.selectedExaminations,
+      onExaminationController.onExaminationMap,
+      onExaminationController.selectedSubExaminations,
+    );
+    addMissingItems(
+      radiologicalFindingsController.selectedRadioLogicalFindings,
+      radiologicalFindingsController.radiologicalFindingsMap,
+      radiologicalFindingsController.selectedsubRadiologicalFindings,
+    );
+    addMissingItems(
+      primaryMedicalHistoryController.selectedMedicalHistory,
+      primaryMedicalHistoryController.medicalHistoryMap,
+      primaryMedicalHistoryController.selectedsubMedicalHistory,
+    );
+    addMissingItems(
+      drugHistoryController.selectedDrugHistory,
+      drugHistoryController.drugHistoryMap,
+      drugHistoryController.selectedsubDrugHistory,
+    );
+    addMissingItems(
+      assistiveDeviceController.selectedAssestiveDevice,
+      assistiveDeviceController.assestiveDeviceMap,
+      assistiveDeviceController.selectedsubAssestiveDevice,
+    );
+    addMissingItems(
+      referredToController.selectedReferredTo,
+      referredToController.referredToMap,
+      referredToController.selectedsubReferredTo,
+    );
+    addMissingItems(
+      disabilityTypesController.selecteddisabilityTypes,
+      disabilityTypesController.disabilityTypesMap,
+      disabilityTypesController.selectedSubDisabilityTypes,
+    );
+    addMissingItems(
+      diagnosisController.selectedDiagnosis,
+      diagnosisController.diagnosisMap,
+      diagnosisController.selectedsubDiagnosis,
+    );
+
+    return missingChildSelections.toSet().toList();
+  }
+
+  bool validateRequiredChildSelections() {
+    final missingChildSelections = _getMissingChildSelections();
+    if (missingChildSelections.isEmpty) {
+      return true;
+    }
+
+    Get.snackbar(
+      'Child Category Required',
+      'Please select a child category for: ${missingChildSelections.join(', ')}',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
+    return false;
+  }
+
   Future<int> storeAllDiagnosisData() async {
     try {
+      if (!validateRequiredChildSelections()) {
+        return 400;
+      }
+
       final cheifComplainController = locator.get<CheifComplainController>();
       final onExaminationController = locator.get<OnExaminationController>();
       final radiologicalFindingsController = locator.get<RadiologicalFindingsController>();
@@ -115,6 +241,10 @@ class MainDiagnosisController extends ChangeNotifier {
           final frequency = _valueOrEmpty(subcategoryData['frequency']);
           final leftRight = _valueOrEmpty(subcategoryData['left_right']);
 
+          final children =
+              (subcategoryData['children'] as List?)?.cast<Map<String, dynamic>>() ??
+                  const <Map<String, dynamic>>[];
+
           if (childSelections.isEmpty) {
             appendDiagnosisEntry(
               subcategoryId: subcategoryData['id'],
@@ -125,10 +255,6 @@ class MainDiagnosisController extends ChangeNotifier {
             );
             continue;
           }
-
-          final children =
-              (subcategoryData['children'] as List?)?.cast<Map<String, dynamic>>();
-          if (children == null || children.isEmpty) continue;
 
           for (final childName in childSelections) {
             Map<String, dynamic>? childData;

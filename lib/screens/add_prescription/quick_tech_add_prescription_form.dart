@@ -327,6 +327,12 @@ class _QuickTechPrescriptionFormState extends State<QuickTechPrescriptionForm>
                       return;
                     }
                     try {
+                      final isDiagnosisValid =
+                          mainDiagnosisController.validateRequiredChildSelections();
+                      if (!isDiagnosisValid) {
+                        return;
+                      }
+
                       final statusCode = await mainDiagnosisController.storeAllDiagnosisData();
 
                       if (statusCode == 200 || statusCode == 201) {

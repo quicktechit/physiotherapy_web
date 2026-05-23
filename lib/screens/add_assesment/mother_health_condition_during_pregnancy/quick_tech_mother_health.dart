@@ -8,21 +8,78 @@ import 'package:get/get.dart';
 import 'package:e_prescription/locator.dart';
 
 Widget MotherHealthCondition() {
-  final QuickTechThemeController themeController = locator.get<QuickTechThemeController>();
-  final QuickTechMotherHealthController c = locator.get<QuickTechMotherHealthController>();
+  final QuickTechThemeController themeController =
+      locator.get<QuickTechThemeController>();
+  final QuickTechMotherHealthController c =
+      locator.get<QuickTechMotherHealthController>();
 
   return Obx(() {
     final isDay = themeController.isDay.value;
-    final mainColor = isDay ? QuickTechAppColors.lightmaincolor : QuickTechAppColors.darkmaincolor;
+    final mainColor =
+        isDay
+            ? QuickTechAppColors.lightmaincolor
+            : QuickTechAppColors.darkmaincolor;
 
     final fields = [
-      assessmentDropdown(label: 'Blood pressure', items: c.bloodPressureOptions, value: c.bloodPressure.value, onChanged: c.updateBloodPressure, icon: Icons.favorite, isDay: isDay, enableOthers: true, dialogTitle: "Add Blood Pressure", dialogHint: "Enter Blood Pressure"),
-      assessmentDropdown(label: 'Diabetes mellitus', items: c.diabetesOptions, value: c.diabetes.value, onChanged: (v) => c.updateDiabetes(v!), icon: Icons.accessibility, isDay: isDay),
-      assessmentDropdown(label: 'Gestational Diabetes', items: c.diabetesOptions, value: c.gestationalDiabetes.value, onChanged: (v) => c.updateGestationalDiabetes(v!), icon: Icons.sick_outlined, isDay: isDay),
-      assessmentDropdown(label: 'Preeclampsia', items: c.preeclampsiaOptions, value: c.preeclampsia.value, onChanged: (v) => c.updatePreeclampsia(v!), icon: Icons.warning, isDay: isDay),
-      assessmentDropdown(label: 'Infection', items: c.infectionOptions, value: c.infection.value, onChanged: (v) => c.updateInfection(v!), icon: Icons.medical_services, isDay: isDay),
-      assessmentDropdown(label: 'Bleeding', items: c.bleedingOptions, value: c.bleeding.value, onChanged: (v) => c.updateBleeding(v!), icon: Icons.bloodtype, isDay: isDay),
-      assessmentDropdown(label: 'Anxiety or stress', items: c.anxietyOptions, value: c.anxiety.value, onChanged: (v) => c.updateAnxiety(v!), icon: Icons.sentiment_very_dissatisfied, isDay: isDay),
+      assessmentDropdown(
+        label: 'Blood pressure',
+        items: c.bloodPressureOptions,
+        value: c.bloodPressure.value,
+        onChanged: c.updateBloodPressure,
+        icon: Icons.favorite,
+        isDay: isDay,
+        enableOthers: true,
+        dialogTitle: "Add Blood Pressure",
+        dialogHint: "Enter Blood Pressure",
+      ),
+      assessmentDropdown(
+        label: 'Diabetes mellitus',
+        items: c.diabetesOptions,
+        value: c.diabetes.value,
+        onChanged: (v) => c.updateDiabetes(v!),
+        icon: Icons.accessibility,
+        isDay: isDay,
+      ),
+      assessmentDropdown(
+        label: 'Gestational Diabetes',
+        items: c.diabetesOptions,
+        value: c.gestationalDiabetes.value,
+        onChanged: (v) => c.updateGestationalDiabetes(v!),
+        icon: Icons.sick_outlined,
+        isDay: isDay,
+      ),
+      assessmentDropdown(
+        label: 'Preeclampsia',
+        items: c.preeclampsiaOptions,
+        value: c.preeclampsia.value,
+        onChanged: (v) => c.updatePreeclampsia(v!),
+        icon: Icons.warning,
+        isDay: isDay,
+      ),
+      assessmentDropdown(
+        label: 'Infection',
+        items: c.infectionOptions,
+        value: c.infection.value,
+        onChanged: (v) => c.updateInfection(v!),
+        icon: Icons.medical_services,
+        isDay: isDay,
+      ),
+      assessmentDropdown(
+        label: 'Bleeding',
+        items: c.bleedingOptions,
+        value: c.bleeding.value,
+        onChanged: (v) => c.updateBleeding(v!),
+        icon: Icons.bloodtype,
+        isDay: isDay,
+      ),
+      assessmentDropdown(
+        label: 'Anxiety or stress',
+        items: c.anxietyOptions,
+        value: c.anxiety.value,
+        onChanged: (v) => c.updateAnxiety(v!),
+        icon: Icons.sentiment_very_dissatisfied,
+        isDay: isDay,
+      ),
     ];
 
     // Mobile

@@ -4,7 +4,6 @@ import 'package:e_prescription/const/quick_tech_app_colors.dart';
 import 'package:e_prescription/const/web_image.dart';
 import 'package:e_prescription/controllers/theme_controller/quick_tech_theme_controller.dart';
 import 'package:e_prescription/locator.dart';
-import 'package:e_prescription/screens/blogs/blog_details/quick_tech_blog_details.dart';
 import 'package:e_prescription/utils/api.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -44,7 +43,7 @@ class _customBlogCardState extends State<customBlogCard> {
         onEnter: (_) => setState(() => _isHovered = true),
         onExit: (_) => setState(() => _isHovered = false),
         child: GestureDetector(
-          onTap: () => Get.to(() => QuickTechBlogDetails(id: widget.id)),
+          onTap: () => Get.toNamed('/blogdetails', arguments: widget.id),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             margin: const EdgeInsets.only(bottom: 4),
