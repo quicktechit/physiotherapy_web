@@ -121,7 +121,12 @@ class QuicktechmainPrescriptionControllr extends GetxController {
           }
         }
 
-        String? firstNonNull(List l) => l.firstWhere((e) => e != null && e.toString().isNotEmpty, orElse: () => null)?.toString();
+        String? firstNonNull(List values) => values
+            .firstWhere(
+              (value) => value != null && value.toString().isNotEmpty,
+              orElse: () => null,
+            )
+            ?.toString();
       
         // Flatten all area IDs from all therapies into a single list
         // Backend's array_intersect() expects a flat array, not per-therapy nesting
@@ -132,8 +137,7 @@ class QuicktechmainPrescriptionControllr extends GetxController {
           }
         }
 
-        if (electroTherapyIds.isEmpty && !hasExtraTherapies) {
-        } else {
+        if (electroTherapyIds.isNotEmpty || hasExtraTherapies) {
           // ✅ FIX: Manually build form-encoded body to support MULTIPLE values per key
           // (http.MultipartRequest.fields is a Map and can't have duplicate keys)
           final bodyParts = <String>[];
@@ -321,7 +325,7 @@ class QuicktechmainPrescriptionControllr extends GetxController {
       
       /// ✅ Check patient_id
       final patientId = patientInfoController.patientId.value;
-      if (patientId == '0') {
+      if (patientId == 0) {
         errorMessages.add("Invalid patient ID. Cannot submit other therapy without patient.");
       } else {
         try {
