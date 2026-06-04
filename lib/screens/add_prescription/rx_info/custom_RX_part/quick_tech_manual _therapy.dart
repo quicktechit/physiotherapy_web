@@ -1,3 +1,4 @@
+import 'package:e_prescription/const/const.dart';
 import 'package:e_prescription/const/text_to_html.dart';
 import 'package:e_prescription/locator.dart';
 import 'package:e_prescription/widgets/quick_tech_custom_text_field.dart';
@@ -372,20 +373,21 @@ class _CustomManualTherapyInfoState extends State<CustomManualTherapyInfo> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Custom Manual Therapy',
+                          'Extra Therapy',
                           style: myStyle(
-                            15,
+                            15.sp,
                             themeController.isDay.value
                                 ? QuickTechAppColors.lightmaintextcolor
                                 : QuickTechAppColors.darkmaintextcolor,
                             FontWeight.w700,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'Add custom therapy options',
-                          style: myStyle(
-                            11,
+                           'Add therapy options',
+                        style: myStyle(
+                          11.sp,
                             themeController.isDay.value
                                 ? QuickTechAppColors.lightmaintextcolor
                                     .withValues(alpha: 0.6)
@@ -553,75 +555,157 @@ class _CustomManualTherapyInfoState extends State<CustomManualTherapyInfo> {
                         ),
                         SizedBox(height: 12),
                         // Action buttons
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            // Cancel button
-                            TextButton(
-                              onPressed: () {
-                                final idx = activeInputIndex.value;
-                                tempControllers[idx].dispose();
-                                tempControllers.removeAt(idx);
-                                activeInputIndex.value = -1;
-                              },
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 10,
-                                ),
-                              ),
-                              child: Text(
-                                'Cancel',
-                                style: myStyle(
-                                  12,
-                                  themeController.isDay.value
-                                      ? QuickTechAppColors.lightmaintextcolor
-                                          .withValues(alpha: 0.7)
-                                      : QuickTechAppColors.darkmaintextcolor
-                                          .withValues(alpha: 0.7),
-                                  FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            // OK button
-                            ElevatedButton.icon(
-                              icon: Icon(Icons.check_rounded, size: 18),
-                              label: Text('Save'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    themeController.isDay.value
-                                        ? QuickTechAppColors.lightmaincolor
-                                        : QuickTechAppColors.darkmaincolor,
-                                foregroundColor: Colors.white,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                elevation: 0,
-                              ),
-                              onPressed: () {
-                                final idx = activeInputIndex.value;
-                                final plainText = tempControllers[idx].text.trim();
-                                if (plainText.isNotEmpty) {
-                                  // Convert plain text to HTML format for mPDF
-                                  final htmlText = convertToHtmlParagraphs(plainText);
-                                  
-                                  // Store HTML format in both lists
-                                  therapyController.customTherapies.add(htmlText);
-                                  therapyController.customTherapyControllers
-                                      .add(TextEditingController(text: htmlText));
-                                }
-                                tempControllers[idx].dispose();
-                                tempControllers.removeAt(idx);
-                                activeInputIndex.value = -1;
-                              },
-                            ),
-                          ],
-                        ),
+                       LayoutBuilder(
+  builder: (context, constraints) {
+    final hasEnoughSpace = constraints.maxWidth > 200;
+
+    if (hasEnoughSpace) {
+      // Wide screen - Horizontal layout
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // Cancel button
+          TextButton(
+            onPressed: () {
+              final idx = activeInputIndex.value;
+              tempControllers[idx].dispose();
+              tempControllers.removeAt(idx);
+              activeInputIndex.value = -1;
+            },
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 10,
+              ),
+            ),
+            child: Text(
+              'Cancel',
+              style: myStyle(
+                12,
+                themeController.isDay.value
+                    ? QuickTechAppColors.lightmaintextcolor
+                        .withValues(alpha: 0.7)
+                    : QuickTechAppColors.darkmaintextcolor
+                        .withValues(alpha: 0.7),
+                FontWeight.w600,
+              ),
+            ),
+          ),
+          SizedBox(width: 8),
+          // OK button
+          ElevatedButton.icon(
+            icon: Icon(Icons.check_rounded, size: 18),
+            label: Text('Save'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: themeController.isDay.value
+                  ? QuickTechAppColors.lightmaincolor
+                  : QuickTechAppColors.darkmaincolor,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 0,
+            ),
+            onPressed: () {
+              final idx = activeInputIndex.value;
+              final plainText = tempControllers[idx].text.trim();
+              if (plainText.isNotEmpty) {
+                // Convert plain text to HTML format for mPDF
+                final htmlText = convertToHtmlParagraphs(plainText);
+
+                // Store HTML format in both lists
+                therapyController.customTherapies.add(htmlText);
+                therapyController.customTherapyControllers
+                    .add(TextEditingController(text: htmlText));
+              }
+              tempControllers[idx].dispose();
+              tempControllers.removeAt(idx);
+              activeInputIndex.value = -1;
+            },
+          ),
+        ],
+      );
+    } else {
+      // Narrow screen - Vertical stacked layout
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // OK button (Save) - First on mobile
+          ElevatedButton.icon(
+            icon: Icon(Icons.check_rounded, size: 18),
+            label: Text('Save'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: themeController.isDay.value
+                  ? QuickTechAppColors.lightmaincolor
+                  : QuickTechAppColors.darkmaincolor,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 0,
+            ),
+            onPressed: () {
+              final idx = activeInputIndex.value;
+              final plainText = tempControllers[idx].text.trim();
+              if (plainText.isNotEmpty) {
+                // Convert plain text to HTML format for mPDF
+                final htmlText = convertToHtmlParagraphs(plainText);
+
+                // Store HTML format in both lists
+                therapyController.customTherapies.add(htmlText);
+                therapyController.customTherapyControllers
+                    .add(TextEditingController(text: htmlText));
+              }
+              tempControllers[idx].dispose();
+              tempControllers.removeAt(idx);
+              activeInputIndex.value = -1;
+            },
+          ),
+          SizedBox(height: 8),
+          // Cancel button - Second on mobile
+          SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              onPressed: () {
+                final idx = activeInputIndex.value;
+                tempControllers[idx].dispose();
+                tempControllers.removeAt(idx);
+                activeInputIndex.value = -1;
+              },
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+              ),
+              child: Text(
+                'Cancel',
+                style: myStyle(
+                  12,
+                  themeController.isDay.value
+                      ? QuickTechAppColors.lightmaintextcolor
+                          .withValues(alpha: 0.7)
+                      : QuickTechAppColors.darkmaintextcolor
+                          .withValues(alpha: 0.7),
+                  FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+  },
+)
                       ],
                     ),
                   ),

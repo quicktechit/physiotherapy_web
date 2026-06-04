@@ -340,7 +340,7 @@ class _QuickTechPrescriptionFormState extends State<QuickTechPrescriptionForm>
                         _showSavedDialog('Diagnosis info', 2);
                       } else {
                         print('Error storing diagnosis. Status code: $statusCode');
-                        _showErrorDialog('Diagnosis info', 'Failed with status code $statusCode. Please try again.');
+                        statusCode!=400?_showErrorDialog('Diagnosis info', 'Failed with status code $statusCode. Please try again.'):null;
                       }
                     } catch (e) {
                       print('Exception while storing diagnosis data: $e');

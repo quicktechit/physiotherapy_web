@@ -4,6 +4,7 @@ import 'package:e_prescription/locator.dart';
 import 'package:e_prescription/models/rx_models/miscellaneous_therapy.dart';
 import 'package:e_prescription/widgets/quick_tech_custom_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:e_prescription/const/quick_tech_app_colors.dart';
 import 'package:e_prescription/const/quick_tech_styles.dart';
@@ -11,11 +12,14 @@ import 'package:e_prescription/screens/authentications/login/forgot_password/wid
 
 class CustomMiscalleneousTherapyInfo extends StatefulWidget {
   @override
-  _CustomMiscalleneousTherapyInfoState createState() => _CustomMiscalleneousTherapyInfoState();
+  _CustomMiscalleneousTherapyInfoState createState() =>
+      _CustomMiscalleneousTherapyInfoState();
 }
 
-class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTherapyInfo> {
-  final QuickTechMiscellaneousTherapyController therapyController = locator.get<QuickTechMiscellaneousTherapyController>();
+class _CustomMiscalleneousTherapyInfoState
+    extends State<CustomMiscalleneousTherapyInfo> {
+  final QuickTechMiscellaneousTherapyController therapyController =
+      locator.get<QuickTechMiscellaneousTherapyController>();
   TextEditingController searchController = TextEditingController();
   String searchQuery = '';
 
@@ -55,8 +59,14 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
         controller: searchController,
         height: 50,
         icon: Icons.search,
-        iconcolor: themeController.isDay.value ? QuickTechAppColors.lightmaintextcolor : QuickTechAppColors.darkmaintextcolor,
-        backcolor: themeController.isDay.value ? QuickTechAppColors.lightScaffoldColor : QuickTechAppColors.darkScaffoldColor,
+        iconcolor:
+            themeController.isDay.value
+                ? QuickTechAppColors.lightmaintextcolor
+                : QuickTechAppColors.darkmaintextcolor,
+        backcolor:
+            themeController.isDay.value
+                ? QuickTechAppColors.lightScaffoldColor
+                : QuickTechAppColors.darkScaffoldColor,
       ),
     );
   }
@@ -64,14 +74,23 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
   Widget customExpansionTile(String title) {
     return Obx(
       () => Card(
-        color: themeController.isDay.value ? QuickTechAppColors.lightScaffoldColor : QuickTechAppColors.darkScaffoldColor,
+        color:
+            themeController.isDay.value
+                ? QuickTechAppColors.lightScaffoldColor
+                : QuickTechAppColors.darkScaffoldColor,
         elevation: 5,
-        shadowColor: themeController.isDay.value ? QuickTechAppColors.black.withValues(alpha: 0.5) : QuickTechAppColors.white.withValues(alpha: 0.3),
+        shadowColor:
+            themeController.isDay.value
+                ? QuickTechAppColors.black.withValues(alpha: 0.5)
+                : QuickTechAppColors.white.withValues(alpha: 0.3),
         child: ExpansionTile(
           collapsedShape: OutlineInputBorder(
             borderSide: BorderSide(
               width: 1.5,
-              color: themeController.isDay.value ? QuickTechAppColors.lightmaincolor : QuickTechAppColors.darkmaincolor,
+              color:
+                  themeController.isDay.value
+                      ? QuickTechAppColors.lightmaincolor
+                      : QuickTechAppColors.darkmaincolor,
             ),
             borderRadius: BorderRadius.circular(12),
           ),
@@ -79,7 +98,10 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
           shape: OutlineInputBorder(
             borderSide: BorderSide(
               width: 2,
-              color: themeController.isDay.value ? QuickTechAppColors.lightmaincolor : QuickTechAppColors.darkmaincolor,
+              color:
+                  themeController.isDay.value
+                      ? QuickTechAppColors.lightmaincolor
+                      : QuickTechAppColors.darkmaincolor,
             ),
             borderRadius: BorderRadius.circular(12),
           ),
@@ -87,7 +109,9 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
             title,
             style: myStyle(
               16,
-              themeController.isDay.value ? QuickTechAppColors.lightmaintextcolor : QuickTechAppColors.darkmaintextcolor,
+              themeController.isDay.value
+                  ? QuickTechAppColors.lightmaintextcolor
+                  : QuickTechAppColors.darkmaintextcolor,
               FontWeight.bold,
             ),
           ),
@@ -104,7 +128,10 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
                       onPressed: therapyController.clearAllSelections,
                       icon: Icon(
                         Icons.clear_all,
-                        color: themeController.isDay.value ? QuickTechAppColors.lightmaintextcolor : QuickTechAppColors.darkmaintextcolor,
+                        color:
+                            themeController.isDay.value
+                                ? QuickTechAppColors.lightmaintextcolor
+                                : QuickTechAppColors.darkmaintextcolor,
                       ),
                     ),
                   ],
@@ -143,7 +170,10 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
         duration: Duration(milliseconds: 300),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: themeController.isDay.value ? QuickTechAppColors.lightScaffoldColor : QuickTechAppColors.darkScaffoldColor,
+          color:
+              themeController.isDay.value
+                  ? QuickTechAppColors.lightScaffoldColor
+                  : QuickTechAppColors.darkScaffoldColor,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         ),
         child: Column(
@@ -153,7 +183,9 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
               'Selected Therapies:',
               style: myStyle(
                 16,
-                themeController.isDay.value ? QuickTechAppColors.darkmaincolor : QuickTechAppColors.white,
+                themeController.isDay.value
+                    ? QuickTechAppColors.darkmaincolor
+                    : QuickTechAppColors.white,
                 FontWeight.bold,
               ),
             ),
@@ -168,36 +200,44 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
   Widget customSelectedTherapyList() {
     return therapyController.selectedTherapies.isEmpty
         ? Text(
-            'No therapies selected',
-            style: myStyle(
-              14,
-              themeController.isDay.value ? QuickTechAppColors.darkmaincolor : QuickTechAppColors.white,
-              FontWeight.normal,
-            ),
-          )
+          'No therapies selected',
+          style: myStyle(
+            14,
+            themeController.isDay.value
+                ? QuickTechAppColors.darkmaincolor
+                : QuickTechAppColors.white,
+            FontWeight.normal,
+          ),
+        )
         : Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: therapyController.selectedTherapies
-                .map(
-                  (therapy) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Text(
-                      '• $therapy',
-                      style: myStyle(
-                        14,
-                        themeController.isDay.value ? QuickTechAppColors.darkmaincolor : QuickTechAppColors.white,
-                        FontWeight.normal,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children:
+              therapyController.selectedTherapies
+                  .map(
+                    (therapy) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Text(
+                        '• $therapy',
+                        style: myStyle(
+                          14,
+                          themeController.isDay.value
+                              ? QuickTechAppColors.darkmaincolor
+                              : QuickTechAppColors.white,
+                          FontWeight.normal,
+                        ),
                       ),
                     ),
-                  ),
-                )
-                .toList(),
-          );
+                  )
+                  .toList(),
+        );
   }
 
   Widget CustomCategoryCard(MiscellaneousTherapy category, int categoryIndex) {
     return Card(
-      color: themeController.isDay.value ? QuickTechAppColors.white : QuickTechAppColors.black2,
+      color:
+          themeController.isDay.value
+              ? QuickTechAppColors.white
+              : QuickTechAppColors.black2,
       margin: const EdgeInsets.all(8),
       elevation: 2,
       child: Column(
@@ -207,7 +247,9 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
               category.name,
               style: myStyle(
                 14,
-                themeController.isDay.value ? QuickTechAppColors.lightmaintextcolor : QuickTechAppColors.darkmaintextcolor,
+                themeController.isDay.value
+                    ? QuickTechAppColors.lightmaintextcolor
+                    : QuickTechAppColors.darkmaintextcolor,
                 category.isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
@@ -249,12 +291,17 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
             sub.name,
             style: myStyle(
               12,
-              themeController.isDay.value ? QuickTechAppColors.lightmaintextcolor : QuickTechAppColors.darkmaintextcolor,
+              themeController.isDay.value
+                  ? QuickTechAppColors.lightmaintextcolor
+                  : QuickTechAppColors.darkmaintextcolor,
             ),
           ),
           value: sub.isSelected,
           onChanged: (value) {
-            therapyController.toggleSubcategorySelection(categoryIndex, subcategoryIndex);
+            therapyController.toggleSubcategorySelection(
+              categoryIndex,
+              subcategoryIndex,
+            );
           },
           controlAffinity: ListTileControlAffinity.leading,
           dense: true,
@@ -272,7 +319,10 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
       padding: const EdgeInsets.only(left: 32.0, right: 16.0, bottom: 8.0),
       child: Container(
         decoration: BoxDecoration(
-          color: themeController.isDay.value ? QuickTechAppColors.bktxtfld : QuickTechAppColors.bkdarktxtfld,
+          color:
+              themeController.isDay.value
+                  ? QuickTechAppColors.bktxtfld
+                  : QuickTechAppColors.bkdarktxtfld,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: QuickTechAppColors.lightmaincolor.withValues(alpha: 0.5),
@@ -300,11 +350,17 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
               ),
               style: myStyle(
                 12,
-                themeController.isDay.value ? QuickTechAppColors.lightmaintextcolor : QuickTechAppColors.darkmaintextcolor,
+                themeController.isDay.value
+                    ? QuickTechAppColors.lightmaintextcolor
+                    : QuickTechAppColors.darkmaintextcolor,
               ),
               maxLines: 1,
               onChanged: (value) {
-                therapyController.updateSubcategoryNote(categoryIndex, subcategoryIndex, value);
+                therapyController.updateSubcategoryNote(
+                  categoryIndex,
+                  subcategoryIndex,
+                  value,
+                );
               },
             ),
           ],
@@ -329,7 +385,9 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
                   : QuickTechAppColors.darkScaffoldColor,
           elevation: 2,
           margin: EdgeInsets.only(bottom: 8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Padding(
             padding: EdgeInsets.all(16),
             child: Column(
@@ -345,20 +403,21 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Custom Miscellaneous Therapy',
+                          'Extra Therapy',
                           style: myStyle(
-                            15,
+                            15.sp,
                             themeController.isDay.value
                                 ? QuickTechAppColors.lightmaintextcolor
                                 : QuickTechAppColors.darkmaintextcolor,
                             FontWeight.w700,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'Add custom therapy options',
+                          'Add therapy options',
                           style: myStyle(
-                            11,
+                            11.sp,
                             themeController.isDay.value
                                 ? QuickTechAppColors.lightmaintextcolor
                                     .withValues(alpha: 0.6)
@@ -373,11 +432,11 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
                       decoration: BoxDecoration(
                         color:
                             themeController.isDay.value
-                                ? QuickTechAppColors.lightmaincolor.withValues(alpha:
-                                  0.1,
+                                ? QuickTechAppColors.lightmaincolor.withValues(
+                                  alpha: 0.1,
                                 )
-                                : QuickTechAppColors.darkmaincolor.withValues(alpha:
-                                  0.2,
+                                : QuickTechAppColors.darkmaincolor.withValues(
+                                  alpha: 0.2,
                                 ),
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -415,11 +474,11 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
                       border: Border.all(
                         color:
                             themeController.isDay.value
-                                ? QuickTechAppColors.lightmaincolor.withValues(alpha:
-                                  0.3,
+                                ? QuickTechAppColors.lightmaincolor.withValues(
+                                  alpha: 0.3,
                                 )
-                                : QuickTechAppColors.darkmaincolor.withValues(alpha:
-                                  0.3,
+                                : QuickTechAppColors.darkmaincolor.withValues(
+                                  alpha: 0.3,
                                 ),
                         width: 1.5,
                       ),
@@ -525,75 +584,145 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
                         ),
                         SizedBox(height: 12),
                         // Action buttons
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            // Cancel button
-                            TextButton(
-                              onPressed: () {
-                                final idx = activeInputIndex.value;
-                                tempControllers[idx].dispose();
-                                tempControllers.removeAt(idx);
-                                activeInputIndex.value = -1;
-                              },
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 10,
-                                ),
-                              ),
-                              child: Text(
-                                'Cancel',
-                                style: myStyle(
-                                  12,
-                                  themeController.isDay.value
-                                      ? QuickTechAppColors.lightmaintextcolor
-                                          .withValues(alpha: 0.7)
-                                      : QuickTechAppColors.darkmaintextcolor
-                                          .withValues(alpha: 0.7),
-                                  FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            // OK button
-                            ElevatedButton.icon(
-                              icon: Icon(Icons.check_rounded, size: 18),
-                              label: Text('Save'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    themeController.isDay.value
-                                        ? QuickTechAppColors.lightmaincolor
-                                        : QuickTechAppColors.darkmaincolor,
-                                foregroundColor: Colors.white,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                elevation: 0,
-                              ),
-                              onPressed: () {
-                                final idx = activeInputIndex.value;
-                                final plainText = tempControllers[idx].text.trim();
-                                if (plainText.isNotEmpty) {
-                                  // Convert plain text to HTML format for mPDF
-                                  final htmlText = convertToHtmlParagraphs(plainText);
-                                  
-                                  // Store HTML format in both lists
-                                  therapyController.customTherapies.add(htmlText);
-                                  therapyController.customTherapyControllers
-                                      .add(TextEditingController(text: htmlText));
-                                }
-                                tempControllers[idx].dispose();
-                                tempControllers.removeAt(idx);
-                                activeInputIndex.value = -1;
-                              },
-                            ),
-                          ],
-                        ),
+                       LayoutBuilder(
+  builder: (context, constraints) {
+    final hasEnoughSpace = constraints.maxWidth > 200;
+
+    if (hasEnoughSpace) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          TextButton(
+            onPressed: () {
+              final idx = activeInputIndex.value;
+              tempControllers[idx].dispose();
+              tempControllers.removeAt(idx);
+              activeInputIndex.value = -1;
+            },
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 10,
+              ),
+            ),
+            child: Text(
+              'Cancel',
+              style: myStyle(
+                12,
+                themeController.isDay.value
+                    ? QuickTechAppColors.lightmaintextcolor
+                        .withValues(alpha: 0.7)
+                    : QuickTechAppColors.darkmaintextcolor
+                        .withValues(alpha: 0.7),
+                FontWeight.w600,
+              ),
+            ),
+          ),
+          SizedBox(width: 8),
+          ElevatedButton.icon(
+            icon: Icon(Icons.check_rounded, size: 18),
+            label: Text('Save'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: themeController.isDay.value
+                  ? QuickTechAppColors.lightmaincolor
+                  : QuickTechAppColors.darkmaincolor,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 0,
+            ),
+            onPressed: () {
+              final idx = activeInputIndex.value;
+              final plainText = tempControllers[idx].text.trim();
+              if (plainText.isNotEmpty) {
+                final htmlText = convertToHtmlParagraphs(plainText);
+                therapyController.customTherapies.add(htmlText);
+                therapyController.customTherapyControllers
+                    .add(TextEditingController(text: htmlText));
+              }
+              tempControllers[idx].dispose();
+              tempControllers.removeAt(idx);
+              activeInputIndex.value = -1;
+            },
+          ),
+        ],
+      );
+    } else {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ElevatedButton.icon(
+            icon: Icon(Icons.check_rounded, size: 18),
+            label: Text('Save'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: themeController.isDay.value
+                  ? QuickTechAppColors.lightmaincolor
+                  : QuickTechAppColors.darkmaincolor,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 0,
+            ),
+            onPressed: () {
+              final idx = activeInputIndex.value;
+              final plainText = tempControllers[idx].text.trim();
+              if (plainText.isNotEmpty) {
+                final htmlText = convertToHtmlParagraphs(plainText);
+                therapyController.customTherapies.add(htmlText);
+                therapyController.customTherapyControllers
+                    .add(TextEditingController(text: htmlText));
+              }
+              tempControllers[idx].dispose();
+              tempControllers.removeAt(idx);
+              activeInputIndex.value = -1;
+            },
+          ),
+          SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              onPressed: () {
+                final idx = activeInputIndex.value;
+                tempControllers[idx].dispose();
+                tempControllers.removeAt(idx);
+                activeInputIndex.value = -1;
+              },
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+              ),
+              child: Text(
+                'Cancel',
+                style: myStyle(
+                  12,
+                  themeController.isDay.value
+                      ? QuickTechAppColors.lightmaintextcolor
+                          .withValues(alpha: 0.7)
+                      : QuickTechAppColors.darkmaintextcolor
+                          .withValues(alpha: 0.7),
+                  FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+  },
+)
                       ],
                     ),
                   ),
@@ -659,7 +788,9 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
                           color:
                               themeController.isDay.value
                                   ? Colors.green.shade50.withValues(alpha: 0.3)
-                                  : Colors.green.shade900.withValues(alpha: 0.05),
+                                  : Colors.green.shade900.withValues(
+                                    alpha: 0.05,
+                                  ),
                         ),
                         constraints: BoxConstraints(maxHeight: 300),
                         child: SingleChildScrollView(
@@ -669,8 +800,8 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
                             children: List.generate(
                               therapyController.customTherapies.length,
                               (index) {
-                                final therapy = therapyController
-                                    .customTherapies[index];
+                                final therapy =
+                                    therapyController.customTherapies[index];
                                 if (therapy.trim().isEmpty)
                                   return SizedBox.shrink();
 
@@ -679,12 +810,16 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
                                   decoration: BoxDecoration(
                                     color:
                                         themeController.isDay.value
-                                            ? Colors.white.withValues(alpha: 0.6)
-                                            : Colors.white.withValues(alpha: 0.05),
+                                            ? Colors.white.withValues(
+                                              alpha: 0.6,
+                                            )
+                                            : Colors.white.withValues(
+                                              alpha: 0.05,
+                                            ),
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
-                                      color: Colors.green.shade200.withValues(alpha:
-                                        0.5,
+                                      color: Colors.green.shade200.withValues(
+                                        alpha: 0.5,
                                       ),
                                     ),
                                   ),
@@ -720,9 +855,7 @@ class _CustomMiscalleneousTherapyInfoState extends State<CustomMiscalleneousTher
                                           GestureDetector(
                                             onTap: () {
                                               therapyController
-                                                  .removeCustomTherapy(
-                                                    index,
-                                                  );
+                                                  .removeCustomTherapy(index);
                                             },
                                             child: Container(
                                               padding: EdgeInsets.all(6),

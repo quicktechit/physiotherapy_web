@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 
 import 'package:e_prescription/controllers/prescription_controller/diagnosis_controller/diagnosis_controller.dart';
 import 'package:e_prescription/utils/api.dart';
+import 'package:e_prescription/utils/ui_helpers.dart';
 import 'package:e_prescription/controllers/prescription_controller/diagnosis_controller/cheif_complain_controller.dart';
 import 'package:e_prescription/controllers/prescription_controller/diagnosis_controller/on_examination_controller.dart';
 import 'package:e_prescription/controllers/prescription_controller/diagnosis_controller/radiological_findings_controller.dart';
@@ -138,12 +139,39 @@ class MainDiagnosisController extends ChangeNotifier {
       return true;
     }
 
-    Get.snackbar(
+    UIHelper.showError(
       'Child Category Required',
       'Please select a child category for: ${missingChildSelections.join(', ')}',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
+    );
+    return false;
+  }
+
+  /// Validate that all "With Value" examination items have values provided
+  bool validateRequiredExaminationValues() {
+    final onExaminationController = locator.get<OnExaminationController>();
+    final missingValues = <String>[];
+
+    for (final examName in onExaminationController.selectedExaminations) {
+      final examData = onExaminationController.onExaminationMap[examName];
+      
+      // Check if this examination is of type "With Value"
+      if (examData != null && examData['type'] == 'With Value') {
+        final valueRx = onExaminationController.examinationValues[examName];
+        
+        // Check if value is empty or not provided
+        if (valueRx == null || valueRx.value.isEmpty) {
+          missingValues.add(examName);
+        }
+      }
+    }
+
+    if (missingValues.isEmpty) {
+      return true;
+    }
+
+    UIHelper.showError(
+      'Examination Values Required',
+      'Please provide values for: ${missingValues.join(', ')}',
     );
     return false;
   }
@@ -151,6 +179,11 @@ class MainDiagnosisController extends ChangeNotifier {
   Future<int> storeAllDiagnosisData() async {
     try {
       if (!validateRequiredChildSelections()) {
+        return 400;
+      }
+
+      // NEW: Validate examination values
+      if (!validateRequiredExaminationValues()) {
         return 400;
       }
 
@@ -578,12 +611,9 @@ class MainDiagnosisController extends ChangeNotifier {
       // Now we check if there's ANY data: DB entries OR custom entries
       if (diagnosisEntries.isEmpty &&
           newSubCats.isEmpty) {
-        Get.snackbar(
+        UIHelper.showError(
           'Error',
           'No diagnosis selected. Please add at least one diagnosis item before saving.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
         );
         return 400;
       }
@@ -666,21 +696,15 @@ class MainDiagnosisController extends ChangeNotifier {
       debugPrint('DIAGNOSIS RESPONSE [${response.statusCode}]: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.snackbar(
-          'Success',
-          'Diagnosis data stored successfully.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        // UIHelper.showSuccess(
+        //   'Success',
+        //   'Diagnosis data stored successfully.',
+        // );
         return response.statusCode;
       } else {
-        Get.snackbar(
+        UIHelper.showError(
           'Error',
           'Failed to store diagnosis. Status: ${response.statusCode}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
         );
         return response.statusCode;
       }
@@ -688,10 +712,7 @@ class MainDiagnosisController extends ChangeNotifier {
       debugPrint('DIAGNOSIS RESPONSE [EXCEPTION]: $e');
       return 500;
     }
-  
-
-
-}
+  }
 
   void clearAllDiagnosisData() {
     try {

@@ -1,3 +1,4 @@
+import 'package:e_prescription/const/const.dart';
 import 'package:e_prescription/const/quick_tech_app_colors.dart';
 import 'package:e_prescription/const/quick_tech_styles.dart';
 import 'package:e_prescription/const/text_to_html.dart';
@@ -108,25 +109,27 @@ Widget customElectroOthersCard() {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Custom Electrotherapy',
+                        'Extra Therapy',
                         style: myStyle(
-                          15,
+                          15.sp,
                           themeController.isDay.value
                               ? QuickTechAppColors.lightmaintextcolor
                               : QuickTechAppColors.darkmaintextcolor,
                           FontWeight.w700,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                       SizedBox(height: 4),
                       Text(
-                        'Add custom therapy options',
+                        'Add therapy options',
                         style: myStyle(
-                          11,
+                          11.sp,
                           themeController.isDay.value
                               ? QuickTechAppColors.lightmaintextcolor
                                   .withValues(alpha: 0.6)
-                              : QuickTechAppColors.darkmaintextcolor
-                                  .withValues(alpha: 0.6),
+                              : QuickTechAppColors.darkmaintextcolor.withValues(
+                                alpha: 0.6,
+                              ),
                           FontWeight.w400,
                         ),
                       ),
@@ -136,11 +139,11 @@ Widget customElectroOthersCard() {
                     decoration: BoxDecoration(
                       color:
                           themeController.isDay.value
-                              ? QuickTechAppColors.lightmaincolor.withValues(alpha:
-                                0.1,
+                              ? QuickTechAppColors.lightmaincolor.withValues(
+                                alpha: 0.1,
                               )
-                              : QuickTechAppColors.darkmaincolor.withValues(alpha:
-                                0.2,
+                              : QuickTechAppColors.darkmaincolor.withValues(
+                                alpha: 0.2,
                               ),
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -178,11 +181,11 @@ Widget customElectroOthersCard() {
                     border: Border.all(
                       color:
                           themeController.isDay.value
-                              ? QuickTechAppColors.lightmaincolor.withValues(alpha:
-                                0.3,
+                              ? QuickTechAppColors.lightmaincolor.withValues(
+                                alpha: 0.3,
                               )
-                              : QuickTechAppColors.darkmaincolor.withValues(alpha:
-                                0.3,
+                              : QuickTechAppColors.darkmaincolor.withValues(
+                                alpha: 0.3,
                               ),
                       width: 1.5,
                     ),
@@ -289,73 +292,174 @@ Widget customElectroOthersCard() {
                       ),
                       SizedBox(height: 12),
                       // Action buttons
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          // Cancel button
-                          TextButton(
-                            onPressed: () {
-                              final idx = activeInputIndex.value;
-                              tempControllers[idx].dispose();
-                              tempControllers.removeAt(idx);
-                              activeInputIndex.value = -1;
-                            },
-                            style: TextButton.styleFrom(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 10,
-                              ),
-                            ),
-                            child: Text(
-                              'Cancel',
-                              style: myStyle(
-                                12,
-                                themeController.isDay.value
-                                    ? QuickTechAppColors.lightmaintextcolor
-                                        .withValues(alpha: 0.7)
-                                    : QuickTechAppColors.darkmaintextcolor
-                                        .withValues(alpha: 0.7),
-                                FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          // OK button
-                          ElevatedButton.icon(
-                            icon: Icon(Icons.check_rounded, size: 18),
-                            label: Text('Save'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  themeController.isDay.value
-                                      ? QuickTechAppColors.lightmaincolor
-                                      : QuickTechAppColors.darkmaincolor,
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              elevation: 0,
-                            ),
-                            onPressed: () {
-                              final idx = activeInputIndex.value;
-                             final plainText = tempControllers[idx].text.trim();
-                              if (plainText.isNotEmpty) {
-                                // Convert plain text to HTML format for mPDF
-                                final htmlText = convertToHtmlParagraphs(plainText);
-                                electrotherapyController.extraElectrotherapies
-                                    .add(htmlText);
-                                electrotherapyController.extraTherapyControllers
-                                    .add(TextEditingController(text: htmlText));
-                              }
-                              tempControllers[idx].dispose();
-                              tempControllers.removeAt(idx);
-                              activeInputIndex.value = -1;
-                            },
-                          ),
-                        ],
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final hasEnoughSpace = constraints.maxWidth > 200;
+
+                          if (hasEnoughSpace) {
+                            // Horizontal layout for wide screens
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                TextButton(
+                                  onPressed: () {
+                                    final idx = activeInputIndex.value;
+                                    tempControllers[idx].dispose();
+                                    tempControllers.removeAt(idx);
+                                    activeInputIndex.value = -1;
+                                  },
+                                  style: TextButton.styleFrom(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 10,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Cancel',
+                                    style: myStyle(
+                                      12,
+                                      themeController.isDay.value
+                                          ? QuickTechAppColors
+                                              .lightmaintextcolor
+                                              .withValues(alpha: 0.7)
+                                          : QuickTechAppColors.darkmaintextcolor
+                                              .withValues(alpha: 0.7),
+                                      FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                ElevatedButton.icon(
+                                  icon: Icon(Icons.check_rounded, size: 18),
+                                  label: Text('Save'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        themeController.isDay.value
+                                            ? QuickTechAppColors.lightmaincolor
+                                            : QuickTechAppColors.darkmaincolor,
+                                    foregroundColor: Colors.white,
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  onPressed: () {
+                                    final idx = activeInputIndex.value;
+                                    final plainText =
+                                        tempControllers[idx].text.trim();
+                                    if (plainText.isNotEmpty) {
+                                      final htmlText = convertToHtmlParagraphs(
+                                        plainText,
+                                      );
+                                      electrotherapyController
+                                          .extraElectrotherapies
+                                          .add(htmlText);
+                                      electrotherapyController
+                                          .extraTherapyControllers
+                                          .add(
+                                            TextEditingController(
+                                              text: htmlText,
+                                            ),
+                                          );
+                                    }
+                                    tempControllers[idx].dispose();
+                                    tempControllers.removeAt(idx);
+                                    activeInputIndex.value = -1;
+                                  },
+                                ),
+                              ],
+                            );
+                          } else {
+                            // Vertical layout for narrow screens
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton.icon(
+                                    icon: Icon(Icons.check_rounded, size: 18),
+                                    label: Text('Save'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          themeController.isDay.value
+                                              ? QuickTechAppColors
+                                                  .lightmaincolor
+                                              : QuickTechAppColors
+                                                  .darkmaincolor,
+                                      foregroundColor: Colors.white,
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 24,
+                                        vertical: 12,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      elevation: 0,
+                                    ),
+                                    onPressed: () {
+                                      final idx = activeInputIndex.value;
+                                      final plainText =
+                                          tempControllers[idx].text.trim();
+                                      if (plainText.isNotEmpty) {
+                                        final htmlText =
+                                            convertToHtmlParagraphs(plainText);
+                                        electrotherapyController
+                                            .extraElectrotherapies
+                                            .add(htmlText);
+                                        electrotherapyController
+                                            .extraTherapyControllers
+                                            .add(
+                                              TextEditingController(
+                                                text: htmlText,
+                                              ),
+                                            );
+                                      }
+                                      tempControllers[idx].dispose();
+                                      tempControllers.removeAt(idx);
+                                      activeInputIndex.value = -1;
+                                    },
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: TextButton(
+                                    onPressed: () {
+                                      final idx = activeInputIndex.value;
+                                      tempControllers[idx].dispose();
+                                      tempControllers.removeAt(idx);
+                                      activeInputIndex.value = -1;
+                                    },
+                                    style: TextButton.styleFrom(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 10,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Cancel',
+                                      style: myStyle(
+                                        12,
+                                        themeController.isDay.value
+                                            ? QuickTechAppColors
+                                                .lightmaintextcolor
+                                                .withValues(alpha: 0.7)
+                                            : QuickTechAppColors
+                                                .darkmaintextcolor
+                                                .withValues(alpha: 0.7),
+                                        FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+                        },
                       ),
                     ],
                   ),
@@ -415,8 +519,9 @@ Widget customElectroOthersCard() {
                               themeController.isDay.value
                                   ? QuickTechAppColors.lightmaincolor
                                       .withValues(alpha: 0.15)
-                                  : QuickTechAppColors.darkmaincolor
-                                      .withValues(alpha: 0.15),
+                                  : QuickTechAppColors.darkmaincolor.withValues(
+                                    alpha: 0.15,
+                                  ),
                         ),
                         borderRadius: BorderRadius.circular(10),
                         color:
@@ -446,11 +551,13 @@ Widget customElectroOthersCard() {
                                   color:
                                       themeController.isDay.value
                                           ? Colors.white.withValues(alpha: 0.6)
-                                          : Colors.white.withValues(alpha: 0.05),
+                                          : Colors.white.withValues(
+                                            alpha: 0.05,
+                                          ),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: Colors.green.shade200.withValues(alpha:
-                                      0.5,
+                                    color: Colors.green.shade200.withValues(
+                                      alpha: 0.5,
                                     ),
                                   ),
                                 ),
@@ -819,7 +926,6 @@ Widget customTextField(
             electrotherapyController.textControllers[optionName]?[param.name] ??
             TextEditingController();
         return TextField(
-       
           keyboardType: keyboard,
           controller: controller,
           style: myStyle(

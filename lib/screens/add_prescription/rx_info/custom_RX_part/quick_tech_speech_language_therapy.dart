@@ -4,6 +4,7 @@ import 'package:e_prescription/locator.dart';
 import 'package:e_prescription/models/rx_models/speech_language_therapy.dart';
 import 'package:e_prescription/widgets/quick_tech_custom_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import 'package:e_prescription/const/quick_tech_app_colors.dart';
@@ -397,20 +398,21 @@ class _CustomSpeechLanguageTherapyInfoState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Custom Speech Language Therapy',
+                          'Extra Therapy',
                           style: myStyle(
-                            12,
+                            15.sp,
                             themeController.isDay.value
                                 ? QuickTechAppColors.lightmaintextcolor
                                 : QuickTechAppColors.darkmaintextcolor,
                             FontWeight.w700,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'Add custom therapy options',
-                          style: myStyle(
-                            11,
+                        'Add therapy options',
+                        style: myStyle(
+                          11.sp,
                             themeController.isDay.value
                                 ? QuickTechAppColors.lightmaintextcolor
                                     .withValues(alpha: 0.6)
@@ -575,78 +577,146 @@ class _CustomSpeechLanguageTherapyInfoState
                           ),
                         ),
                         SizedBox(height: 12),
-                        // Action buttons
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            // Cancel button
-                            TextButton(
-                              onPressed: () {
-                                final idx = activeInputIndex.value;
-                                tempControllers[idx].dispose();
-                                tempControllers.removeAt(idx);
-                                activeInputIndex.value = -1;
-                              },
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 10,
-                                ),
-                              ),
-                              child: Text(
-                                'Cancel',
-                                style: myStyle(
-                                  12,
-                                  themeController.isDay.value
-                                      ? QuickTechAppColors.lightmaintextcolor
-                                          .withValues(alpha: 0.7)
-                                      : QuickTechAppColors.darkmaintextcolor
-                                          .withValues(alpha: 0.7),
-                                  FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            // OK button
-                            ElevatedButton.icon(
-                              icon: Icon(Icons.check_rounded, size: 18),
-                              label: Text('Save'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    themeController.isDay.value
-                                        ? QuickTechAppColors.lightmaincolor
-                                        : QuickTechAppColors.darkmaincolor,
-                                foregroundColor: Colors.white,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                elevation: 0,
-                              ),
-                              onPressed: () {
-                                final idx = activeInputIndex.value;
-                                final plainText = tempControllers[idx].text.trim();
-                                if (plainText.isNotEmpty) {
-                                  // Convert plain text to HTML format for mPDF
-                                  final htmlText = convertToHtmlParagraphs(plainText);
-                                  
-                                  // Store HTML format in both lists
-                                  speechLanguageTherapyController.customTherapies
-                                      .add(htmlText);
-                                  speechLanguageTherapyController
-                                      .customTherapyControllers
-                                      .add(TextEditingController(text: htmlText));
-                                }
-                                tempControllers[idx].dispose();
-                                tempControllers.removeAt(idx);
-                                activeInputIndex.value = -1;
-                              },
-                            ),
-                          ],
-                        ),
+                      // Action buttons
+LayoutBuilder(
+  builder: (context, constraints) {
+    final hasEnoughSpace = constraints.maxWidth > 200;
+
+    if (hasEnoughSpace) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          TextButton(
+            onPressed: () {
+              final idx = activeInputIndex.value;
+              tempControllers[idx].dispose();
+              tempControllers.removeAt(idx);
+              activeInputIndex.value = -1;
+            },
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 10,
+              ),
+            ),
+            child: Text(
+              'Cancel',
+              style: myStyle(
+                12,
+                themeController.isDay.value
+                    ? QuickTechAppColors.lightmaintextcolor
+                        .withValues(alpha: 0.7)
+                    : QuickTechAppColors.darkmaintextcolor
+                        .withValues(alpha: 0.7),
+                FontWeight.w600,
+              ),
+            ),
+          ),
+          SizedBox(width: 8),
+          ElevatedButton.icon(
+            icon: Icon(Icons.check_rounded, size: 18),
+            label: Text('Save'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: themeController.isDay.value
+                  ? QuickTechAppColors.lightmaincolor
+                  : QuickTechAppColors.darkmaincolor,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 0,
+            ),
+            onPressed: () {
+              final idx = activeInputIndex.value;
+              final plainText = tempControllers[idx].text.trim();
+              if (plainText.isNotEmpty) {
+                final htmlText = convertToHtmlParagraphs(plainText);
+                speechLanguageTherapyController.customTherapies.add(htmlText);
+                speechLanguageTherapyController.customTherapyControllers
+                    .add(TextEditingController(text: htmlText));
+              }
+              tempControllers[idx].dispose();
+              tempControllers.removeAt(idx);
+              activeInputIndex.value = -1;
+            },
+          ),
+        ],
+      );
+    } else {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ElevatedButton.icon(
+            icon: Icon(Icons.check_rounded, size: 18),
+            label: Text('Save'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: themeController.isDay.value
+                  ? QuickTechAppColors.lightmaincolor
+                  : QuickTechAppColors.darkmaincolor,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 0,
+            ),
+            onPressed: () {
+              final idx = activeInputIndex.value;
+              final plainText = tempControllers[idx].text.trim();
+              if (plainText.isNotEmpty) {
+                final htmlText = convertToHtmlParagraphs(plainText);
+                speechLanguageTherapyController.customTherapies.add(htmlText);
+                speechLanguageTherapyController.customTherapyControllers
+                    .add(TextEditingController(text: htmlText));
+              }
+              tempControllers[idx].dispose();
+              tempControllers.removeAt(idx);
+              activeInputIndex.value = -1;
+            },
+          ),
+          SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              onPressed: () {
+                final idx = activeInputIndex.value;
+                tempControllers[idx].dispose();
+                tempControllers.removeAt(idx);
+                activeInputIndex.value = -1;
+              },
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+              ),
+              child: Text(
+                'Cancel',
+                style: myStyle(
+                  12,
+                  themeController.isDay.value
+                      ? QuickTechAppColors.lightmaintextcolor
+                          .withValues(alpha: 0.7)
+                      : QuickTechAppColors.darkmaintextcolor
+                          .withValues(alpha: 0.7),
+                  FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+  },
+)
                       ],
                     ),
                   ),
