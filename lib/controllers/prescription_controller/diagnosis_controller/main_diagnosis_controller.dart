@@ -2,7 +2,7 @@
 import 'package:e_prescription/services/auth_services/quick_tech_auth_storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:get/get.dart';
+
 
 import 'package:e_prescription/controllers/prescription_controller/diagnosis_controller/diagnosis_controller.dart';
 import 'package:e_prescription/utils/api.dart';
