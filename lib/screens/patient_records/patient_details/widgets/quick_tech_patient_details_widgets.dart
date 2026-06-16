@@ -111,18 +111,84 @@ class _PrescriptionCardState extends State<_PrescriptionCard> {
       return;
     }
     if (widget.templateId == null) {
-      Get.snackbar(
-        onTap: (snack) {
-          Get.to(() => QuickTechTemplatesSelection());
-        },
+      Get.dialog(
+      AlertDialog(
+  backgroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(20), // Soft, modern rounded corners
+  ),
+  contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+  content: Column(
+    mainAxisSize: MainAxisSize.min, // Wrap content tightly
+    children: [
+      // Decorative Warning/Info Icon
+      CircleAvatar(
+        radius: 28,
+        backgroundColor: Colors.amber.shade50,
+        child: Icon(
+          Icons.insert_drive_file_outlined, // Template icon
+          color: Colors.amber.shade800,
+          size: 28,
+        ),
+      ),
+      const SizedBox(height: 20),
+      
+      // Title
+      const Text(
         'Template Required',
-        'Please select a template first.',
-        backgroundColor: widget.mainColor,
-        colorText: Colors.white,
-        margin: EdgeInsets.all(16.w),
-        borderRadius: 12.r,
-        icon: const Icon(Icons.error_outline, color: Colors.white),
-        duration: const Duration(seconds: 4),
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF1E1E1E),
+          letterSpacing: -0.5,
+        ),
+      ),
+      const SizedBox(height: 10),
+      
+      // Subtitle / Content
+      Text(
+        'Please select a template first to proceed with your workflow.',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 14,
+          color: Colors.grey.shade600,
+          height: 1.4,
+        ),
+      ),
+    ],
+  ),
+  actionsAlignment: MainAxisAlignment.center, // Center actions for a balanced look
+  actionsPadding: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
+  actions: [
+    // Primary Action Button
+    SizedBox(
+      width: double.infinity, // Full width button for better tap targets
+      height: 48,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Theme.of(Get.context!).primaryColor, // Adapts to your theme color
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        onPressed: () {
+          Get.back();
+          Get.to(() => const QuickTechTemplatesSelection());
+        },
+        child: const Text(
+          'Select Template',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    ),
+  ],
+)
       );
       return;
     }
@@ -149,7 +215,6 @@ class _PrescriptionCardState extends State<_PrescriptionCard> {
         Get.offNamed(
           '/pdfprescription',
           arguments: patientController.prescriptionPreviewPdfBytes.value!,
-      
         );
       } else if (error != null && error.isNotEmpty) {
         Get.snackbar(
