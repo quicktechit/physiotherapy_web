@@ -155,7 +155,8 @@ class _QuickTechMainHomeState extends State<QuickTechMainHome>
                       onPressed:
                           () =>
                               WidgetsBinding.instance.addPostFrameCallback((_) {
-                                Get.to(() => QuickTechPrescriptionForm());
+
+                              Get.toNamed('/prescriptionform');
                               }),
                       backgroundColor:
                           themeController.isDay.value

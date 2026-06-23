@@ -952,7 +952,8 @@ class _QuickTechAddAssesmentPageState extends State<QuickTechAddAssesmentPage>
                   Navigator.of(context).pop();
                   _clearAllAssessmentData();
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    Get.off(() => QuickTechPrescriptionForm());
+                    Get.toNamed('/prescriptionform');
+                
                   });
                 },
                 child: const Text('Continue to Prescription'),

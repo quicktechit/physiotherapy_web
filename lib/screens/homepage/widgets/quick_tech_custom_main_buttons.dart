@@ -33,7 +33,8 @@ class QuickTechCustomMainButtons extends StatelessWidget {
         hasBorder: !isDark,
         onTap: () {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            Get.off(() => QuickTechPrescriptionForm());
+            Get.offNamed('/prescriptionform');
+     
           });
         },
         isWide: false,

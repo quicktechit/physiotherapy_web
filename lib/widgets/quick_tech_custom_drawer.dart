@@ -101,7 +101,8 @@ Widget customDrawer(BuildContext context) {
                     icon: Icons.note_add_rounded,
                     onTap: () {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
-                        Get.off(() => QuickTechPrescriptionForm());
+                        Get.offNamed('/prescriptionform');
+                        
                       });
                     },
                   ),
