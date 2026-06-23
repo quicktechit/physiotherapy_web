@@ -176,7 +176,8 @@ class _PrescriptionCardState extends State<_PrescriptionCard> {
         ),
         onPressed: () {
           Get.back();
-          Get.to(() => const QuickTechTemplatesSelection());
+          Get.toNamed('/templateselect');
+         
         },
         child: const Text(
           'Select Template',

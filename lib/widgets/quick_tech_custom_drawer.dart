@@ -5,7 +5,7 @@ import 'package:e_prescription/controllers/package_controller/quick_tech_package
 import 'package:e_prescription/controllers/profile_controller/quick_tech_profile_controller.dart';
 import 'package:e_prescription/controllers/theme_controller/quick_tech_theme_controller.dart';
 import 'package:e_prescription/screens/add_prescription/quick_tech_add_prescription_form.dart';
-import 'package:e_prescription/screens/packages/quick_tech_packages.dart';
+
 import 'package:e_prescription/utils/api.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -121,7 +121,7 @@ Widget customDrawer(BuildContext context) {
                     context: context,
                     title: 'Packages',
                     icon: Icons.inventory_2_rounded,
-                    onTap: () => Get.off(() => QuickTechPackages()),
+                    onTap: () => Get.toNamed('/packages'),
                   ),
                   _buildDrawerItem(
                     context: context,
